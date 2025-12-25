@@ -7,7 +7,15 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Thu, 25 Dec 2025 19:02:09 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 25 Dec 2025 21:42:31 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>SecondBlog</title>
+        <link>https://fuquan99666.github.io/p/secondblog/</link>
+        <pubDate>Thu, 25 Dec 2025 21:42:31 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/secondblog/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>MyFirstBlog</title>
         <link>https://fuquan99666.github.io/p/myfirstblog/</link>
         <pubDate>Thu, 25 Dec 2025 19:02:09 +0800</pubDate>
