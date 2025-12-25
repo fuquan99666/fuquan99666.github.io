@@ -2,221 +2,221 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://github.com/fuquan99666.github.io/</loc>
+    <loc>https://fuquan99666.github.io/</loc>
     <lastmod>2025-12-25T19:02:09+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://github.com/fuquan99666.github.io/en/"
+                href="https://fuquan99666.github.io/en/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://github.com/fuquan99666.github.io/ja/"
+                href="https://fuquan99666.github.io/ja/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-tw"
-                href="https://github.com/fuquan99666.github.io/zh-tw/"
+                href="https://fuquan99666.github.io/zh-tw/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ar"
-                href="https://github.com/fuquan99666.github.io/ar/"
+                href="https://fuquan99666.github.io/ar/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://github.com/fuquan99666.github.io/"
+                href="https://fuquan99666.github.io/"
                 />
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/p/myfirstblog/</loc>
+    <loc>https://fuquan99666.github.io/p/myfirstblog/</loc>
     <lastmod>2025-12-25T19:02:09+08:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/post/</loc>
+    <loc>https://fuquan99666.github.io/post/</loc>
     <lastmod>2025-12-25T19:02:09+08:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ja"
-                href="https://github.com/fuquan99666.github.io/ja/post/"
-                />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-tw"
-                href="https://github.com/fuquan99666.github.io/zh-tw/post/"
+                href="https://fuquan99666.github.io/zh-tw/post/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="https://fuquan99666.github.io/ja/post/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://github.com/fuquan99666.github.io/post/"
+                href="https://fuquan99666.github.io/post/"
                 />
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/categories/</loc>
+    <loc>https://fuquan99666.github.io/categories/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://github.com/fuquan99666.github.io/en/categories/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-tw"
-                href="https://github.com/fuquan99666.github.io/zh-tw/categories/"
+                href="https://fuquan99666.github.io/en/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://github.com/fuquan99666.github.io/ja/categories/"
+                href="https://fuquan99666.github.io/ja/categories/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-tw"
+                href="https://fuquan99666.github.io/zh-tw/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ar"
-                href="https://github.com/fuquan99666.github.io/ar/categories/"
+                href="https://fuquan99666.github.io/ar/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://github.com/fuquan99666.github.io/categories/"
+                href="https://fuquan99666.github.io/categories/"
                 />
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/p/test-chinese/</loc>
+    <loc>https://fuquan99666.github.io/p/test-chinese/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-tw"
-                href="https://github.com/fuquan99666.github.io/zh-tw/p/test-chinese/"
+                href="https://fuquan99666.github.io/zh-tw/p/test-chinese/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://github.com/fuquan99666.github.io/ja/p/test-chinese/"
+                href="https://fuquan99666.github.io/ja/p/test-chinese/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://github.com/fuquan99666.github.io/p/test-chinese/"
+                href="https://fuquan99666.github.io/p/test-chinese/"
                 />
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/categories/test/</loc>
+    <loc>https://fuquan99666.github.io/categories/test/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ja"
+                href="https://fuquan99666.github.io/ja/categories/test/"
+                />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-tw"
-                href="https://github.com/fuquan99666.github.io/zh-tw/categories/test/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="ja"
-                href="https://github.com/fuquan99666.github.io/ja/categories/test/"
+                href="https://fuquan99666.github.io/zh-tw/categories/test/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://github.com/fuquan99666.github.io/categories/test/"
+                href="https://fuquan99666.github.io/categories/test/"
                 />
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/categories/%E6%B5%8B%E8%AF%95/</loc>
+    <loc>https://fuquan99666.github.io/categories/%E6%B5%8B%E8%AF%95/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/page/</loc>
+    <loc>https://fuquan99666.github.io/page/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/archives/</loc>
+    <loc>https://fuquan99666.github.io/archives/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/css/</loc>
+    <loc>https://fuquan99666.github.io/tags/css/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/html/</loc>
+    <loc>https://fuquan99666.github.io/tags/html/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/markdown/</loc>
+    <loc>https://fuquan99666.github.io/tags/markdown/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/p/markdown-syntax-guide/</loc>
+    <loc>https://fuquan99666.github.io/p/markdown-syntax-guide/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/categories/syntax/</loc>
+    <loc>https://fuquan99666.github.io/categories/syntax/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/</loc>
+    <loc>https://fuquan99666.github.io/tags/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://github.com/fuquan99666.github.io/en/tags/"
+                href="https://fuquan99666.github.io/en/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
-                href="https://github.com/fuquan99666.github.io/ja/tags/"
+                href="https://fuquan99666.github.io/ja/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-tw"
-                href="https://github.com/fuquan99666.github.io/zh-tw/tags/"
+                href="https://fuquan99666.github.io/zh-tw/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ar"
-                href="https://github.com/fuquan99666.github.io/ar/tags/"
+                href="https://fuquan99666.github.io/ar/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://github.com/fuquan99666.github.io/tags/"
+                href="https://fuquan99666.github.io/tags/"
                 />
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/categories/themes/</loc>
+    <loc>https://fuquan99666.github.io/categories/themes/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/themes/</loc>
+    <loc>https://fuquan99666.github.io/tags/themes/</loc>
     <lastmod>2019-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/privacy/</loc>
+    <loc>https://fuquan99666.github.io/tags/privacy/</loc>
     <lastmod>2019-03-10T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/p/rich-content/</loc>
+    <loc>https://fuquan99666.github.io/p/rich-content/</loc>
     <lastmod>2019-03-10T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/shortcodes/</loc>
+    <loc>https://fuquan99666.github.io/tags/shortcodes/</loc>
     <lastmod>2019-03-10T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/p/placeholder-text/</loc>
+    <loc>https://fuquan99666.github.io/p/placeholder-text/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ar"
-                href="https://github.com/fuquan99666.github.io/ar/p/%D9%85%D8%AB%D8%A7%D9%84-%D9%86%D8%B5/"
+                href="https://fuquan99666.github.io/ar/p/%D9%85%D8%AB%D8%A7%D9%84-%D9%86%D8%B5/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://github.com/fuquan99666.github.io/p/placeholder-text/"
+                href="https://fuquan99666.github.io/p/placeholder-text/"
                 />
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/tag-with-whitespaces/</loc>
+    <loc>https://fuquan99666.github.io/tags/tag-with-whitespaces/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/categories/test-with-whitespaces/</loc>
+    <loc>https://fuquan99666.github.io/categories/test-with-whitespaces/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/text/</loc>
+    <loc>https://fuquan99666.github.io/tags/text/</loc>
     <lastmod>2019-03-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/p/math-typesetting/</loc>
+    <loc>https://fuquan99666.github.io/p/math-typesetting/</loc>
     <lastmod>2019-03-08T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/tags/emoji/</loc>
+    <loc>https://fuquan99666.github.io/tags/emoji/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/p/emoji-support/</loc>
+    <loc>https://fuquan99666.github.io/p/emoji-support/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/%E5%85%B3%E4%BA%8E/</loc>
+    <loc>https://fuquan99666.github.io/%E5%85%B3%E4%BA%8E/</loc>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/search/</loc>
+    <loc>https://fuquan99666.github.io/search/</loc>
   </url><url>
-    <loc>https://github.com/fuquan99666.github.io/%E5%8F%8B%E9%93%BE/</loc>
+    <loc>https://fuquan99666.github.io/%E5%8F%8B%E9%93%BE/</loc>
   </url>
 </urlset>
