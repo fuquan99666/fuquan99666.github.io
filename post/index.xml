@@ -14,18 +14,18 @@
         
         <guid>https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/</guid>
         <description>&lt;h1 id=&#34;in-this-file-we-will-create-a-simple-wordcloud-using-python-from-scratch&#34;&gt;In this file, we will create a simple wordcloud using Python from scratch.
-&lt;/h1&gt;&lt;h3 id=&#34;ps-python-has-a-wordcloud-library-but-i-cant-find-even-a-100-py-implementation-in-github-all-use-js-to-do-it&#34;&gt;ps: python has a wordcloud library, but I can&amp;rsquo;t find even a 100% .py implementation in github, all use js to do it.
-&lt;/h3&gt;&lt;h3 id=&#34;you-can-find-my-final-code-heredont-forget-to-star-it-&#34;&gt;You can find my final code &lt;a class=&#34;link&#34; href=&#34;https://github.com/fuquan99666/word-cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;here&lt;/a&gt;,don&amp;rsquo;t forget to star it ~
-&lt;/h3&gt;&lt;h3 id=&#34;and-you-can-try-the-demo-here&#34;&gt;And you can try the demo &lt;a class=&#34;link&#34; href=&#34;https://word-cloud-fuquan99666.streamlit.app/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;here&lt;/a&gt;
-&lt;/h3&gt;&lt;h2 id=&#34;a-wordcloud-is-a-visual-representation-of-text-data-where-the-size-of-each-word-indicates-its-frequency-or-importance&#34;&gt;A wordcloud is a visual representation of text data, where the size of each word indicates its frequency or importance.
-&lt;/h2&gt;&lt;h3 id=&#34;i-learn-from-this-articlethe-wordcloud-invention-by-jonathan-feinberg&#34;&gt;I learn from &lt;a class=&#34;link&#34; href=&#34;https://s3.amazonaws.com/static.mrfeinberg.com/bv_ch03.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;this article&lt;/a&gt;(The wordcloud invention by Jonathan Feinberg)
-&lt;/h3&gt;&lt;h3 id=&#34;and-learn-from-this-implementationjason-daviesand-hope-to-realize-the-effect-like-this-website&#34;&gt;And learn from &lt;a class=&#34;link&#34; href=&#34;https://github.com/jasondavies/d3-cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;this implementation&lt;/a&gt;(Jason Davies),and hope to realize the effect like &lt;a class=&#34;link&#34; href=&#34;https://www.jasondavies.com/wordcloud/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;this website&lt;/a&gt;.
-&lt;/h3&gt;&lt;h3 id=&#34;all-in-all-we-will-do-these-steps&#34;&gt;All in all, we will do these steps:
+&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;ps: python has a wordcloud library, but I can&amp;rsquo;t find even a 100% .py implementation in github, all use js to do it.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;You can find my final code &lt;a class=&#34;link&#34; href=&#34;https://github.com/fuquan99666/word-cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;here&lt;/a&gt;,don&amp;rsquo;t forget to star it ~&lt;/li&gt;
+&lt;li&gt;And you can try the demo &lt;a class=&#34;link&#34; href=&#34;https://word-cloud-fuquan99666.streamlit.app/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;here&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;what-is-a-wordcloud&#34;&gt;What is a wordcloud?
+&lt;/h2&gt;&lt;p&gt;A wordcloud is a visual representation of text data, where the size of each word indicates its frequency or importance.&lt;/p&gt;
+&lt;h3 id=&#34;all-in-all-we-will-do-these-steps&#34;&gt;All in all, we will do these steps:
 &lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -42,15 +42,29 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5. done!
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;my-old-version-&#34;&gt;My old version ~~~
-&lt;/h3&gt;&lt;h4 id=&#34;you-can-find-my-old-version-in-repos-old_version-directory&#34;&gt;You can find my old version in repo&amp;rsquo;s old_version directory.
-&lt;/h4&gt;&lt;h4 id=&#34;i-initially-treat-each-word-as-a-rectangle-object-and-use-a-for-loop-to-detect-if-collision-happens-this-need-to-check-all-placed-words-and-most-check-is-wasteful&#34;&gt;I initially treat each word as a rectangle object, and use a for loop to detect if collision happens. This need to check all placed words and most check is wasteful.
-&lt;/h4&gt;&lt;h4 id=&#34;besides-wasteful-check-i-also-find-that-the-collision-detection-based-objects-bounding-box-is-so-tricky-when-there-is-rotation-完蛋&#34;&gt;Besides wasteful check, I also find that the collision detection based object&amp;rsquo;s bounding box is so tricky, when there is rotation, 完蛋.
-&lt;/h4&gt;&lt;h4 id=&#34;so-the-last-effect-is-not-so-good-just-support-90-and--90-degree-rotation&#34;&gt;so the last effect is not so good, just support 90 and -90 degree rotation.
-&lt;/h4&gt;&lt;h4 id=&#34;here-is-the-old-effect-有点用但不多&#34;&gt;Here is the old effect: (有点用但不多～)
-&lt;/h4&gt;&lt;center&gt;
+&lt;/div&gt;&lt;h3 id=&#34;early-attempt-old-version&#34;&gt;early attempt (old version)
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;You can find my old version in repo&amp;rsquo;s old_version directory.&lt;/li&gt;
+&lt;li&gt;I initially treat each word as a rectangle object, and use a for loop to detect if collision happens. This need to check all placed words and most check is wasteful.&lt;/li&gt;
+&lt;li&gt;Besides wasteful check, I also find that the collision detection based object&amp;rsquo;s bounding box is so tricky, when there is rotation, 完蛋.&lt;/li&gt;
+&lt;li&gt;so the last effect is not so good, just support 90 and -90 degree rotation.&lt;/li&gt;
+&lt;li&gt;Here is the old effect: (有点用但不多～)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
     &lt;img src=&#34;old_version.png&#34; alt=&#34;old_version_effect&#34; width=&#34;300&#34; /&gt;
 &lt;/center&gt;
+&lt;h2 id=&#34;references--inspirations&#34;&gt;References &amp;amp; Inspirations
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;I learn from &lt;a class=&#34;link&#34; href=&#34;https://s3.amazonaws.com/static.mrfeinberg.com/bv_ch03.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this article&lt;/a&gt;(The wordcloud invention by Jonathan Feinberg)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;And learn from &lt;a class=&#34;link&#34; href=&#34;https://github.com/jasondavies/d3-cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this implementation&lt;/a&gt;(Jason Davies),and hope to realize the effect like &lt;a class=&#34;link&#34; href=&#34;https://www.jasondavies.com/wordcloud/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this website&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 </description>
         </item>
         
