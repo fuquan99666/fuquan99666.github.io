@@ -15,9 +15,9 @@
         <guid>https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/</guid>
         <description>&lt;h1 id=&#34;in-this-file-we-will-create-a-simple-wordcloud-using-python-from-scratch&#34;&gt;In this file, we will create a simple wordcloud using Python from scratch.
 &lt;/h1&gt;&lt;blockquote&gt;
-&lt;p&gt;ps: python has a wordcloud library, but I can&amp;rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.
-靠还真有这个&lt;a class=&#34;link&#34; href=&#34;https://github.com/amueller/word_cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;仓库&lt;/a&gt;，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿&lt;/p&gt;
+&lt;p&gt;ps: python has a wordcloud library, but I can&amp;rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.&lt;/p&gt;
+&lt;p&gt;靠还真有这个&lt;a class=&#34;link&#34; href=&#34;https://github.com/amueller/word_cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;仓库&lt;/a&gt;，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿,但我这个更好懂嘛🐶&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;You can find my final code &lt;a class=&#34;link&#34; href=&#34;https://github.com/fuquan99666/word-cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
@@ -98,9 +98,11 @@ we will use archimedean spiral to place words from center to outside.&lt;/li&gt;
 &lt;li&gt;This file is used to convert a text to a 2D array of pixels.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;There is a question, how to get acurate pixel representation of a text with a specific font?
-here I use PIL&amp;rsquo;s ImageFont(getbbox) to get text bounding box(the lt point is (bbox[0],bbox[1]), the rb point is (bbox[2],bbox[3])), then create a blank image with that size(bbox[2]-bbox[0], bbox[3]-bbox[1]), then use ImageDraw to draw text on that image at position (-bbox[0],-bbox[1]),why 多此一举？ because some text has rotation which can&amp;rsquo;t directly use getbbox to solve.
-So, we rotate the image if needed, then convert image to numpy array for latter use.&lt;/p&gt;
+&lt;p&gt;There is a question, how to get acurate pixel representation of a text with a specific font?&lt;/p&gt;
+&lt;p&gt;here I use PIL&amp;rsquo;s ImageFont(getbbox) to get text bounding box(the lt point is (bbox[0],bbox[1]), the rb point is (bbox[2],bbox[3])),&lt;/p&gt;
+&lt;p&gt;then create a blank image with that size(bbox[2]-bbox[0], bbox[3]-bbox[1]), then use ImageDraw to draw text on that image at position (-bbox[0],-bbox[1]),and rotate the image if needed.&lt;/p&gt;
+&lt;p&gt;why 多此一举？ because some text has rotation which can&amp;rsquo;t directly use getbbox to solve.&lt;/p&gt;
+&lt;p&gt;So, we convert image to numpy array for latter use.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h4 id=&#34;重难点分析突然发现mac的表情包键用来加表情包很方便&#34;&gt;重难点分析😭(突然发现mac的表情包键用来加表情包很方便😆)
 &lt;/h4&gt;&lt;ul&gt;
@@ -124,8 +126,10 @@ So, we rotate the image if needed, then convert image to numpy array for latter 
 &lt;li&gt;now we explain why use -bbox[0], -bbox[1]&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;because when no anchor, this (x,y) is the position of painting start point, and we can think bbox[0],bbox[1] is the offset from painting start point to left and top border of text bounding box.
-打个比方：bbox[0]=-2,bbox[1]=8,绘制原点默认是(0,0),此时左边界是-2,上边界是8，当移动到(-bbox[0],-bbox[1])=(2,-8)时，左边界变为2+(-2)为0，上边界也变为(-8+8)为0，正好对齐。（当然这个是我经过实测后的理解，可能不完全准确，但能说明问题问题🙋‍♂️）&lt;/p&gt;
+&lt;p&gt;because when no anchor, this (x,y) is the position of painting start point,&lt;/p&gt;
+&lt;p&gt;and we can think bbox[0],bbox[1] is the offset from painting start point to left and top border of text bounding box.&lt;/p&gt;
+&lt;p&gt;打个比方：bbox[0]=-2,bbox[1]=8,绘制原点默认是(0,0),此时左边界是-2,上边界是8，当移动到(-bbox[0],-bbox[1])=(2,-8)时，左边界变为2+(-2)为0，上边界也变为(-8+8)为0，正好对齐。&lt;/p&gt;
+&lt;p&gt;（当然这个是我经过实测后的理解，可能不完全准确，但能说明问题问题🙋‍♂️）&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h4 id=&#34;placepy&#34;&gt;&lt;code&gt;place.py&lt;/code&gt;
 &lt;/h4&gt;&lt;ul&gt;

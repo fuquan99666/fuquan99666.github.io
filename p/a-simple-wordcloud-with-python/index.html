@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="In this file, we will create a simple wordcloud using Python from scratch. ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange. 靠还真有这个仓库，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="In this file, we will create a simple wordcloud using Python from scratch. ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.\n靠还真有这个仓库，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿,但我这个更好懂嘛🐶\n">
 <title>A Simple Wordcloud with Python</title>
 
 <link rel='canonical' href='https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/'>
 
 <link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="A Simple Wordcloud with Python">
-<meta property='og:description' content="In this file, we will create a simple wordcloud using Python from scratch. ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange. 靠还真有这个仓库，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿\n">
+<meta property='og:description' content="In this file, we will create a simple wordcloud using Python from scratch. ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.\n靠还真有这个仓库，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿,但我这个更好懂嘛🐶\n">
 <meta property='og:url' content='https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/'>
 <meta property='og:site_name' content='My Site'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2025-12-25T19:02:09&#43;08:00'/><meta property='article:modified_time' content='2025-12-25T19:02:09&#43;08:00'/>
 <meta name="twitter:title" content="A Simple Wordcloud with Python">
-<meta name="twitter:description" content="In this file, we will create a simple wordcloud using Python from scratch. ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange. 靠还真有这个仓库，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿\n">
+<meta name="twitter:description" content="In this file, we will create a simple wordcloud using Python from scratch. ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.\n靠还真有这个仓库，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿,但我这个更好懂嘛🐶\n">
     <link rel="shortcut icon" href="/favicon.ico" />
 
     </head>
@@ -343,9 +343,9 @@
     
     <h1 id="in-this-file-we-will-create-a-simple-wordcloud-using-python-from-scratch">In this file, we will create a simple wordcloud using Python from scratch.
 </h1><blockquote>
-<p>ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.
-靠还真有这个<a class="link" href="https://github.com/amueller/word_cloud"  target="_blank" rel="noopener"
-    >仓库</a>，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿</p>
+<p>ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.</p>
+<p>靠还真有这个<a class="link" href="https://github.com/amueller/word_cloud"  target="_blank" rel="noopener"
+    >仓库</a>，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿,但我这个更好懂嘛🐶</p>
 </blockquote>
 <ul>
 <li>You can find my final code <a class="link" href="https://github.com/fuquan99666/word-cloud"  target="_blank" rel="noopener"
@@ -426,9 +426,11 @@ we will use archimedean spiral to place words from center to outside.</li>
 <li>This file is used to convert a text to a 2D array of pixels.</li>
 </ul>
 <blockquote>
-<p>There is a question, how to get acurate pixel representation of a text with a specific font?
-here I use PIL&rsquo;s ImageFont(getbbox) to get text bounding box(the lt point is (bbox[0],bbox[1]), the rb point is (bbox[2],bbox[3])), then create a blank image with that size(bbox[2]-bbox[0], bbox[3]-bbox[1]), then use ImageDraw to draw text on that image at position (-bbox[0],-bbox[1]),why 多此一举？ because some text has rotation which can&rsquo;t directly use getbbox to solve.
-So, we rotate the image if needed, then convert image to numpy array for latter use.</p>
+<p>There is a question, how to get acurate pixel representation of a text with a specific font?</p>
+<p>here I use PIL&rsquo;s ImageFont(getbbox) to get text bounding box(the lt point is (bbox[0],bbox[1]), the rb point is (bbox[2],bbox[3])),</p>
+<p>then create a blank image with that size(bbox[2]-bbox[0], bbox[3]-bbox[1]), then use ImageDraw to draw text on that image at position (-bbox[0],-bbox[1]),and rotate the image if needed.</p>
+<p>why 多此一举？ because some text has rotation which can&rsquo;t directly use getbbox to solve.</p>
+<p>So, we convert image to numpy array for latter use.</p>
 </blockquote>
 <h4 id="重难点分析突然发现mac的表情包键用来加表情包很方便">重难点分析😭(突然发现mac的表情包键用来加表情包很方便😆)
 </h4><ul>
@@ -452,8 +454,10 @@ So, we rotate the image if needed, then convert image to numpy array for latter 
 <li>now we explain why use -bbox[0], -bbox[1]</li>
 </ul>
 <blockquote>
-<p>because when no anchor, this (x,y) is the position of painting start point, and we can think bbox[0],bbox[1] is the offset from painting start point to left and top border of text bounding box.
-打个比方：bbox[0]=-2,bbox[1]=8,绘制原点默认是(0,0),此时左边界是-2,上边界是8，当移动到(-bbox[0],-bbox[1])=(2,-8)时，左边界变为2+(-2)为0，上边界也变为(-8+8)为0，正好对齐。（当然这个是我经过实测后的理解，可能不完全准确，但能说明问题问题🙋‍♂️）</p>
+<p>because when no anchor, this (x,y) is the position of painting start point,</p>
+<p>and we can think bbox[0],bbox[1] is the offset from painting start point to left and top border of text bounding box.</p>
+<p>打个比方：bbox[0]=-2,bbox[1]=8,绘制原点默认是(0,0),此时左边界是-2,上边界是8，当移动到(-bbox[0],-bbox[1])=(2,-8)时，左边界变为2+(-2)为0，上边界也变为(-8+8)为0，正好对齐。</p>
+<p>（当然这个是我经过实测后的理解，可能不完全准确，但能说明问题问题🙋‍♂️）</p>
 </blockquote>
 <h4 id="placepy"><code>place.py</code>
 </h4><ul>
