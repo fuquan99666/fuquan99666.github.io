@@ -247,9 +247,10 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#what-is-a-wordcloud">What is a wordcloud?</a>
+    <li><a href="#in-this-file-we-will-create-a-simple-wordcloud-using-python-from-scratch">In this file, we will create a simple wordcloud using Python from scratch.</a></li>
+    <li><a href="#what-is-a-wordcloud">What is a wordcloud?</a></li>
+    <li><a href="#all-in-all-we-will-do-these-steps">All in all, we will do these steps:</a>
       <ol>
-        <li><a href="#all-in-all-we-will-do-these-steps">All in all, we will do these steps:</a></li>
         <li><a href="#early-attempt-old-version">early attempt (old version)</a></li>
         <li><a href="#new-attempt-current-version">New attempt (current version)</a>
           <ol>
@@ -357,8 +358,8 @@
     <section class="article-content">
     
     
-    <h1 id="in-this-file-we-will-create-a-simple-wordcloud-using-python-from-scratch">In this file, we will create a simple wordcloud using Python from scratch.
-</h1><blockquote>
+    <h2 id="in-this-file-we-will-create-a-simple-wordcloud-using-python-from-scratch">In this file, we will create a simple wordcloud using Python from scratch.
+</h2><blockquote>
 <p>ps: python has a wordcloud library, but I can&rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.</p>
 <p>靠还真有这个<a class="link" href="https://github.com/amueller/word_cloud"  target="_blank" rel="noopener"
     >仓库</a>，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿,但我这个更好懂嘛🐶</p>
@@ -371,8 +372,8 @@
 </ul>
 <h2 id="what-is-a-wordcloud">What is a wordcloud?
 </h2><p>A wordcloud is a visual representation of text data, where the size of each word indicates its frequency or importance.</p>
-<h3 id="all-in-all-we-will-do-these-steps">All in all, we will do these steps:
-</h3><div class="highlight"><div class="chroma">
+<h2 id="all-in-all-we-will-do-these-steps">All in all, we will do these steps:
+</h2><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
@@ -462,7 +463,7 @@ we will use archimedean spiral to place words from center to outside.</li>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">word</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">word</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&#34;lt&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">w</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">h</span><span class="o">//</span><span class="mi">2</span><span class="p">),</span> <span class="n">word</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&#34;mm&#34;</span><span class="p">)</span><span class="n">的方</span>
+</span></span><span class="line"><span class="cl"><span class="n">draw</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">w</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">h</span><span class="o">//</span><span class="mi">2</span><span class="p">),</span> <span class="n">word</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">font</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s2">&#34;mm&#34;</span><span class="p">)</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
