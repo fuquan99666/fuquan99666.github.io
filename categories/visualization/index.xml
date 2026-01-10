@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Visualization on My Site</title>
+        <link>https://fuquan99666.github.io/categories/visualization/</link>
+        <description>Recent content in Visualization on My Site</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>zz486</copyright>
+        <lastBuildDate>Thu, 25 Dec 2025 19:02:09 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/visualization/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>A Simple Wordcloud with Python</title>
+        <link>https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/</link>
+        <pubDate>Thu, 25 Dec 2025 19:02:09 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/</guid>
+        <description>&lt;h1 id=&#34;in-this-file-we-will-create-a-simple-wordcloud-using-python-from-scratch&#34;&gt;In this file, we will create a simple wordcloud using Python from scratch.
+&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;ps: python has a wordcloud library, but I can&amp;rsquo;t find even a 100% .py implementation in github, all use js to do it, so strange.&lt;/p&gt;
+&lt;p&gt;靠还真有这个&lt;a class=&#34;link&#34; href=&#34;https://github.com/amueller/word_cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;仓库&lt;/a&gt;，官方还是太强了🤣，第一次搜索的时候忘记加空格了🌿,但我这个更好懂嘛🐶&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;You can find my final code &lt;a class=&#34;link&#34; href=&#34;https://github.com/fuquan99666/word-cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;here&lt;/a&gt;,don&amp;rsquo;t forget to star it ⭐ ~&lt;/li&gt;
+&lt;li&gt;And you can try the demo &lt;a class=&#34;link&#34; href=&#34;https://word-cloud-fuquan99666.streamlit.app/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;here&lt;/a&gt;😉&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;what-is-a-wordcloud&#34;&gt;What is a wordcloud?
+&lt;/h2&gt;&lt;p&gt;A wordcloud is a visual representation of text data, where the size of each word indicates its frequency or importance.&lt;/p&gt;
+&lt;h3 id=&#34;all-in-all-we-will-do-these-steps&#34;&gt;All in all, we will do these steps:
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. get input text
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. process text to get word(or line) weights
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3. select font_size, color, rotation for each word according to its weight
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4. place each word in the canvas(maybe use a special mask) and to make sure it will not collide with others.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5. done!
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;early-attempt-old-version&#34;&gt;early attempt (old version)
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;You can find my old version in repo&amp;rsquo;s old_version directory.&lt;/li&gt;
+&lt;li&gt;I initially treat each word as a rectangle object, and use a for loop to detect if collision happens. This need to check all placed words and most check is wasteful.&lt;/li&gt;
+&lt;li&gt;Besides wasteful check, I also find that the collision detection based object&amp;rsquo;s bounding box is so tricky, when there is rotation, 完蛋.&lt;/li&gt;
+&lt;li&gt;so the last effect is not so good, just support 90 and -90 degree rotation.&lt;/li&gt;
+&lt;li&gt;Here is the old effect: (有点用但不多～)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#34;output/old_version.png&#34; alt=&#34;old_version_effect&#34; width=&#34;300&#34; /&gt;
+&lt;/center&gt;
+&lt;h3 id=&#34;new-attempt-current-version&#34;&gt;New attempt (current version)
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;In the new version, I use pixel level collision detection, that is, use a 2D array to represent the canvas, each pixel is either occupied or not.(each line can seen as a bitmask)&lt;/li&gt;
+&lt;li&gt;This idea not only speed up the collision detection, but also make the rotation easy to implement, and even make latter mask support easier.&lt;/li&gt;
+&lt;li&gt;Now let&amp;rsquo;s travel through the code file by file.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;main1py&#34;&gt;&lt;code&gt;main1.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This is the main file, where we can make sense all process of wordcloud generation.&lt;/li&gt;
+&lt;li&gt;You can select what words you want to ignore in to_remove list, and set some parameters like canvas size, max words count, font path, rotate angle, etc.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;input1py&#34;&gt;&lt;code&gt;input1.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This file is used to read input text file, and process it to get word weights.&lt;/li&gt;
+&lt;li&gt;It use re module to split text into words kind that you want.&lt;/li&gt;
+&lt;li&gt;And notice that our weights compute is based not only on just frequency, but also the length of word, and the positive-negative sentiment score(which you also can customize the emotion list).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;style1py&#34;&gt;&lt;code&gt;style1.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This file is used to select font size, color, rotation, mask.&lt;/li&gt;
+&lt;li&gt;I recommend you to use &lt;a class=&#34;link&#34; href=&#34;https://www.flaticon.com/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this website&lt;/a&gt; to get some cool mask images(remember to select filled and black icon) and you will use function convert_transparent_to_mask to convert transparent part to white mask.&lt;/li&gt;
+&lt;li&gt;At first, I use a soomth size mapping function to map word weight to font size, but the output effect is not good, all image looks stranger, so I change to a step function, set up six levels, and looks better.&lt;/li&gt;
+&lt;li&gt;For color, you can see I tried so many map-func(some had been deleted😄), rgb,hsv, etc.
+I can firmly say all fails, all image looks stanger, so I imitate a nice pattern, and surprisingly with Impact font, 👍 👍 👍&lt;/li&gt;
+&lt;li&gt;thanks to ics 😄 I use a font cache(a dict) to speed up font loading, or it will be so slow when many words exist.&lt;/li&gt;
+&lt;li&gt;Same as said , rotation is also set up n levels, you can customize it.&lt;/li&gt;
+&lt;li&gt;For mask, I try to extract the topic of input(太粗糙了，没用) to map with existing masks, or use fixed mask.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;spritepy&#34;&gt;&lt;code&gt;sprite.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This file is used to generate word sprite, that is ,from a 2D array of pixels to a list of bitmasks(each line is a bits),later will use it to do collision detection.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;sprial1py&#34;&gt;&lt;code&gt;sprial1.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This file is used to generate spiral points,(a iterator that yield (x,y) points)， latter
+we will use archimedean spiral to place words from center to outside.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;rasterpy&#34;&gt;&lt;code&gt;raster.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This file is used to convert a text to a 2D array of pixels.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;There is a question, how to get acurate pixel representation of a text with a specific font?&lt;/p&gt;
+&lt;p&gt;here I use PIL&amp;rsquo;s ImageFont(getbbox) to get text bounding box(the lt point is (bbox[0],bbox[1]), the rb point is (bbox[2],bbox[3])),&lt;/p&gt;
+&lt;p&gt;then create a blank image with that size(bbox[2]-bbox[0], bbox[3]-bbox[1]), then use ImageDraw to draw text on that image at position (-bbox[0],-bbox[1]),and rotate the image if needed.&lt;/p&gt;
+&lt;p&gt;why 多此一举？ because some text has rotation which can&amp;rsquo;t directly use getbbox to solve.&lt;/p&gt;
+&lt;p&gt;So, we convert image to numpy array for latter use.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;重难点分析突然发现mac的表情包键用来加表情包很方便&#34;&gt;重难点分析😭(突然发现mac的表情包键用来加表情包很方便😆)
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;bbox和anchor的爱恨情仇&lt;/li&gt;
+&lt;li&gt;尝试了三种写法&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;draw&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;bbox&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;bbox&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;word&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;font&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;font&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fill&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;255&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;draw&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;),&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;word&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;font&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;font&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fill&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;255&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;anchor&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;lt&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;draw&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;((&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;w&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;//&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;h&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;//&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;),&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;word&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;font&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;font&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fill&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;255&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;anchor&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;mm&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;的方&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;最后用的第一种，后两种经过实践发现会有偏差，只是大概对齐，我们要的可是精确对齐。&lt;/li&gt;
+&lt;li&gt;now we explain why use -bbox[0], -bbox[1]&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;because when no anchor, this (x,y) is the position of painting start point,&lt;/p&gt;
+&lt;p&gt;and we can think bbox[0],bbox[1] is the offset from painting start point to left and top border of text bounding box.&lt;/p&gt;
+&lt;p&gt;打个比方：bbox[0]=-2,bbox[1]=8,绘制原点默认是(0,0),此时左边界是-2,上边界是8，当移动到(-bbox[0],-bbox[1])=(2,-8)时，左边界变为2+(-2)为0，上边界也变为(-8+8)为0，正好对齐。&lt;/p&gt;
+&lt;p&gt;（当然这个是我经过实测后的理解，可能不完全准确，但能说明问题问题🙋‍♂️）&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;placepy&#34;&gt;&lt;code&gt;place.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This file is used to place each word in the board.&lt;/li&gt;
+&lt;li&gt;I use 6500 loops(avoid can&amp;rsquo;t find place forever), each loop get a new position by using our spiral iterator, then check if collision happens by using our board implementation.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;boardpy&#34;&gt;&lt;code&gt;board.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This file is used to represent the canvas board, and do collision detection and place word.&lt;/li&gt;
+&lt;li&gt;It has a rows to represent each line of canvas, each row is an integer, each bit of integer represent a pixel(1 for occupied,0 for free).&lt;/li&gt;
+&lt;li&gt;For collision detection, we just need to do bitwise AND between board row and word sprite row, if result is not 0, then collision happens.&lt;/li&gt;
+&lt;li&gt;I also add a padding to move word sprite more outside, to avoid words too close.&lt;/li&gt;
+&lt;li&gt;And when placing word, we just do bitwise OR to update board rows.&lt;/li&gt;
+&lt;li&gt;I think this is the most clever part of this new version, make collision detection and place so fast and easy.😈&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;layout1py&#34;&gt;&lt;code&gt;layout1.py&lt;/code&gt;
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;This file is used to place each word in the canvas.&lt;/li&gt;
+&lt;li&gt;just use all above modules&amp;rsquo;s functions and words that already selected style(font size, color, rotation), then place each word one by one.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;final-output&#34;&gt;final output
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Here is some final output examples:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#34;output/output.png&#34; alt=&#34;circle&#34; width=&#34;300&#34; /&gt;
+    &lt;img src=&#34;output/output_yh.jpg&#34; alt=&#34;runner&#34; width=&#34;300&#34; /&gt;
+    &lt;img src=&#34;output/output_apple.png&#34; alt=&#34;apple&#34; width=&#34;300&#34; /&gt;
+    &lt;img src=&#34;output/per_line.png&#34; alt=&#34;line&#34; width=&#34;300&#34; /&gt;
+    &lt;img src=&#34;output/line_emotion.png&#34; alt=&#34;line with emotion&#34; width=&#34;300&#34; /&gt;
+&lt;/center&gt;
+&lt;h3 id=&#34;some-possible-improvements&#34;&gt;some possible improvements
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;because I finish this project for my vcl course assignment, so I didn&amp;rsquo;t spend much time polishing it.(绝对不是我懒😆),but there is no doubt that it isn&amp;rsquo;t as good as &lt;a class=&#34;link&#34; href=&#34;#good-demo&#34; &gt;this implementation&lt;/a&gt; now.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol&gt;
+&lt;li&gt;better input text getting and processing,like support pdf,docx file directly and better word segmentation(maybe use some nlp to split chinese text and better analyze sentiment)&lt;/li&gt;
+&lt;li&gt;better color,size,rotation,font,mask? 交给设计师吧😄&lt;/li&gt;
+&lt;li&gt;object control,now data structure I drop all placed words info after placing, if we keep them, we can do some interaction,like hover to highlight word, move word smoothly when regenerate.&lt;/li&gt;
+&lt;li&gt;better placement algorithm, now just use archimedean spiral, maybe we can try other algorithms to make better use of space.&lt;/li&gt;
+&lt;li&gt;auto parameter tuning, now all parameters are set by hand, maybe we can use some optimization algorithms to auto tune them according to some aesthetic metrics.For example, how to adjust canvas size,max words count, font size range, sprial step size, etc to make the wordcloud more beautiful, if you just use hand set parameters, 💩&lt;/li&gt;
+&lt;li&gt;improve out demo website, now just a simple streamlit app, can be more beautiful and user friendly.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;references--inspirations&#34;&gt;References &amp;amp; Inspirations
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;I learn from &lt;a class=&#34;link&#34; href=&#34;https://s3.amazonaws.com/static.mrfeinberg.com/bv_ch03.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this article&lt;/a&gt;(The wordcloud invention by Jonathan Feinberg)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;And learn from &lt;a class=&#34;link&#34; href=&#34;https://github.com/jasondavies/d3-cloud&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this implementation&lt;/a&gt;(Jason Davies),and hope to realize the effect like &lt;a id=&#34;good-demo&#34;&gt;&lt;/a&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.jasondavies.com/wordcloud/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;this website&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
