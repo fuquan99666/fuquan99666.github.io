@@ -7,7 +7,23 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Thu, 25 Dec 2025 21:42:31 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 11 Jan 2026 16:51:41 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c</title>
+        <link>https://fuquan99666.github.io/categories/cs61c/</link>
+        <pubDate>Sun, 11 Jan 2026 16:51:41 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/categories/cs61c/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>RISC-V</title>
+        <link>https://fuquan99666.github.io/categories/risc-v/</link>
+        <pubDate>Sun, 11 Jan 2026 16:51:41 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/categories/risc-v/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>FPGA</title>
         <link>https://fuquan99666.github.io/categories/fpga/</link>
         <pubDate>Thu, 25 Dec 2025 21:42:31 +0800</pubDate>

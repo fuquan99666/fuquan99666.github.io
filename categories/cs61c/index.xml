@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>CS61c on My Site</title>
+        <link>https://fuquan99666.github.io/categories/cs61c/</link>
+        <description>Recent content in CS61c on My Site</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>zz486</copyright>
+        <lastBuildDate>Sun, 11 Jan 2026 16:51:41 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/cs61c/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_0</title>
+        <link>https://fuquan99666.github.io/p/cs61c_0/</link>
+        <pubDate>Sun, 11 Jan 2026 16:51:41 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_0/</guid>
+        <description>&lt;h2 id=&#34;我的cs61c学习笔记&#34;&gt;我的CS61c学习笔记
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;感谢csdiy提供的&lt;a class=&#34;link&#34; href=&#34;https://csdiy.wiki/%e4%bd%93%e7%b3%bb%e7%bb%93%e6%9e%84/CS61C/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;课程资料&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;看的是20Fall的&lt;a class=&#34;link&#34; href=&#34;https://www.bilibili.com/video/BV17b42177VG/?share_source=copy_webvd_source=7c3823b46a52fbbef42b79e01d55c300&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;课程视频&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;由于前六节的内容是开学前看的，所以从第七节开始记录笔记。&lt;/li&gt;
+&lt;li&gt;课程资料可以fork这个&lt;a class=&#34;link&#34; href=&#34;https://github.com/InsideEmpire/CS61C-Assignment&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;仓库&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;risc-v-intro-and-project-1&#34;&gt;RISC-V intro and Project 1
+&lt;/h2&gt;&lt;h3 id=&#34;risc-v-intro&#34;&gt;RISC-V intro
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。&lt;/li&gt;
+&lt;li&gt;主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。&lt;/li&gt;
+&lt;li&gt;优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃&lt;/li&gt;
+&lt;li&gt;70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。&lt;/li&gt;
+&lt;li&gt;RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;深入理解risc-v&#34;&gt;深入理解RISC-V🐶
+&lt;/h3&gt;&lt;h4 id=&#34;basic-concepts&#34;&gt;basic concepts
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;Registers，there is no variable in assembly language, to keep Hardware simple.
+It is near to the cpu and fast.And their number is limited, which is a main feature of ISA.
+RISC-V has 32 registers, in the RV32 one word is 32 bits.
+Referred by x0-x31, and x0 is special, always 0.&lt;/li&gt;
+&lt;li&gt;Hash(#) comments, like python.🐍&lt;/li&gt;
+&lt;li&gt;In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;addition-and-subtraction&#34;&gt;Addition and Subtraction
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;add x1,x2,x3 # x1 = x2 + x3&lt;/li&gt;
+&lt;li&gt;sub x4,x5,x6 # x4 = x5 - x6&lt;/li&gt;
+&lt;li&gt;example:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# f = (g + h) - (i + j)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;add x5,x20,x21  # x5 = x20 + x21
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;add x6,x22,x23  # x6 = x22 + x23
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sub x19,x5,x6   # x19 = x5 - x6
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;immediates&#34;&gt;Immediates
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Immediates are numerical constants.&lt;/li&gt;
+&lt;li&gt;addi x3,x4,10 # x3 = x4 + 10&lt;/li&gt;
+&lt;li&gt;but don&amp;rsquo;t support sub immediate&lt;/li&gt;
+&lt;li&gt;why? because we can use addi with negative immediate to achieve the same effect.&lt;/li&gt;
+&lt;li&gt;addi x3,x4,-10 # x3 = x4 - 10&lt;/li&gt;
+&lt;li&gt;how to move?&lt;/li&gt;
+&lt;li&gt;add x1,x0,x2 # x1 = x2&lt;/li&gt;
+&lt;li&gt;add x0,x1,x2 # will not do anything, because x0 is hardwired to 0.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;project-1-life-game&#34;&gt;Project 1: Life Game
+&lt;/h3&gt;&lt;h4 id=&#34;preparation&#34;&gt;Preparation
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;use PPM ASCII files (type P3) with maximum value 255, for example:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;P3
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4 5
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;255
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  0   0   0     0   0   0     0   0   0     0   0   0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;255 255 255   255 255 255   255 255 255     0   0   0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  0   0   0     0   0   0     0   0   0     0   0   0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  0   0   0     0   0   0     0   0   0     0   0   0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  0   0   0     0   0   0     0   0   0     0   0   0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;P3 means ASCII encoding,4 5 means width=4,height=5,255
+means max color value.&lt;/li&gt;
+&lt;li&gt;each pixel is represented by three integers(RGB), each
+ranging from 0 to 255.&lt;/li&gt;
+&lt;li&gt;(255,255,255) is white,(0,0,0) is black.&lt;/li&gt;
+&lt;li&gt;the command convert can be used to convert between png
+to ppm, for example:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;convert -compress none glider.png glider.ppm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;convert glider.ppm glider.png
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;structure of the Image and I/O functions&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;typedef struct Color 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    uint8_t R;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    uint8_t G;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    uint8_t B;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;} Color;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;typedef struct Image
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    Color **image;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    uint32_t rows;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    uint32_t cols;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;} Image;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;// an example of reading a text file in C
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;FILE *fp = fopen(&amp;#34;diary.txt&amp;#34;, &amp;#34;r&amp;#34;);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;char buf[20];
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;int num;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;fscanf(fp, &amp;#34;%s %d&amp;#34;, buf, &amp;amp;num);
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;fclose(fp);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;part-a1-readingwritingand-freeing-images&#34;&gt;Part A1: Reading,writing,and freeing images
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;说实话不难但是挺坑的🤣&lt;/li&gt;
+&lt;li&gt;使用malloc分配image二维数组，image要分配，然后每一行也要分配。&lt;/li&gt;
+&lt;li&gt;一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。&lt;/li&gt;
+&lt;li&gt;free的时候先free每一行，然后free image，最后free Image结构体本身。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;part-a2-使用刚写的a1藏信息&#34;&gt;Part A2: 使用刚写的A1藏信息
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。&lt;/li&gt;
+&lt;li&gt;比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。&lt;/li&gt;
+&lt;li&gt;这里直接用最低一位，0和1来表示黑白。天才啊😆&lt;/li&gt;
+&lt;li&gt;需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。&lt;/li&gt;
+&lt;li&gt;写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;part-b-game-of-life&#34;&gt;Part B: Game of Life
+&lt;/h4&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;基本规则：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Any dead cell with three live neighbours becomes a live cell in the next generation.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;整理成二进制格式：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对于活细胞：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;8 7 6 5 4 3 2 1 0 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 0 0 0 0 1 1 0 0  -&amp;gt; 2 or 3 neighbors survive
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对于死细胞：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;8 7 6 5 4 3 2 1 0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 0 0 0 0 1 0 0 0  -&amp;gt; 3 neighbors become alive
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;即0b000001100000001000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;使用格式：./gameOfLife [file] [rule]&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;或者直接使用./frames.csh [file] [rule] [num_frames]来生成多帧图片和gif。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;该&lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/Life-like_cellular_automaton&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;wiki&lt;/a&gt;提供了很多有趣的规则，可以尝试不同的规则看看效果。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;可以将24位颜色分成24个独立的游戏，状态完全独立但是颜色可以叠加，增加了趣味性？&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;挺简单的？，主要是边界条件要注意（warp around），0和rows-1,0和cols-1要连接起来。（可以考虑直接使用模运算处理）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;善于使用valgrind检查内存泄漏，凡是用malloc分配的最后都不要忘记了free。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;分成24个颜色通道后的遍历逻辑写起来挺繁琐的，我是直接循环24次，处理时需要判断8，16的大小关系，感觉不如直接分成3中颜色情况处理来的清晰。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;效果展示(run ./frames.csh GliderGuns 0x1808 100 and ./frames.csh glider 0x1808 10 and convert ppm to gif):&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;div&gt;
+        &lt;img src=&#34;glider.gif&#34; alt=&#34;glider&#34; width=&#34;30&#34; /&gt;
+        &lt;img src=&#34;GliderGuns.gif&#34; alt=&#34;GliderGuns&#34; width=&#34;200&#34; /&gt;
+    &lt;/div&gt;
+    &lt;img src=&#34;JohnConway.gif&#34; alt=&#34;JohnConway&#34; width=&#34;200&#34; /&gt;
+&lt;/center&gt;
+&lt;h4 id=&#34;part-c-其实官方没有&#34;&gt;Part C: 其实官方没有😃
+&lt;/h4&gt;&lt;p&gt;我自己写了一个将信息图片藏入已知图片的小函数，在我的仓库叫hide.c，需要先手动使用上文提到过的convert命令将png转换成ppm格式，然后运行&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;convert -compress none hide.png hide.ppm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;convert -compress none input.png input.ppm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./hide input.ppm hide.ppm &amp;gt; output.ppm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;convert output.ppm output.png
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;// 如果需要验证可以使用之前part A2的steganography程序
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;./steganography output.ppm &amp;gt; real_info.ppm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;convert real_info.ppm  real_info.png
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这里我提供一个例子,you can try to solve this little puzzle🧩.&lt;/p&gt;
+&lt;div style=&#34;display: flex; justify-content: space-around; align-items: center;&#34;&gt;
+    &lt;div&gt;
+        &lt;img src=&#34;hide.png&#34; alt=&#34;hide&#34; width=&#34;200&#34; /&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;details&gt;
+        &lt;summary&gt;click for the answer!&lt;/summary&gt;
+        &lt;img src=&#34;output.png&#34; alt=&#34;output&#34; width=&#34;200&#34; /&gt;
+        &lt;/details&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;对了，这个黑白的隐藏信息图片是利用我的词云程序raster.py生成的，请看另一篇文章&lt;a class=&#34;link&#34; href=&#34;https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;wordcloud with python&lt;/a&gt;,可以在demo.py中修改word1的内容(比如改成&amp;quot;hello world&amp;quot;)，然后重新运行生成隐藏信息图片(temp.png)。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
