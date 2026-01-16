@@ -55,23 +55,6 @@
         <guid>https://fuquan99666.github.io/categories/wordcloud/</guid>
         <description></description>
         </item>
-        <item>
-        <title></title>
-        <link>https://fuquan99666.github.io/categories/test/</link>
-        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-        
-        <guid>https://fuquan99666.github.io/categories/test/</guid>
-        <description>&lt;!-- ---
-title: &#34;Test&#34;
-description: &#34;This is an example category&#34;
-slug: &#34;test&#34;
-image: &#34;hutomo-abrianto-l2jk-uxb1BY-unsplash.jpg&#34;
-style:
-    background: &#34;#2a9d8f&#34;
-    color: &#34;#fff&#34;
---- --&gt;
-</description>
-        </item>
         
     </channel>
 </rss>
