@@ -13,7 +13,7 @@
         <pubDate>Tue, 13 Jan 2026 11:08:31 +0800</pubDate>
         
         <guid>https://fuquan99666.github.io/p/fpga1/</guid>
-        <description>&lt;h2 id=&#34;fpga学习之路-阻塞赋值与非阻塞赋值&#34;&gt;FPGA学习之路-阻塞赋值与非阻塞赋值
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg" alt="Featured image of post FPGA1" /&gt;&lt;h2 id=&#34;fpga学习之路-阻塞赋值与非阻塞赋值&#34;&gt;FPGA学习之路-阻塞赋值与非阻塞赋值
 &lt;/h2&gt;&lt;h3 id=&#34;例子二者有什么区别呢&#34;&gt;例子,二者有什么区别呢？
 &lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -217,7 +217,7 @@
         <pubDate>Thu, 25 Dec 2025 21:42:31 +0800</pubDate>
         
         <guid>https://fuquan99666.github.io/p/fpga0/</guid>
-        <description>&lt;h2 id=&#34;记录我的fpga学习之路-可控线性序列机&#34;&gt;记录我的FPGA学习之路-可控线性序列机
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C5.jpg" alt="Featured image of post FPGA0" /&gt;&lt;h2 id=&#34;记录我的fpga学习之路-可控线性序列机&#34;&gt;记录我的FPGA学习之路-可控线性序列机
 &lt;/h2&gt;&lt;h3 id=&#34;感谢小梅哥的fpga入门教程&#34;&gt;感谢小梅哥的&lt;a class=&#34;link&#34; href=&#34;https://www.bilibili.com/video/BV1va411c7Dz/?share_source=copy_web&amp;amp;vd_source=b8f0a6fce11ed11e5b293d962deba800&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;FPGA入门教程&lt;/a&gt;
 &lt;/h3&gt;&lt;h3 id=&#34;使用zynq-z2开发板&#34;&gt;使用ZYNQ-Z2开发板

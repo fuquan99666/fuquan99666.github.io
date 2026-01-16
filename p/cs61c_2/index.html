@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="FPGA学习之路-阻塞赋值与非阻塞赋值 例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n">
-<title>FPGA1</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="RISC-V procedures Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
+<title>CS61c_2</title>
 
-<link rel='canonical' href='https://fuquan99666.github.io/p/fpga1/'>
+<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_2/'>
 
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="FPGA1">
-<meta property='og:description' content="FPGA学习之路-阻塞赋值与非阻塞赋值 例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/fpga1/'>
+<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_2">
+<meta property='og:description' content="RISC-V procedures Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
+<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_2/'>
 <meta property='og:site_name' content='My Site'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-13T11:08:31&#43;08:00'/><meta property='article:modified_time' content='2026-01-13T11:08:31&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg' />
-<meta name="twitter:title" content="FPGA1">
-<meta name="twitter:description" content="FPGA学习之路-阻塞赋值与非阻塞赋值 例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-16T15:29:16&#43;08:00'/><meta property='article:modified_time' content='2026-01-16T15:29:16&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg' />
+<meta name="twitter:title" content="CS61c_2">
+<meta name="twitter:description" content="RISC-V procedures Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg' />
     <link rel="shortcut icon" href="/favicon.ico" />
 
     </head>
@@ -248,16 +248,16 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#fpga学习之路-阻塞赋值与非阻塞赋值">FPGA学习之路-阻塞赋值与非阻塞赋值</a>
+    <li><a href="#risc-v-procedures">RISC-V procedures</a>
       <ol>
-        <li><a href="#例子二者有什么区别呢">例子,二者有什么区别呢？</a>
+        <li><a href="#where-are-old-register-values-saved-to-restore-them-after-function-call">Where are old register values saved to restore them after function call?</a>
           <ol>
-            <li><a href="#非阻塞赋值的情况">非阻塞赋值的情况</a></li>
-            <li><a href="#阻塞赋值的情况">阻塞赋值的情况</a></li>
-            <li><a href="#d触发器">D触发器</a></li>
+            <li><a href="#preserved-across-function-call">Preserved across function call</a></li>
+            <li><a href="#not-preserved-across-function-call">Not preserved across function call</a></li>
           </ol>
         </li>
-        <li><a href="#总结">总结</a></li>
+        <li><a href="#memory-allocation">Memory Allocation</a></li>
+        <li><a href="#instruction-representations">Instruction Representations</a></li>
       </ol>
     </li>
   </ol>
@@ -274,9 +274,9 @@
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
-            <a href="/p/fpga1/">
+            <a href="/p/cs61c_2/">
                 
-                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c6.jpg" loading="lazy" alt="Featured image of post FPGA1" />
+                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c4.jpg" loading="lazy" alt="Featured image of post CS61c_2" />
                 
             </a>
         </div>
@@ -286,12 +286,12 @@
     
     <header class="article-category">
         
-            <a href="/categories/fpga/" style="background-color: ; color: #fff;">
-                FPGA
+            <a href="/categories/cs61c/" style="background-color: ; color: #fff;">
+                CS61c
             </a>
         
-            <a href="/categories/verilog/" style="background-color: ; color: #fff;">
-                Verilog
+            <a href="/categories/risc-v/" style="background-color: ; color: #fff;">
+                RISC V
             </a>
         
     </header>
@@ -299,7 +299,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/fpga1/">FPGA1</a>
+            <a href="/p/cs61c_2/">CS61c_2</a>
         </h2>
     
         
@@ -321,7 +321,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published" datetime='2026-01-13T11:08:31&#43;08:00'>2026-01-13</time>
+                <time class="article-time--published" datetime='2026-01-16T15:29:16&#43;08:00'>2026-01-16</time>
             </div>
         
 
@@ -336,7 +336,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 3 分钟
+                    阅读时长: 1 分钟
                 </time>
             </div>
         
@@ -351,30 +351,26 @@
     <section class="article-content">
     
     
-    <h2 id="fpga学习之路-阻塞赋值与非阻塞赋值">FPGA学习之路-阻塞赋值与非阻塞赋值
-</h2><h3 id="例子二者有什么区别呢">例子,二者有什么区别呢？
-</h3><div class="highlight"><div class="chroma">
+    <h2 id="risc-v-procedures">RISC-V procedures
+</h2><h3 id="where-are-old-register-values-saved-to-restore-them-after-function-call">Where are old register values saved to restore them after function call?
+</h3><ul>
+<li>sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address</li>
+<li>stack frame : the memory area that contains all the data for one function call, address grows downwards.</li>
+<li>an example of function call</li>
+</ul>
+<div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="c1">// 非阻塞赋值
-</span></span></span><span class="line"><span class="cl"><span class="k">always</span><span class="p">@</span> <span class="p">(</span><span class="k">posedge</span> <span class="n">Clk</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">counter</span> <span class="o">&lt;=</span> <span class="n">counter</span> <span class="o">+</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 阻塞赋值
-</span></span></span><span class="line"><span class="cl"><span class="k">always</span><span class="p">@</span> <span class="p">(</span><span class="k">posedge</span> <span class="n">Clk</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">counter</span> <span class="o">=</span> <span class="n">counter</span> <span class="o">+</span> <span class="mh">1</span><span class="p">;</span>
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">ha</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="p">,</span><span class="kt">int</span> <span class="n">k</span><span class="p">,</span><span class="kt">int</span> <span class="n">m</span><span class="p">,</span><span class="kt">int</span> <span class="n">n</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="n">n</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="非阻塞赋值的情况">非阻塞赋值的情况
-</h4><div class="highlight"><div class="chroma">
+</div><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -389,42 +385,61 @@
 </span><span class="lnt">11
 </span><span class="lnt">12
 </span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="k">module</span> <span class="n">block_nonblock</span><span class="p">(</span>
-</span></span><span class="line"><span class="cl">    <span class="k">input</span> <span class="n">Clk</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="k">input</span> <span class="n">Reset_n</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="k">input</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="k">output</span> <span class="kt">reg</span> <span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">out</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">);</span>
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ha:
+</span></span><span class="line"><span class="cl">    addi sp,sp,-8 # make room for 2 saved registers
+</span></span><span class="line"><span class="cl">    sw s1,4(sp)
+</span></span><span class="line"><span class="cl">    sw s0,0(sp)
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">reg</span> <span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">d</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    add s0,a0,a1
+</span></span><span class="line"><span class="cl">    add s1,a2,a3
+</span></span><span class="line"><span class="cl">    sub a0,s0,s1
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="k">posedge</span> <span class="n">Clk</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">Reset_n</span><span class="p">)</span> 
-</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Reset_n</span><span class="p">)</span><span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">&lt;=</span> <span class="mh">2</span><span class="mb">&#39;b0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">out</span> <span class="o">&lt;=</span> <span class="mh">2</span><span class="mb">&#39;b0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">out</span> <span class="o">&lt;=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">c</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">// out &lt;= a + b + c; 这个又是一种可能的写法
-</span></span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">endmodule</span>
+</span></span><span class="line"><span class="cl">    lw s1,4(sp)
+</span></span><span class="line"><span class="cl">    lw s0,0(sp)
+</span></span><span class="line"><span class="cl">    addi sp,sp,8
+</span></span><span class="line"><span class="cl">    jr ra
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
-<li>还有一种等价的写法（分成两个always）,参数部分省略</li>
+<li>当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？</li>
+<li>使用stack,将返回地址保存在stack frame中。</li>
+<li>caller: the calling function</li>
+<li>callee: the called function</li>
 </ul>
+<h4 id="preserved-across-function-call">Preserved across function call
+</h4><ul>
+<li>caller can rely on values being unchanged</li>
+<li>sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp)</li>
+</ul>
+<h4 id="not-preserved-across-function-call">Not preserved across function call
+</h4><ul>
+<li>caller cannot rely on values being unchanged</li>
+<li>Argument/return registers a0-a7,ra</li>
+<li>&ldquo;temporary registers&rdquo; t0-t6</li>
+</ul>
+<center>
+    <img src="1.png" alt="register name" width="300"/>
+</center>
+<h3 id="memory-allocation">Memory Allocation
+</h3><ul>
+<li>an example of stack</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">sumSquare</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nf">mult</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">y</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址，
+然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -439,115 +454,32 @@
 </span><span class="lnt">10
 </span><span class="lnt">11
 </span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="k">posedge</span> <span class="n">Clk</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Reset_n</span><span class="p">)</span><span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">&lt;=</span> <span class="mh">2</span><span class="mb">&#39;b0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="k">posedge</span> <span class="n">Clk</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Reset_n</span><span class="p">)</span><span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">out</span> <span class="o">&lt;=</span> <span class="mh">2</span><span class="mb">&#39;b0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">out</span> <span class="o">&lt;=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">c</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>其中d&lt;=a+b的电路展示：</p>
-<center>
-    <img src="1.png" alt="d<=a+b" width="400" />
-</center>
-而out<=d+c的电路展示：
-<center>
-    <img src='2.png' alt='out<=d+c' width='550' />
-</center>
-而out<=a+b+c的电路展示：
-<center>
-    <img src='3.png' alt='out<=a+b+c' width='500' />
-</center>
-<h4 id="阻塞赋值的情况">阻塞赋值的情况
-</h4><ul>
-<li>现在的是如果我写成</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="k">posedge</span> <span class="n">Clk</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Reset_n</span><span class="p">)</span><span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">=</span> <span class="mh">2</span><span class="mb">&#39;b0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">out</span> <span class="o">=</span> <span class="mh">2</span><span class="mb">&#39;b0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">out</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">c</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># sumSquare is caller, mult is callee
+</span></span><span class="line"><span class="cl">sumSquare:
+</span></span><span class="line"><span class="cl">    addi sp,sp,-8      |
+</span></span><span class="line"><span class="cl">    sw ra,4(sp)        | push
+</span></span><span class="line"><span class="cl">    sw a1,0(sp)        |
+</span></span><span class="line"><span class="cl">    mv a1,a0
+</span></span><span class="line"><span class="cl">    jal mult
+</span></span><span class="line"><span class="cl">    lw a1,0(sp)        |
+</span></span><span class="line"><span class="cl">    add a0,a0,a1       | pop
+</span></span><span class="line"><span class="cl">    lw ra,4(sp)        |
+</span></span><span class="line"><span class="cl">    addi sp,sp,8       |
+</span></span><span class="line"><span class="cl">    jr ra
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
-<li>在这种情况下，如果使用vivado的综合分析工具，查看schematic view，会发现d寄存器没了，只有一个out寄存器。（可以看成是组合逻辑顺序执行了）</li>
-<li>也就是说，阻塞赋值会让d的值在同一个时钟周期内立刻更新，所以out的计算会使用新的d值，相当于out=a+b+c。</li>
-<li>所以和out&lt;=a+b+c的电路原理是一样的。</li>
-<li>但是如果我这样写：</li>
+<li>三种数据存储，静态区，动态分配，栈区。</li>
+<li>对于RV32来说，stack starts in high memory and grows down(bfff_fff0 and must be aligned on 16-byte boundary)</li>
+<li>RV32 programs(text segment) in low ene(0001_0000)</li>
+<li>static data segment(constants and other static variables) above text for static variables, global pointer(gp) points to static, rv32 gp = 1000_0000</li>
+<li>Heap above static for data structures that grow and shrink.</li>
+<li>what about the lowest area? Reserved for system call.</li>
 </ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="k">posedge</span> <span class="n">Clk</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Reset_n</span><span class="p">)</span><span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">=</span> <span class="mh">2</span><span class="mb">&#39;b0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">out</span> <span class="o">=</span> <span class="mh">2</span><span class="mb">&#39;b0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">out</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">c</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>不存在依赖问题，因为out的计算使用的是上一个时钟周期的d值，然后d才被更新为新的值。所以在综合分析后的原理图中，d寄存器又回来了(用于存储供out使用的旧值)。</li>
-</ul>
-<h4 id="d触发器">D触发器
-</h4><ul>
-<li>这里顺便说一下D触发器的工作原理</li>
-<li>D触发器是一种最简单的存储单元，用于在数字电路中存储单个位的信息。而寄存器则是有多个D触发器组成的，用于存储多位信息。比如Reg [7:0] output 就是有8个D触发器并联组成的8位寄存器（共享同一个时钟信号）。</li>
-<li>D触发器在时钟上升沿时，将D输入的值传递到Q输出端。</li>
-<li>也就是说，在时钟上升沿之前，D输入的值会被锁存，并在时钟上升沿时更新Q输出。</li>
-<li>这意味着在时钟周期内，D输入的值可以变化，但Q输出只会在时钟上升沿时更新为D的值。</li>
-<li>例如，如果D在时钟上升沿之前为1，那么在时钟上升沿时，Q将更新为1。</li>
-<li>如果D在下一个时钟周期内变为0，那么Q仍然保持为1，直到下一个时钟上升沿时，Q才会更新为0。</li>
-</ul>
-<h3 id="总结">总结
-</h3><p>在时序逻辑中，一律使用非阻塞赋值(&lt;=)，以确保所有寄存器在时钟边沿同时更新，避免竞态条件和不确定行为。
-阻塞赋值(=)主要用于组合逻辑电路的描述，在这种情况下，赋值顺序很重要，因为它们会立即生效，影响后续的计算。</p>
-
+<h3 id="instruction-representations">Instruction Representations
+</h3>
 </section>
 
 
@@ -615,18 +547,37 @@
             
                 
 <article class="has-image">
-    <a href="/p/fpga0/">
+    <a href="/p/cs61c_1/">
         
         
             <div class="article-image">
                 
-                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c5.jpg" loading="lazy" data-key="" data-hash="/伊蕾娜5.jpg"/>
+                    <img src="/avatar.png" loading="lazy" data-key="" data-hash="/avatar.png"/>
                 
             </div>
         
 
         <div class="article-details">
-            <h2 class="article-title">FPGA0</h2>
+            <h2 class="article-title">CS61c_1</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/cs61c_0/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/st.jpg" loading="lazy" data-key="" data-hash="/st.jpg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CS61c_0</h2>
         </div>
     </a>
 </article>
