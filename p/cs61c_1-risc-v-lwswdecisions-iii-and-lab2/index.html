@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="RISC-V lw,sw,Decisions I,II and Lab2 Load and Store from Memory a word is 4 bytes, and same as registers. follow little-endian convention, that is, the least significant byte is stored at the lowest memory address.（小端序） 大端序(big-endian): the most significant byte is stored at the lowest memory address. 大多数90%的处理器采用小端序，包括x86和RISC-V。一些IBM的处理器采用大端序，比如PowerPC。美国人名字，java的包名都是大端序的。美国的日期格式是中端序？（月/日/年） some instructions main memory , also called DRAM(dynamic random access memory), is large but slow. Register is 50x-500x faster than main memory.1ns vs 50-100ns. 打个比方：我们的脑子中找一个东西（大概需要1分钟），100倍就是1.5小时，相当于你开车到一个小镇拿一份文件，如果是500倍，那就是你开车去另一个城市拿文件了。由此可见从内存中load数据是多么慢的一件事。expensive! 1 2 int A[100]; g = h + A[3]; 1 2 lw x10,12(x15) // load a word, from right to left add x11,x12,x10 1 2 int A[100]; A[10] = h + A[3]; 1 2 3 lw x10,12(x15) add x10,x12,x10 sw x10,40(x15) // store a word, from left to right x+12 and x+40 must be multiples of 4. In addition to word data transfer(lw,sw), RISC-V also has byte data transfers(lb,sb), same format as lw,sw.\n">
-<title>CS61c_1</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Load and Store from Memory a word is 4 bytes, and same as registers. follow little-endian convention, that is, the least significant byte is stored at the lowest memory address.（小端序） 大端序(big-endian): the most significant byte is stored at the lowest memory address. 大多数90%的处理器采用小端序，包括x86和RISC-V。一些IBM的处理器采用大端序，比如PowerPC。美国人名字，java的包名都是大端序的。美国的日期格式是中端序？（月/日/年） some instructions main memory , also called DRAM(dynamic random access memory), is large but slow. Register is 50x-500x faster than main memory.1ns vs 50-100ns. 打个比方：我们的脑子中找一个东西（大概需要1分钟），100倍就是1.5小时，相当于你开车到一个小镇拿一份文件，如果是500倍，那就是你开车去另一个城市拿文件了。由此可见从内存中load数据是多么慢的一件事。expensive! 1 2 int A[100]; g = h + A[3]; 1 2 lw x10,12(x15) // load a word, from right to left add x11,x12,x10 1 2 int A[100]; A[10] = h + A[3]; 1 2 3 lw x10,12(x15) add x10,x12,x10 sw x10,40(x15) // store a word, from left to right x+12 and x+40 must be multiples of 4. In addition to word data transfer(lw,sw), RISC-V also has byte data transfers(lb,sb), same format as lw,sw.\n">
+<title>CS61c_1 — RISC-V lw,sw,Decisions I,II and Lab2</title>
 
-<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_1/'>
+<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_1-risc-v-lwswdecisions-iii-and-lab2/'>
 
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_1">
-<meta property='og:description' content="RISC-V lw,sw,Decisions I,II and Lab2 Load and Store from Memory a word is 4 bytes, and same as registers. follow little-endian convention, that is, the least significant byte is stored at the lowest memory address.（小端序） 大端序(big-endian): the most significant byte is stored at the lowest memory address. 大多数90%的处理器采用小端序，包括x86和RISC-V。一些IBM的处理器采用大端序，比如PowerPC。美国人名字，java的包名都是大端序的。美国的日期格式是中端序？（月/日/年） some instructions main memory , also called DRAM(dynamic random access memory), is large but slow. Register is 50x-500x faster than main memory.1ns vs 50-100ns. 打个比方：我们的脑子中找一个东西（大概需要1分钟），100倍就是1.5小时，相当于你开车到一个小镇拿一份文件，如果是500倍，那就是你开车去另一个城市拿文件了。由此可见从内存中load数据是多么慢的一件事。expensive! 1 2 int A[100]; g = h + A[3]; 1 2 lw x10,12(x15) // load a word, from right to left add x11,x12,x10 1 2 int A[100]; A[10] = h + A[3]; 1 2 3 lw x10,12(x15) add x10,x12,x10 sw x10,40(x15) // store a word, from left to right x+12 and x+40 must be multiples of 4. In addition to word data transfer(lw,sw), RISC-V also has byte data transfers(lb,sb), same format as lw,sw.\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_1/'>
+<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_1 — RISC-V lw,sw,Decisions I,II and Lab2">
+<meta property='og:description' content="Load and Store from Memory a word is 4 bytes, and same as registers. follow little-endian convention, that is, the least significant byte is stored at the lowest memory address.（小端序） 大端序(big-endian): the most significant byte is stored at the lowest memory address. 大多数90%的处理器采用小端序，包括x86和RISC-V。一些IBM的处理器采用大端序，比如PowerPC。美国人名字，java的包名都是大端序的。美国的日期格式是中端序？（月/日/年） some instructions main memory , also called DRAM(dynamic random access memory), is large but slow. Register is 50x-500x faster than main memory.1ns vs 50-100ns. 打个比方：我们的脑子中找一个东西（大概需要1分钟），100倍就是1.5小时，相当于你开车到一个小镇拿一份文件，如果是500倍，那就是你开车去另一个城市拿文件了。由此可见从内存中load数据是多么慢的一件事。expensive! 1 2 int A[100]; g = h + A[3]; 1 2 lw x10,12(x15) // load a word, from right to left add x11,x12,x10 1 2 int A[100]; A[10] = h + A[3]; 1 2 3 lw x10,12(x15) add x10,x12,x10 sw x10,40(x15) // store a word, from left to right x+12 and x+40 must be multiples of 4. In addition to word data transfer(lw,sw), RISC-V also has byte data transfers(lb,sb), same format as lw,sw.\n">
+<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_1-risc-v-lwswdecisions-iii-and-lab2/'>
 <meta property='og:site_name' content='My Site'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-13T09:26:15&#43;08:00'/><meta property='article:modified_time' content='2026-01-13T09:26:15&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/avatar.png' />
-<meta name="twitter:title" content="CS61c_1">
-<meta name="twitter:description" content="RISC-V lw,sw,Decisions I,II and Lab2 Load and Store from Memory a word is 4 bytes, and same as registers. follow little-endian convention, that is, the least significant byte is stored at the lowest memory address.（小端序） 大端序(big-endian): the most significant byte is stored at the lowest memory address. 大多数90%的处理器采用小端序，包括x86和RISC-V。一些IBM的处理器采用大端序，比如PowerPC。美国人名字，java的包名都是大端序的。美国的日期格式是中端序？（月/日/年） some instructions main memory , also called DRAM(dynamic random access memory), is large but slow. Register is 50x-500x faster than main memory.1ns vs 50-100ns. 打个比方：我们的脑子中找一个东西（大概需要1分钟），100倍就是1.5小时，相当于你开车到一个小镇拿一份文件，如果是500倍，那就是你开车去另一个城市拿文件了。由此可见从内存中load数据是多么慢的一件事。expensive! 1 2 int A[100]; g = h + A[3]; 1 2 lw x10,12(x15) // load a word, from right to left add x11,x12,x10 1 2 int A[100]; A[10] = h + A[3]; 1 2 3 lw x10,12(x15) add x10,x12,x10 sw x10,40(x15) // store a word, from left to right x+12 and x+40 must be multiples of 4. In addition to word data transfer(lw,sw), RISC-V also has byte data transfers(lb,sb), same format as lw,sw.\n"><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CS61c_1 — RISC-V lw,sw,Decisions I,II and Lab2">
+<meta name="twitter:description" content="Load and Store from Memory a word is 4 bytes, and same as registers. follow little-endian convention, that is, the least significant byte is stored at the lowest memory address.（小端序） 大端序(big-endian): the most significant byte is stored at the lowest memory address. 大多数90%的处理器采用小端序，包括x86和RISC-V。一些IBM的处理器采用大端序，比如PowerPC。美国人名字，java的包名都是大端序的。美国的日期格式是中端序？（月/日/年） some instructions main memory , also called DRAM(dynamic random access memory), is large but slow. Register is 50x-500x faster than main memory.1ns vs 50-100ns. 打个比方：我们的脑子中找一个东西（大概需要1分钟），100倍就是1.5小时，相当于你开车到一个小镇拿一份文件，如果是500倍，那就是你开车去另一个城市拿文件了。由此可见从内存中load数据是多么慢的一件事。expensive! 1 2 int A[100]; g = h + A[3]; 1 2 lw x10,12(x15) // load a word, from right to left add x11,x12,x10 1 2 int A[100]; A[10] = h + A[3]; 1 2 3 lw x10,12(x15) add x10,x12,x10 sw x10,40(x15) // store a word, from left to right x+12 and x+40 must be multiples of 4. In addition to word data transfer(lw,sw), RISC-V also has byte data transfers(lb,sb), same format as lw,sw.\n"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://fuquan99666.github.io/avatar.png' />
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -248,7 +248,7 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#risc-v-lwswdecisions-iii-and-lab2">RISC-V lw,sw,Decisions I,II and Lab2</a>
+    <li>
       <ol>
         <li><a href="#load-and-store-from-memory">Load and Store from Memory</a></li>
         <li><a href="#some-instructions">some instructions</a></li>
@@ -283,9 +283,9 @@
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
-            <a href="/p/cs61c_1/">
+            <a href="/p/cs61c_1-risc-v-lwswdecisions-iii-and-lab2/">
                 
-                    <img src="/avatar.png" loading="lazy" alt="Featured image of post CS61c_1" />
+                    <img src="/avatar.png" loading="lazy" alt="Featured image of post CS61c_1 — RISC-V lw,sw,Decisions I,II and Lab2" />
                 
             </a>
         </div>
@@ -308,7 +308,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/cs61c_1/">CS61c_1</a>
+            <a href="/p/cs61c_1-risc-v-lwswdecisions-iii-and-lab2/">CS61c_1 — RISC-V lw,sw,Decisions I,II and Lab2</a>
         </h2>
     
         
@@ -360,8 +360,7 @@
     <section class="article-content">
     
     
-    <h2 id="risc-v-lwswdecisions-iii-and-lab2">RISC-V lw,sw,Decisions I,II and Lab2
-</h2><h3 id="load-and-store-from-memory">Load and Store from Memory
+    <h3 id="load-and-store-from-memory">Load and Store from Memory
 </h3><ul>
 <li>a word is 4 bytes, and same as registers.</li>
 <li>follow little-endian convention, that is, the least significant byte is stored at the lowest memory address.（小端序）</li>
@@ -696,7 +695,7 @@ jr ra: jal x0,ra</li>
             
                 
 <article class="has-image">
-    <a href="/p/cs61c_2/">
+    <a href="/p/cs61c_2-risc-v-procedures-and-lab3/">
         
         
             <div class="article-image">
@@ -707,7 +706,7 @@ jr ra: jal x0,ra</li>
         
 
         <div class="article-details">
-            <h2 class="article-title">CS61c_2</h2>
+            <h2 class="article-title">CS61c_2 — RISC-V procedures and Lab3</h2>
         </div>
     </a>
 </article>
@@ -715,7 +714,7 @@ jr ra: jal x0,ra</li>
             
                 
 <article class="has-image">
-    <a href="/p/cs61c_0/">
+    <a href="/p/cs61c_0-risc-v-intro-and-project-1/">
         
         
             <div class="article-image">
@@ -726,7 +725,7 @@ jr ra: jal x0,ra</li>
         
 
         <div class="article-details">
-            <h2 class="article-title">CS61c_0</h2>
+            <h2 class="article-title">CS61c_0 — RISC-V intro and Project 1</h2>
         </div>
     </a>
 </article>

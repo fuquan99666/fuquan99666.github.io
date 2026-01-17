@@ -8,13 +8,12 @@
         <language>en-us</language>
         <copyright>zz486</copyright>
         <lastBuildDate>Fri, 16 Jan 2026 15:29:16 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>CS61c_2</title>
-        <link>https://fuquan99666.github.io/p/cs61c_2/</link>
+        <title>CS61c_2 — RISC-V procedures and Lab3</title>
+        <link>https://fuquan99666.github.io/p/cs61c_2-risc-v-procedures-and-lab3/</link>
         <pubDate>Fri, 16 Jan 2026 15:29:16 +0800</pubDate>
         
-        <guid>https://fuquan99666.github.io/p/cs61c_2/</guid>
-        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg" alt="Featured image of post CS61c_2" /&gt;&lt;h2 id=&#34;risc-v-procedures-and-lab3&#34;&gt;RISC-V procedures and Lab3
-&lt;/h2&gt;&lt;h3 id=&#34;where-are-old-register-values-saved-to-restore-them-after-function-call&#34;&gt;Where are old register values saved to restore them after function call?
+        <guid>https://fuquan99666.github.io/p/cs61c_2-risc-v-procedures-and-lab3/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg" alt="Featured image of post CS61c_2 — RISC-V procedures and Lab3" /&gt;&lt;h3 id=&#34;where-are-old-register-values-saved-to-restore-them-after-function-call&#34;&gt;Where are old register values saved to restore them after function call?
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address&lt;/li&gt;
 &lt;li&gt;stack frame : the memory area that contains all the data for one function call, address grows downwards.&lt;/li&gt;
@@ -302,13 +301,12 @@ n的地址是0x10000010.
 </description>
         </item>
         <item>
-        <title>FPGA1</title>
-        <link>https://fuquan99666.github.io/p/fpga1/</link>
+        <title>FPGA1 — 阻塞赋值与非阻塞赋值</title>
+        <link>https://fuquan99666.github.io/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/</link>
         <pubDate>Tue, 13 Jan 2026 11:08:31 +0800</pubDate>
         
-        <guid>https://fuquan99666.github.io/p/fpga1/</guid>
-        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg" alt="Featured image of post FPGA1" /&gt;&lt;h2 id=&#34;fpga学习之路-阻塞赋值与非阻塞赋值&#34;&gt;FPGA学习之路-阻塞赋值与非阻塞赋值
-&lt;/h2&gt;&lt;h3 id=&#34;例子二者有什么区别呢&#34;&gt;例子,二者有什么区别呢？
+        <guid>https://fuquan99666.github.io/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg" alt="Featured image of post FPGA1 — 阻塞赋值与非阻塞赋值" /&gt;&lt;h3 id=&#34;例子二者有什么区别呢&#34;&gt;例子,二者有什么区别呢？
 &lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -506,13 +504,12 @@ n的地址是0x10000010.
 </description>
         </item>
         <item>
-        <title>CS61c_1</title>
-        <link>https://fuquan99666.github.io/p/cs61c_1/</link>
+        <title>CS61c_1 — RISC-V lw,sw,Decisions I,II and Lab2</title>
+        <link>https://fuquan99666.github.io/p/cs61c_1-risc-v-lwswdecisions-iii-and-lab2/</link>
         <pubDate>Tue, 13 Jan 2026 09:26:15 +0800</pubDate>
         
-        <guid>https://fuquan99666.github.io/p/cs61c_1/</guid>
-        <description>&lt;img src="https://fuquan99666.github.io/avatar.png" alt="Featured image of post CS61c_1" /&gt;&lt;h2 id=&#34;risc-v-lwswdecisions-iii-and-lab2&#34;&gt;RISC-V lw,sw,Decisions I,II and Lab2
-&lt;/h2&gt;&lt;h3 id=&#34;load-and-store-from-memory&#34;&gt;Load and Store from Memory
+        <guid>https://fuquan99666.github.io/p/cs61c_1-risc-v-lwswdecisions-iii-and-lab2/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/avatar.png" alt="Featured image of post CS61c_1 — RISC-V lw,sw,Decisions I,II and Lab2" /&gt;&lt;h3 id=&#34;load-and-store-from-memory&#34;&gt;Load and Store from Memory
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;a word is 4 bytes, and same as registers.&lt;/li&gt;
 &lt;li&gt;follow little-endian convention, that is, the least significant byte is stored at the lowest memory address.（小端序）&lt;/li&gt;
@@ -782,12 +779,12 @@ jr ra: jal x0,ra&lt;/li&gt;
 </description>
         </item>
         <item>
-        <title>CS61c_0</title>
-        <link>https://fuquan99666.github.io/p/cs61c_0/</link>
+        <title>CS61c_0 — RISC-V intro and Project 1</title>
+        <link>https://fuquan99666.github.io/p/cs61c_0-risc-v-intro-and-project-1/</link>
         <pubDate>Sun, 11 Jan 2026 16:51:41 +0800</pubDate>
         
-        <guid>https://fuquan99666.github.io/p/cs61c_0/</guid>
-        <description>&lt;img src="https://fuquan99666.github.io/st.jpg" alt="Featured image of post CS61c_0" /&gt;&lt;h2 id=&#34;我的cs61c学习笔记&#34;&gt;我的CS61c学习笔记
+        <guid>https://fuquan99666.github.io/p/cs61c_0-risc-v-intro-and-project-1/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/st.jpg" alt="Featured image of post CS61c_0 — RISC-V intro and Project 1" /&gt;&lt;h2 id=&#34;我的cs61c学习笔记&#34;&gt;我的CS61c学习笔记
 &lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;感谢csdiy提供的&lt;a class=&#34;link&#34; href=&#34;https://csdiy.wiki/%e4%bd%93%e7%b3%bb%e7%bb%93%e6%9e%84/CS61C/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;课程资料&lt;/a&gt;&lt;/li&gt;
@@ -798,8 +795,7 @@ jr ra: jal x0,ra&lt;/li&gt;
     &gt;仓库&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;risc-v-intro-and-project-1&#34;&gt;RISC-V intro and Project 1
-&lt;/h2&gt;&lt;h3 id=&#34;risc-v-intro&#34;&gt;RISC-V intro
+&lt;h3 id=&#34;risc-v-intro&#34;&gt;RISC-V intro
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。&lt;/li&gt;
 &lt;li&gt;主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。&lt;/li&gt;
@@ -1070,13 +1066,12 @@ to ppm, for example:&lt;/li&gt;
 </description>
         </item>
         <item>
-        <title>FPGA0</title>
-        <link>https://fuquan99666.github.io/p/fpga0/</link>
+        <title>FPGA0 — 可控线性序列机</title>
+        <link>https://fuquan99666.github.io/p/fpga0-%E5%8F%AF%E6%8E%A7%E7%BA%BF%E6%80%A7%E5%BA%8F%E5%88%97%E6%9C%BA/</link>
         <pubDate>Thu, 25 Dec 2025 21:42:31 +0800</pubDate>
         
-        <guid>https://fuquan99666.github.io/p/fpga0/</guid>
-        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C5.jpg" alt="Featured image of post FPGA0" /&gt;&lt;h2 id=&#34;记录我的fpga学习之路-可控线性序列机&#34;&gt;记录我的FPGA学习之路-可控线性序列机
-&lt;/h2&gt;&lt;h3 id=&#34;感谢小梅哥的fpga入门教程&#34;&gt;感谢小梅哥的&lt;a class=&#34;link&#34; href=&#34;https://www.bilibili.com/video/BV1va411c7Dz/?share_source=copy_web&amp;amp;vd_source=b8f0a6fce11ed11e5b293d962deba800&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+        <guid>https://fuquan99666.github.io/p/fpga0-%E5%8F%AF%E6%8E%A7%E7%BA%BF%E6%80%A7%E5%BA%8F%E5%88%97%E6%9C%BA/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C5.jpg" alt="Featured image of post FPGA0 — 可控线性序列机" /&gt;&lt;h3 id=&#34;感谢小梅哥的fpga入门教程&#34;&gt;感谢小梅哥的&lt;a class=&#34;link&#34; href=&#34;https://www.bilibili.com/video/BV1va411c7Dz/?share_source=copy_web&amp;amp;vd_source=b8f0a6fce11ed11e5b293d962deba800&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;FPGA入门教程&lt;/a&gt;
 &lt;/h3&gt;&lt;h3 id=&#34;使用zynq-z2开发板&#34;&gt;使用ZYNQ-Z2开发板
 &lt;/h3&gt;&lt;ul&gt;

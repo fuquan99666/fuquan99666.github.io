@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="FPGA学习之路-阻塞赋值与非阻塞赋值 例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n">
-<title>FPGA1</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n">
+<title>FPGA1 — 阻塞赋值与非阻塞赋值</title>
 
-<link rel='canonical' href='https://fuquan99666.github.io/p/fpga1/'>
+<link rel='canonical' href='https://fuquan99666.github.io/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/'>
 
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="FPGA1">
-<meta property='og:description' content="FPGA学习之路-阻塞赋值与非阻塞赋值 例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/fpga1/'>
+<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="FPGA1 — 阻塞赋值与非阻塞赋值">
+<meta property='og:description' content="例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n">
+<meta property='og:url' content='https://fuquan99666.github.io/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/'>
 <meta property='og:site_name' content='My Site'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-13T11:08:31&#43;08:00'/><meta property='article:modified_time' content='2026-01-13T11:08:31&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg' />
-<meta name="twitter:title" content="FPGA1">
-<meta name="twitter:description" content="FPGA学习之路-阻塞赋值与非阻塞赋值 例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n"><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FPGA1 — 阻塞赋值与非阻塞赋值">
+<meta name="twitter:description" content="例子,二者有什么区别呢？ 1 2 3 4 5 6 7 // 非阻塞赋值 always@ (posedge Clk) counter &lt;= counter + 1; // 阻塞赋值 always@ (posedge Clk) counter = counter + 1; 非阻塞赋值的情况 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 module block_nonblock( input Clk, input Reset_n, input a,b,c, output reg [1:0] out; ); reg [1:0] d; always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; out &lt;= 2&#39;b0; end else begin d &lt;= a + b; out &lt;= d + c; // out &lt;= a + b + c; 这个又是一种可能的写法 end endmodule 还有一种等价的写法（分成两个always）,参数部分省略 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin d &lt;= 2&#39;b0; end else begin d &lt;= a + b; end always@(posedge Clk or negedge Reset_n) if(!Reset_n)begin out &lt;= 2&#39;b0; end else begin out &lt;= d + c; end 其中d&lt;=a+b的电路展示：\n"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg' />
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -248,7 +248,7 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#fpga学习之路-阻塞赋值与非阻塞赋值">FPGA学习之路-阻塞赋值与非阻塞赋值</a>
+    <li>
       <ol>
         <li><a href="#例子二者有什么区别呢">例子,二者有什么区别呢？</a>
           <ol>
@@ -274,9 +274,9 @@
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
-            <a href="/p/fpga1/">
+            <a href="/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/">
                 
-                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c6.jpg" loading="lazy" alt="Featured image of post FPGA1" />
+                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c6.jpg" loading="lazy" alt="Featured image of post FPGA1 — 阻塞赋值与非阻塞赋值" />
                 
             </a>
         </div>
@@ -299,7 +299,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/fpga1/">FPGA1</a>
+            <a href="/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/">FPGA1 — 阻塞赋值与非阻塞赋值</a>
         </h2>
     
         
@@ -351,8 +351,7 @@
     <section class="article-content">
     
     
-    <h2 id="fpga学习之路-阻塞赋值与非阻塞赋值">FPGA学习之路-阻塞赋值与非阻塞赋值
-</h2><h3 id="例子二者有什么区别呢">例子,二者有什么区别呢？
+    <h3 id="例子二者有什么区别呢">例子,二者有什么区别呢？
 </h3><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -615,7 +614,7 @@
             
                 
 <article class="has-image">
-    <a href="/p/fpga0/">
+    <a href="/p/fpga0-%E5%8F%AF%E6%8E%A7%E7%BA%BF%E6%80%A7%E5%BA%8F%E5%88%97%E6%9C%BA/">
         
         
             <div class="article-image">
@@ -626,7 +625,7 @@
         
 
         <div class="article-details">
-            <h2 class="article-title">FPGA0</h2>
+            <h2 class="article-title">FPGA0 — 可控线性序列机</h2>
         </div>
     </a>
 </article>

@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="RISC-V procedures and Lab3 Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
-<title>CS61c_2</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
+<title>CS61c_2 — RISC-V procedures and Lab3</title>
 
-<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_2/'>
+<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_2-risc-v-procedures-and-lab3/'>
 
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_2">
-<meta property='og:description' content="RISC-V procedures and Lab3 Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_2/'>
+<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_2 — RISC-V procedures and Lab3">
+<meta property='og:description' content="Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
+<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_2-risc-v-procedures-and-lab3/'>
 <meta property='og:site_name' content='My Site'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-16T15:29:16&#43;08:00'/><meta property='article:modified_time' content='2026-01-16T15:29:16&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg' />
-<meta name="twitter:title" content="CS61c_2">
-<meta name="twitter:description" content="RISC-V procedures and Lab3 Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n"><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CS61c_2 — RISC-V procedures and Lab3">
+<meta name="twitter:description" content="Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg' />
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -248,7 +248,7 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#risc-v-procedures-and-lab3">RISC-V procedures and Lab3</a>
+    <li>
       <ol>
         <li><a href="#where-are-old-register-values-saved-to-restore-them-after-function-call">Where are old register values saved to restore them after function call?</a>
           <ol>
@@ -285,9 +285,9 @@
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
-            <a href="/p/cs61c_2/">
+            <a href="/p/cs61c_2-risc-v-procedures-and-lab3/">
                 
-                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c4.jpg" loading="lazy" alt="Featured image of post CS61c_2" />
+                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c4.jpg" loading="lazy" alt="Featured image of post CS61c_2 — RISC-V procedures and Lab3" />
                 
             </a>
         </div>
@@ -310,7 +310,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/cs61c_2/">CS61c_2</a>
+            <a href="/p/cs61c_2-risc-v-procedures-and-lab3/">CS61c_2 — RISC-V procedures and Lab3</a>
         </h2>
     
         
@@ -362,8 +362,7 @@
     <section class="article-content">
     
     
-    <h2 id="risc-v-procedures-and-lab3">RISC-V procedures and Lab3
-</h2><h3 id="where-are-old-register-values-saved-to-restore-them-after-function-call">Where are old register values saved to restore them after function call?
+    <h3 id="where-are-old-register-values-saved-to-restore-them-after-function-call">Where are old register values saved to restore them after function call?
 </h3><ul>
 <li>sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address</li>
 <li>stack frame : the memory area that contains all the data for one function call, address grows downwards.</li>
@@ -716,7 +715,7 @@ n的地址是0x10000010.
             
                 
 <article class="has-image">
-    <a href="/p/cs61c_1/">
+    <a href="/p/cs61c_1-risc-v-lwswdecisions-iii-and-lab2/">
         
         
             <div class="article-image">
@@ -727,7 +726,7 @@ n的地址是0x10000010.
         
 
         <div class="article-details">
-            <h2 class="article-title">CS61c_1</h2>
+            <h2 class="article-title">CS61c_1 — RISC-V lw,sw,Decisions I,II and Lab2</h2>
         </div>
     </a>
 </article>
@@ -735,7 +734,7 @@ n的地址是0x10000010.
             
                 
 <article class="has-image">
-    <a href="/p/cs61c_0/">
+    <a href="/p/cs61c_0-risc-v-intro-and-project-1/">
         
         
             <div class="article-image">
@@ -746,7 +745,7 @@ n的地址是0x10000010.
         
 
         <div class="article-details">
-            <h2 class="article-title">CS61c_0</h2>
+            <h2 class="article-title">CS61c_0 — RISC-V intro and Project 1</h2>
         </div>
     </a>
 </article>

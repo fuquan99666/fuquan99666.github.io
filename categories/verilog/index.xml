@@ -8,13 +8,12 @@
         <language>en-us</language>
         <copyright>zz486</copyright>
         <lastBuildDate>Tue, 13 Jan 2026 11:08:31 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/verilog/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>FPGA1</title>
-        <link>https://fuquan99666.github.io/p/fpga1/</link>
+        <title>FPGA1 — 阻塞赋值与非阻塞赋值</title>
+        <link>https://fuquan99666.github.io/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/</link>
         <pubDate>Tue, 13 Jan 2026 11:08:31 +0800</pubDate>
         
-        <guid>https://fuquan99666.github.io/p/fpga1/</guid>
-        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg" alt="Featured image of post FPGA1" /&gt;&lt;h2 id=&#34;fpga学习之路-阻塞赋值与非阻塞赋值&#34;&gt;FPGA学习之路-阻塞赋值与非阻塞赋值
-&lt;/h2&gt;&lt;h3 id=&#34;例子二者有什么区别呢&#34;&gt;例子,二者有什么区别呢？
+        <guid>https://fuquan99666.github.io/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg" alt="Featured image of post FPGA1 — 阻塞赋值与非阻塞赋值" /&gt;&lt;h3 id=&#34;例子二者有什么区别呢&#34;&gt;例子,二者有什么区别呢？
 &lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -212,13 +211,12 @@
 </description>
         </item>
         <item>
-        <title>FPGA0</title>
-        <link>https://fuquan99666.github.io/p/fpga0/</link>
+        <title>FPGA0 — 可控线性序列机</title>
+        <link>https://fuquan99666.github.io/p/fpga0-%E5%8F%AF%E6%8E%A7%E7%BA%BF%E6%80%A7%E5%BA%8F%E5%88%97%E6%9C%BA/</link>
         <pubDate>Thu, 25 Dec 2025 21:42:31 +0800</pubDate>
         
-        <guid>https://fuquan99666.github.io/p/fpga0/</guid>
-        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C5.jpg" alt="Featured image of post FPGA0" /&gt;&lt;h2 id=&#34;记录我的fpga学习之路-可控线性序列机&#34;&gt;记录我的FPGA学习之路-可控线性序列机
-&lt;/h2&gt;&lt;h3 id=&#34;感谢小梅哥的fpga入门教程&#34;&gt;感谢小梅哥的&lt;a class=&#34;link&#34; href=&#34;https://www.bilibili.com/video/BV1va411c7Dz/?share_source=copy_web&amp;amp;vd_source=b8f0a6fce11ed11e5b293d962deba800&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+        <guid>https://fuquan99666.github.io/p/fpga0-%E5%8F%AF%E6%8E%A7%E7%BA%BF%E6%80%A7%E5%BA%8F%E5%88%97%E6%9C%BA/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C5.jpg" alt="Featured image of post FPGA0 — 可控线性序列机" /&gt;&lt;h3 id=&#34;感谢小梅哥的fpga入门教程&#34;&gt;感谢小梅哥的&lt;a class=&#34;link&#34; href=&#34;https://www.bilibili.com/video/BV1va411c7Dz/?share_source=copy_web&amp;amp;vd_source=b8f0a6fce11ed11e5b293d962deba800&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;FPGA入门教程&lt;/a&gt;
 &lt;/h3&gt;&lt;h3 id=&#34;使用zynq-z2开发板&#34;&gt;使用ZYNQ-Z2开发板
 &lt;/h3&gt;&lt;ul&gt;
