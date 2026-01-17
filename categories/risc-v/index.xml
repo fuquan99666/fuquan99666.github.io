@@ -13,7 +13,7 @@
         <pubDate>Fri, 16 Jan 2026 15:29:16 +0800</pubDate>
         
         <guid>https://fuquan99666.github.io/p/cs61c_2/</guid>
-        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg" alt="Featured image of post CS61c_2" /&gt;&lt;h2 id=&#34;risc-v-procedures&#34;&gt;RISC-V procedures
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg" alt="Featured image of post CS61c_2" /&gt;&lt;h2 id=&#34;risc-v-procedures-and-lab3&#34;&gt;RISC-V procedures and Lab3
 &lt;/h2&gt;&lt;h3 id=&#34;where-are-old-register-values-saved-to-restore-them-after-function-call&#34;&gt;Where are old register values saved to restore them after function call?
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address&lt;/li&gt;
@@ -80,6 +80,8 @@
 &lt;li&gt;caller cannot rely on values being unchanged&lt;/li&gt;
 &lt;li&gt;Argument/return registers a0-a7,ra&lt;/li&gt;
 &lt;li&gt;&amp;ldquo;temporary registers&amp;rdquo; t0-t6&lt;/li&gt;
+&lt;li&gt;反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。&lt;/li&gt;
+&lt;li&gt;所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;center&gt;
     &lt;img src=&#34;1.png&#34; alt=&#34;register name&#34; width=&#34;300&#34;/&gt;
@@ -135,13 +137,169 @@
 &lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;三种数据存储，静态区，动态分配，栈区。&lt;/li&gt;
 &lt;li&gt;对于RV32来说，stack starts in high memory and grows down(bfff_fff0 and must be aligned on 16-byte boundary)&lt;/li&gt;
-&lt;li&gt;RV32 programs(text segment) in low ene(0001_0000)&lt;/li&gt;
+&lt;li&gt;RV32 programs(text segment) in low memory(0001_0000)&lt;/li&gt;
 &lt;li&gt;static data segment(constants and other static variables) above text for static variables, global pointer(gp) points to static, rv32 gp = 1000_0000&lt;/li&gt;
 &lt;li&gt;Heap above static for data structures that grow and shrink.&lt;/li&gt;
 &lt;li&gt;what about the lowest area? Reserved for system call.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;instruction-representations&#34;&gt;Instruction Representations
-&lt;/h3&gt;</description>
+&lt;h3 id=&#34;lab3&#34;&gt;Lab3
+&lt;/h3&gt;&lt;h4 id=&#34;来者不善&#34;&gt;来者不善
+&lt;/h4&gt;&lt;p&gt;This lab is somewhat longer than the previous labs (and longer than most future labs as well). This is in order to give everyone a chance to get comfortable with writing RISC-V and using the Venus simulator before the release of project 2, which will require you to write a fair amount of assembly.&lt;/p&gt;
+&lt;h4 id=&#34;wsl2--此中苦不足为外人道也记得先看最后一句话&#34;&gt;wsl2 &amp;mdash; 此中苦，不足为外人道也😭，记得先看最后一句话!!!
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;我在写cs61c用的是本地的wsl2环境，发现这个lab3的网络配置很烦，使用20版本的venus.jar的时候一直连不上服务器，然后我就开始检查各种代理配置的是不是有问题，检查到最后发现这个版本的venus.jar运行时监听的端口只有127.0.0.1，问题是如果我们直接通过虚拟网络的网管172.XX.XX.XX来访问的话似乎linux不允许进入自己的回环地址。&lt;/li&gt;
+&lt;li&gt;二阶段是我使用wsl1，似乎它的网络和windows是打通的，所以可以直接访问，但是结果证明确实打通了，我在cmd中使用curl命令是可以返回200ok的，但是在浏览器中的venus界面使用mount local vmfs还是不行，不知道什么情况（也许是浏览器安全问题（http）？）&lt;/li&gt;
+&lt;li&gt;三阶段我用macbook也试了一下，还是不行，又换了一个20夏的venus.jar,还是不行😭&lt;/li&gt;
+&lt;li&gt;最后我换了一个22的venus.jar,并且用wsl1，终于可以了😭，事后检查发现确实它的监听窗口修改过了变成了0.0.0.0。&lt;/li&gt;
+&lt;li&gt;然后我又试了一下wsl2，直接用venus.jar网站是ok的，直接mount local vmfs就行了。&lt;/li&gt;
+&lt;li&gt;总结一下，这个坑太坑了，我被硬控一晚，建议大家直接使用wsl1然后使用22（或者新版）的venus.jar(可以直接用我的仓库里的)，这样直接访问127.0.0.1:6161也是行的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wsl -l -v &lt;span class=&#34;c1&#34;&gt;# 查看wsl版本&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wsl --set-version &amp;lt;distribution name&amp;gt; &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# 设置为wsl1,比如Ubuntu&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wsl --set-version &amp;lt;distribution name&amp;gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# 设置为wsl2&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;如果你非要用wsl2的话，其实直接用&lt;a class=&#34;link&#34; href=&#34;https://venus.cs61c.org&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;venus网页&lt;/a&gt;直接就行了，此时如果你不方便用在线版的venus，可以尝试服务器自带的本地版，需要访问&lt;code&gt;http://localhost:6161&lt;/code&gt;，然后进入/venus本地代理即可和网页端一样,但问题是这个wsl2和windows隔离，所以（除非你用wsl2自己的浏览器）否则你需要配置一个端口转发，可以使用下面的powershell命令：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-powershell&#34; data-lang=&#34;powershell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;netsh&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;interface&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;portproxy&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;v4tov4&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;listenaddress&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mf&#34;&gt;127.0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;py&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;listenport&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mf&#34;&gt;6161&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;connectaddress&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;=&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;WSL_IP_ADDRESS&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;connectport&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mf&#34;&gt;6161&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;其中&amp;lt;WSL_IP_ADDRESS&amp;gt;可以通过在wsl2中运行&lt;code&gt;ip addr&lt;/code&gt;命令来查看，一般是类似172.XX.XX.XX的地址。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ip addr 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 返回结果比如&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;172.21.211.127/20
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;这个地址的意思是前20位是网络地址，后面的12位是主机地址.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;所以可以推断范围是172.21.208到172.21.223，其中208.1就是正常设置代理的网关，其他都是子网内主机地址。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;或者直接在浏览器中访问http://&amp;lt;WSL_IP_ADDRESS&amp;gt;:6161也是可以的，比如我的wsl2的ip地址是172.21.211.127，我就是直接访问http://172.21.211.127:6161的。&lt;/li&gt;
+&lt;li&gt;还有最简单的方法，什么挂载统统滚蛋，直接cv本地文件到网页用不就行了吗😂。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;exercies-1&#34;&gt;exercies 1
+&lt;/h4&gt;&lt;p&gt;就是一个斐波那契数列，输出34。
+n的地址是0x10000010.
+修改t3寄存器的值为13即可得到第13个斐波那契数233。&lt;/p&gt;
+&lt;h4 id=&#34;exercise-2&#34;&gt;exercise 2
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;t0 用来存放k。&lt;/li&gt;
+&lt;li&gt;s0 用来存放sum。&lt;/li&gt;
+&lt;li&gt;The register acting as the pointer to the source and dest is s1 and s2&lt;/li&gt;
+&lt;li&gt;how the pointer be updated?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-gdscript3&#34; data-lang=&#34;gdscript3&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;slli&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;s3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;t0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# multiply k by 4&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;add&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;t1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;s1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;s3&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# t1 = source + 4*k&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;lw&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;t2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;s1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# load word from the source[k]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;run 最后的结果可以通过查看s2的寄存器得到dest的地址然后可以发现dest的内容已经全部被source的前k个元素复制过去了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;exercise-3&#34;&gt;exercise 3
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;写一个阶乘函数,使用递归方法实现。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;factorial:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    addi sp,sp,-4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    sw ra,0(sp)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    addi t0,x0,1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    beq a0,t0,base
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    addi sp,sp,-4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    sw a0,0(sp)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    addi a0,a0,-1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    jal ra,factorial
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    lw t0,0(sp)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    addi sp,sp,4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    mul a0,a0,t0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;exit:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    lw ra,0(sp)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    addi sp,sp,4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    jr ra
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;base:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    addi a0,x0,1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    j exit
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;exercise-4&#34;&gt;exercise 4
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;可以发现在naive_pow_loop or naive_pow_end labels中没有对s0进行保存和恢复操作，即不满足calling convention，这个是由于在一个函数过程内如果我们知道某个寄存器最终都会被恢复那么在函数内的标签中就可以不保存，节省开销。&lt;/li&gt;
+&lt;li&gt;为什么只有inc_arr需要保存ra呢，因为只有inc_arr会调用一个help_fn函数，作为caller它需要保存自己的返回地址放置被覆盖。&lt;/li&gt;
+&lt;li&gt;不要忘了运行java -jar tools/venus.jar -cc lab03/factorial.s 检查一下。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;exercise-5&#34;&gt;exercise 5
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;补充一下la指令，它是load address的缩写，用来将一个标签的地址加载到寄存器中。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-gdscript3&#34; data-lang=&#34;gdscript3&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;la&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;t0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;arr&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# load address of arr into t0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;感受&#34;&gt;感受
+&lt;/h4&gt;&lt;p&gt;写完了对寄存器的save和restore有了更加深入的理解，尤其是对于calling convention的理解。比如说a0系列，函数之中又有函数，所以a0系列必然会被覆盖掉，所以caller必须保存一下，而t0系列就是caller保存一下供函数内部随便使用的，而s0系列则是callee保存一下供函数内部使用的。之所以为什么不在caller的时候就保存s系列呢，节省加载到内存的开销啊！想通这个就明白为什么寄存器为什么分为caller saved和callee saved了。&lt;/p&gt;
+</description>
         </item>
         <item>
         <title>CS61c_1</title>

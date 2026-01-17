@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="RISC-V procedures Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="RISC-V procedures and Lab3 Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
 <title>CS61c_2</title>
 
 <link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_2/'>
 
 <link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_2">
-<meta property='og:description' content="RISC-V procedures Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
+<meta property='og:description' content="RISC-V procedures and Lab3 Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n">
 <meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_2/'>
 <meta property='og:site_name' content='My Site'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-16T15:29:16&#43;08:00'/><meta property='article:modified_time' content='2026-01-16T15:29:16&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg' />
 <meta name="twitter:title" content="CS61c_2">
-<meta name="twitter:description" content="RISC-V procedures Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n"><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="RISC-V procedures and Lab3 Where are old register values saved to restore them after function call? sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address stack frame : the memory area that contains all the data for one function call, address grows downwards. an example of function call 1 2 3 int ha(int j,int k,int m,int n){ return (j+k)-(m+n); } 1 2 3 4 5 6 7 8 9 10 11 12 13 ha: addi sp,sp,-8 # make room for 2 saved registers sw s1,4(sp) sw s0,0(sp) add s0,a0,a1 add s1,a2,a3 sub a0,s0,s1 lw s1,4(sp) lw s0,0(sp) addi sp,sp,8 jr ra 当发生函数嵌套的情况是，只使用x1作为返回地址是危险的，因为内层函数会覆盖掉外层函数的返回地址，如何解决呢？ 使用stack,将返回地址保存在stack frame中。 caller: the calling function callee: the called function Preserved across function call caller can rely on values being unchanged sp,gp,tp and &ldquo;saved register&rdquo; s0-s11(s0 is also fp) Not preserved across function call caller cannot rely on values being unchanged Argument/return registers a0-a7,ra &ldquo;temporary registers&rdquo; t0-t6 反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。 所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。 Memory Allocation an example of stack 1 2 3 int sumSquare(int x, int y){ return mult(x,x) + y; } 思考一下这里由于函数嵌套所以需要空出一个空间来放置返回地址， 然后由于这个嵌套函数的第二个参数不是原来的y所以需要空出一个空间来放置y。\n"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C4.jpg' />
     <link rel="shortcut icon" href="/favicon.ico" />
 
@@ -248,7 +248,7 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#risc-v-procedures">RISC-V procedures</a>
+    <li><a href="#risc-v-procedures-and-lab3">RISC-V procedures and Lab3</a>
       <ol>
         <li><a href="#where-are-old-register-values-saved-to-restore-them-after-function-call">Where are old register values saved to restore them after function call?</a>
           <ol>
@@ -257,7 +257,18 @@
           </ol>
         </li>
         <li><a href="#memory-allocation">Memory Allocation</a></li>
-        <li><a href="#instruction-representations">Instruction Representations</a></li>
+        <li><a href="#lab3">Lab3</a>
+          <ol>
+            <li><a href="#来者不善">来者不善</a></li>
+            <li><a href="#wsl2--此中苦不足为外人道也记得先看最后一句话">wsl2 &mdash; 此中苦，不足为外人道也😭，记得先看最后一句话!!!</a></li>
+            <li><a href="#exercies-1">exercies 1</a></li>
+            <li><a href="#exercise-2">exercise 2</a></li>
+            <li><a href="#exercise-3">exercise 3</a></li>
+            <li><a href="#exercise-4">exercise 4</a></li>
+            <li><a href="#exercise-5">exercise 5</a></li>
+            <li><a href="#感受">感受</a></li>
+          </ol>
+        </li>
       </ol>
     </li>
   </ol>
@@ -336,7 +347,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 1 分钟
+                    阅读时长: 6 分钟
                 </time>
             </div>
         
@@ -351,7 +362,7 @@
     <section class="article-content">
     
     
-    <h2 id="risc-v-procedures">RISC-V procedures
+    <h2 id="risc-v-procedures-and-lab3">RISC-V procedures and Lab3
 </h2><h3 id="where-are-old-register-values-saved-to-restore-them-after-function-call">Where are old register values saved to restore them after function call?
 </h3><ul>
 <li>sp is the stack pointer in RISC-V(x2),x0 is zero and x1 is return address</li>
@@ -418,6 +429,8 @@
 <li>caller cannot rely on values being unchanged</li>
 <li>Argument/return registers a0-a7,ra</li>
 <li>&ldquo;temporary registers&rdquo; t0-t6</li>
+<li>反正就是保存寄存器的时机不同罢了，一个是在进入函数前保存，一个是在函数内保存，保存之后寄存器就可以随便使用了，最后再恢复。</li>
+<li>所以在函数内部可以随便使用由调用者保存的寄存器，但是想要使用被调用者保存的寄存器就必须先自己保存一下。</li>
 </ul>
 <center>
     <img src="1.png" alt="register name" width="300"/>
@@ -473,13 +486,169 @@
 </div><ul>
 <li>三种数据存储，静态区，动态分配，栈区。</li>
 <li>对于RV32来说，stack starts in high memory and grows down(bfff_fff0 and must be aligned on 16-byte boundary)</li>
-<li>RV32 programs(text segment) in low ene(0001_0000)</li>
+<li>RV32 programs(text segment) in low memory(0001_0000)</li>
 <li>static data segment(constants and other static variables) above text for static variables, global pointer(gp) points to static, rv32 gp = 1000_0000</li>
 <li>Heap above static for data structures that grow and shrink.</li>
 <li>what about the lowest area? Reserved for system call.</li>
 </ul>
-<h3 id="instruction-representations">Instruction Representations
-</h3>
+<h3 id="lab3">Lab3
+</h3><h4 id="来者不善">来者不善
+</h4><p>This lab is somewhat longer than the previous labs (and longer than most future labs as well). This is in order to give everyone a chance to get comfortable with writing RISC-V and using the Venus simulator before the release of project 2, which will require you to write a fair amount of assembly.</p>
+<h4 id="wsl2--此中苦不足为外人道也记得先看最后一句话">wsl2 &mdash; 此中苦，不足为外人道也😭，记得先看最后一句话!!!
+</h4><ul>
+<li>我在写cs61c用的是本地的wsl2环境，发现这个lab3的网络配置很烦，使用20版本的venus.jar的时候一直连不上服务器，然后我就开始检查各种代理配置的是不是有问题，检查到最后发现这个版本的venus.jar运行时监听的端口只有127.0.0.1，问题是如果我们直接通过虚拟网络的网管172.XX.XX.XX来访问的话似乎linux不允许进入自己的回环地址。</li>
+<li>二阶段是我使用wsl1，似乎它的网络和windows是打通的，所以可以直接访问，但是结果证明确实打通了，我在cmd中使用curl命令是可以返回200ok的，但是在浏览器中的venus界面使用mount local vmfs还是不行，不知道什么情况（也许是浏览器安全问题（http）？）</li>
+<li>三阶段我用macbook也试了一下，还是不行，又换了一个20夏的venus.jar,还是不行😭</li>
+<li>最后我换了一个22的venus.jar,并且用wsl1，终于可以了😭，事后检查发现确实它的监听窗口修改过了变成了0.0.0.0。</li>
+<li>然后我又试了一下wsl2，直接用venus.jar网站是ok的，直接mount local vmfs就行了。</li>
+<li>总结一下，这个坑太坑了，我被硬控一晚，建议大家直接使用wsl1然后使用22（或者新版）的venus.jar(可以直接用我的仓库里的)，这样直接访问127.0.0.1:6161也是行的。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">wsl -l -v <span class="c1"># 查看wsl版本</span>
+</span></span><span class="line"><span class="cl">wsl --set-version &lt;distribution name&gt; <span class="m">1</span> <span class="c1"># 设置为wsl1,比如Ubuntu</span>
+</span></span><span class="line"><span class="cl">wsl --set-version &lt;distribution name&gt; <span class="m">2</span> <span class="c1"># 设置为wsl2</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>如果你非要用wsl2的话，其实直接用<a class="link" href="https://venus.cs61c.org"  target="_blank" rel="noopener"
+    >venus网页</a>直接就行了，此时如果你不方便用在线版的venus，可以尝试服务器自带的本地版，需要访问<code>http://localhost:6161</code>，然后进入/venus本地代理即可和网页端一样,但问题是这个wsl2和windows隔离，所以（除非你用wsl2自己的浏览器）否则你需要配置一个端口转发，可以使用下面的powershell命令：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="cl"><span class="n">netsh</span> <span class="n">interface</span> <span class="n">portproxy</span> <span class="n">add</span> <span class="n">v4tov4</span> <span class="n">listenaddress</span><span class="p">=</span><span class="mf">127.0</span><span class="p">.</span><span class="py">0</span>
+</span></span><span class="line"><span class="cl"><span class="n">listenport</span><span class="p">=</span><span class="mf">6161</span> <span class="n">connectaddress</span><span class="p">=&lt;</span><span class="n">WSL_IP_ADDRESS</span><span class="p">&gt;</span> <span class="n">connectport</span><span class="p">=</span><span class="mf">6161</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>其中&lt;WSL_IP_ADDRESS&gt;可以通过在wsl2中运行<code>ip addr</code>命令来查看，一般是类似172.XX.XX.XX的地址。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">ip addr 
+</span></span><span class="line"><span class="cl"><span class="c1"># 返回结果比如</span>
+</span></span><span class="line"><span class="cl">172.21.211.127/20
+</span></span><span class="line"><span class="cl">这个地址的意思是前20位是网络地址，后面的12位是主机地址.
+</span></span><span class="line"><span class="cl">所以可以推断范围是172.21.208到172.21.223，其中208.1就是正常设置代理的网关，其他都是子网内主机地址。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>或者直接在浏览器中访问http://&lt;WSL_IP_ADDRESS&gt;:6161也是可以的，比如我的wsl2的ip地址是172.21.211.127，我就是直接访问http://172.21.211.127:6161的。</li>
+<li>还有最简单的方法，什么挂载统统滚蛋，直接cv本地文件到网页用不就行了吗😂。</li>
+</ul>
+<h4 id="exercies-1">exercies 1
+</h4><p>就是一个斐波那契数列，输出34。
+n的地址是0x10000010.
+修改t3寄存器的值为13即可得到第13个斐波那契数233。</p>
+<h4 id="exercise-2">exercise 2
+</h4><ul>
+<li>t0 用来存放k。</li>
+<li>s0 用来存放sum。</li>
+<li>The register acting as the pointer to the source and dest is s1 and s2</li>
+<li>how the pointer be updated?</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">slli</span> <span class="n">s3</span><span class="p">,</span><span class="n">t0</span><span class="p">,</span><span class="mi">2</span> <span class="c1"># multiply k by 4</span>
+</span></span><span class="line"><span class="cl"><span class="n">add</span> <span class="n">t1</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">s3</span> <span class="c1"># t1 = source + 4*k</span>
+</span></span><span class="line"><span class="cl"><span class="n">lw</span> <span class="n">t2</span><span class="p">,</span><span class="mi">0</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="c1"># load word from the source[k]</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>run 最后的结果可以通过查看s2的寄存器得到dest的地址然后可以发现dest的内容已经全部被source的前k个元素复制过去了。</li>
+</ul>
+<h4 id="exercise-3">exercise 3
+</h4><ul>
+<li>写一个阶乘函数,使用递归方法实现。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">factorial:
+</span></span><span class="line"><span class="cl">    addi sp,sp,-4
+</span></span><span class="line"><span class="cl">    sw ra,0(sp)
+</span></span><span class="line"><span class="cl">    addi t0,x0,1
+</span></span><span class="line"><span class="cl">    beq a0,t0,base
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    addi sp,sp,-4
+</span></span><span class="line"><span class="cl">    sw a0,0(sp)
+</span></span><span class="line"><span class="cl">    addi a0,a0,-1
+</span></span><span class="line"><span class="cl">    jal ra,factorial
+</span></span><span class="line"><span class="cl">    lw t0,0(sp)
+</span></span><span class="line"><span class="cl">    addi sp,sp,4
+</span></span><span class="line"><span class="cl">    mul a0,a0,t0
+</span></span><span class="line"><span class="cl">exit:
+</span></span><span class="line"><span class="cl">    lw ra,0(sp)
+</span></span><span class="line"><span class="cl">    addi sp,sp,4
+</span></span><span class="line"><span class="cl">    jr ra
+</span></span><span class="line"><span class="cl">base:
+</span></span><span class="line"><span class="cl">    addi a0,x0,1
+</span></span><span class="line"><span class="cl">    j exit
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="exercise-4">exercise 4
+</h4><ul>
+<li>可以发现在naive_pow_loop or naive_pow_end labels中没有对s0进行保存和恢复操作，即不满足calling convention，这个是由于在一个函数过程内如果我们知道某个寄存器最终都会被恢复那么在函数内的标签中就可以不保存，节省开销。</li>
+<li>为什么只有inc_arr需要保存ra呢，因为只有inc_arr会调用一个help_fn函数，作为caller它需要保存自己的返回地址放置被覆盖。</li>
+<li>不要忘了运行java -jar tools/venus.jar -cc lab03/factorial.s 检查一下。</li>
+</ul>
+<h4 id="exercise-5">exercise 5
+</h4><ul>
+<li>补充一下la指令，它是load address的缩写，用来将一个标签的地址加载到寄存器中。</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">la</span> <span class="n">t0</span><span class="p">,</span><span class="n">arr</span> <span class="c1"># load address of arr into t0</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h4 id="感受">感受
+</h4><p>写完了对寄存器的save和restore有了更加深入的理解，尤其是对于calling convention的理解。比如说a0系列，函数之中又有函数，所以a0系列必然会被覆盖掉，所以caller必须保存一下，而t0系列就是caller保存一下供函数内部随便使用的，而s0系列则是callee保存一下供函数内部使用的。之所以为什么不在caller的时候就保存s系列呢，节省加载到内存的开销啊！想通这个就明白为什么寄存器为什么分为caller saved和callee saved了。</p>
+
 </section>
 
 
