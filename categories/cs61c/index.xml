@@ -7,7 +7,333 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Fri, 16 Jan 2026 15:29:16 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/cs61c/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 19 Jan 2026 09:57:58 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/cs61c/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_3 — Instruction formats</title>
+        <link>https://fuquan99666.github.io/p/cs61c_3-instruction-formats/</link>
+        <pubDate>Mon, 19 Jan 2026 09:57:58 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_3-instruction-formats/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E7%9F%B3%E5%8E%9F%E9%87%8C%E7%BE%8E1.jpg" alt="Featured image of post CS61c_3 — Instruction formats" /&gt;&lt;h3 id=&#34;the-history-of-computers&#34;&gt;the history of Computers
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;first computer is ENIAC,built in 1946,mainly used for calculating triangle.&lt;/li&gt;
+&lt;li&gt;army computer to programmer,mostly are women.&lt;/li&gt;
+&lt;li&gt;von Neumann architecture: stored program computer.&lt;/li&gt;
+&lt;li&gt;the first stored program computer is EDVAC,built in 1949,剑桥。&lt;/li&gt;
+&lt;li&gt;Consequence: Everything has a memeory address.Every instruction and data must be stored in memory, and we can get them by their address because all things can be represented by binary numbers.&lt;/li&gt;
+&lt;li&gt;要知道一开始的程序是用电线的插入来实现的，非常的不方便，现在有了存储二进制指令的计算机，巨大的进步！&lt;/li&gt;
+&lt;li&gt;One register keeps address of instruction to be executed next,called Program Counter(PC).&lt;/li&gt;
+&lt;li&gt;Consequence2: Binary Compatibility,开发者们并不想在更新产品后重新学习一套新的指令集，所以新产品一般都会兼容老产品的指令集，就是所谓的向后兼容(backward compatibility)。比如说IBM在1981年推出的pc采用了intel 8088处理器，这导致现在的最新的pc仍然兼容80x86系列指令集，可以运行从1980到现在的程序。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;instruction-as-numbers&#34;&gt;Instruction as Numbers
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Most instructions are represented as 32-bit numbers in RISC-V ，and that is same in RV32,RV64,RV128.&lt;/li&gt;
+&lt;li&gt;and we divide the 32 bits into several fields,each field tells processor something about instruction.如果直接使用32位来表示我们的指令，那么会有2^32种不同的指令，这显然是不现实的，RISC-V直接定义了6种基础的指令格式，包括R-type,I-type,S-type,B-type,U-type和J-type，每种格式都有自己特定的字段划分方式。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;instruction-formats&#34;&gt;Instruction Formats
+&lt;/h3&gt;&lt;center&gt;
+    &lt;a id=&#34;instruction-formats&#34;&gt;&lt;/a&gt;      
+    &lt;img src=&#39;1.png&#39; alt=&#39;RISC-V Instruction Formats&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+&lt;h4 id=&#34;r-type-reg-reg-operations&#34;&gt;R-type reg-reg operations
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;rs1(source register 1): specifies register containing first operand.&lt;/li&gt;
+&lt;li&gt;rs2: specifies register containing second operand.&lt;/li&gt;
+&lt;li&gt;rd(Desination register): specifies register which will receive result of computation.&lt;/li&gt;
+&lt;li&gt;each register field holds a 5-bit number,刚好32个寄存器。&lt;/li&gt;
+&lt;li&gt;func3和func7与opcode一起指定具体的操作，但是问题来了，func3+func7一共是10位，我们有1024个操作吗，显然没有啊，那么要这么多的冗余干什么呢？有一些选择如何编码指令的方式，让processor更容易找到正确的指令。还有就是为什么func7和func3不是连续的，后面再说🐶&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;一些R的例子
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;add x18,x19,x10
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0000000 01010 10011 000 10010 0110011
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;add      x10   x19 add  x18   reg-reg op
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;add x4,x3,x2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0000000 00010 00011 000 00100 0110011
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;hex: 0x00218233
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#39;2.png&#39; alt=&#39;All RV32 R-format Instructions&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;补充一下slt指令，slt rd,rs1,rs2, 如果rs1&amp;lt;rs2,则rd=1，否则rd=0。 # set less than&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;sltu与slt类似，但是是无符号数比较。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;第30位只有sub和sra是1，其他的都是0，我的理解是前者用于和加法的区分，后者用于提前知道要进行符号扩展。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;i-type-immediate-operations&#34;&gt;I-type immediate operations
+&lt;/h4&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;addi rd,rs1,imm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;可以想到这里不再使用rs2了，所以imm可以直接使用rs2的5位。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;但是显然5位只能表示-16到15的数值，远远不够用，所以我们把func7的7位也拿来表示imm，这样imm就有12位了，可以表示-2048到2047的数值。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;剩下的部分和R-type一致。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#39;3.png&#39; alt=&#39;All RV32 I-format Instructions&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;slti和sltiu与slt和sltu类似，只不过是将rs2替换成了imm。 set less than immediate&lt;/li&gt;
+&lt;li&gt;由于我们使用的是RV32，所以移位最大就是32，再多也没有意义了，所以shamt只需要5位就够了，然后剩下的7位可以用于别的地方，比如和之前类似设置第30位来区分srl和sra。&lt;/li&gt;
+&lt;li&gt;如果需要更大的立即数，后面再说。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;load-instructions-are-also-i-type&#34;&gt;Load instructions are also I-type
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;由于I-type是针对算术指令设计的，所以load指令单独用一个opcode来表示,其余的变化就是把imm作为地址偏移量(offset)来使用。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-gdscript3&#34; data-lang=&#34;gdscript3&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;lw&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x14&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;8&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;mi&#34;&gt;000000001000&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;00010&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;010&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;01110&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0000011&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;imm&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;offset&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;  &lt;span class=&#34;n&#34;&gt;rs1&lt;/span&gt;   &lt;span class=&#34;n&#34;&gt;lw&lt;/span&gt;   &lt;span class=&#34;n&#34;&gt;rd&lt;/span&gt;    &lt;span class=&#34;nb&#34;&gt;load&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#39;4.png&#39; alt=&#39;All RV32 Load Instructions&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;lh表示加载半个word（16位），lb表示加载一个byte（8位），lbu表示加载一个无符号的byte，lbh表示加载一个无符号的halfword，注意到二者特别使用了一个位来区分符号扩展和零扩展。而lb和lh则是需要进行符号扩展的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;s-type-store-operations&#34;&gt;S-type store operations
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;注意到imm（offset）被拆分成了两部分，imm[11:5]和imm[4:0]分别放在了不同的位置，原来的R-type中的rd位置用来放置imm[4:0], 而func7位置用来放置imm[11:5],rs2位置用来放置源寄存器(存储数据的)，而rs1位置用来放置基地址寄存器base。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;sw x14, 8(x2)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0000000        01110       00010  010   01000        0100011
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;offset[11:5]   (source)    base   sw  offset[4:0]     store
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#39;5.png&#39; alt=&#39;All RV32 Store operations&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+&lt;h4 id=&#34;b-type-branch-operations&#34;&gt;B-type branch operations
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;imm is the offset to be addded to PC for branch target address.&lt;/li&gt;
+&lt;li&gt;Shall we use byte as the unit of offset? No, absolutely not, 因为指令都是32位对齐的，如果使用字节作为单位，有可能跑到指令的中间位置导致发生一些奇怪的事情。所以我们使用32位作为unit,这样不仅可以保证对齐，而且可以增加分支的范围。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;if we not branch:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    pc = pc + 4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;else 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    pc = pc + imm * 4
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;然而在真实的risc-v指令中我们并不是这样处理的，因为压缩指令的存在（16位指令），为什么存在16位的指令呢，因为在有些代码中，空间真的很重要，通常用于非常便宜的消费设备(flash,memory keys)。所以相应的步长也就不是4了，而是2，保证16位对齐。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;if we not branch:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    pc = pc + 4
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;else 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    pc = pc + imm * 2
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;这才是真实的risc-v分支指令的工作方式，其实不管是4还是2，我们都不存储这个步长在imm中，而是直接存储其他的位，默认就是2🐶&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在举一个例子之前我们先看看imm的奇怪的位置&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;如果你忘了imm的位是怎么分布的，点这里&lt;a class=&#34;link&#34; href=&#34;#instruction-formats&#34; &gt;Instruction Formats&lt;/a&gt;,可以发现imm的位置大致上没啥变化，只是被拆分成了几部分放在了不同的位置，而且顺序也被打乱了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;6.png&#39; alt=&#39;32-bit immediate produced&#39; width=&#39;800&#39;/&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;这个图表明B-type确实没有存储imm[0],之前也说了由于16位对齐所以一定是2的倍数，所以imm[0]一定是0，不需要存储，所以节省了一个inst的imm位用来引入12位，将原来的11位放到inst[7],12位放到inst[31]，其余和S-type类似。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;an example:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Loop:beq x19,x10, end
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     add x18,x18,x10
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     addi x19,x19,-1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     j Loop
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;end: # target instructions
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;offset = end - beq = 16 bytes = 8 * 2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;beq x19,x10,8
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;8: 000000001000
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0000000     01010 10011 000     10000      1100011
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;imm[12|10:5] rs2   rs1  beq   imm[4:1|11]   branch
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#39;7.png&#39; alt=&#39;All RV32 B-format Instructions&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+&lt;h4 id=&#34;question-on-pc-addressing-and-u-type-instructions&#34;&gt;question on PC-addressing and U-type instructions
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;代码在内存中可能发生移动，但是由于我们使用的是相对地址，所以不影响正确性。&lt;/li&gt;
+&lt;li&gt;由于我们相当于使用了13位的分支偏移量，那就是-1024到1023个指令（32位），如果跳转范围超过了怎么办呢？&lt;/li&gt;
+&lt;li&gt;我们使用u-type指令来加载一个20位的立即数到寄存器中，补充两个指令：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-gdscript3&#34; data-lang=&#34;gdscript3&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;lui&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;rd&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;imm20&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# load upper immediate and set lower 12 bits to 0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;auipc&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# add upper immediate to pc&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;an&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;example&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;how&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;to&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;set&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;0xDEADBEEF&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;to&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x10&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;lui&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mh&#34;&gt;0xDEADB&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;addi&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;mh&#34;&gt;0xEEF&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x10&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;0xDEADAEEF&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;why&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;？&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;因为&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;addi会进行符号扩展&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，所以&lt;/span&gt;&lt;span class=&#34;mh&#34;&gt;0xEEF&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;会被扩展成&lt;/span&gt;&lt;span class=&#34;mh&#34;&gt;0xFFFFEEF&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，相当于&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;B&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;那就是&lt;/span&gt;&lt;span class=&#34;mh&#34;&gt;0xDEADAEEF&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;所以我们是不是可以使用&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;addiu&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;?&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;RISC&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;V有这个东西吗&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;从前面的&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;I&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;type可以看到所有的func3都被用完了&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，所以没地方了，那么怎么办呢？只能在&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;lui的时候提前加上1&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，这样就抵消了。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;为此有了一个新的指令：&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;li&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;rd&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;imm32&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# 这个指令会自动帮你分成lui和addi两条指令来执行，并且自动加一保证结果的正确。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;至于&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;auipc它的格式一样&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;auipc&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;rd&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;imm20&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;将&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;imm20左移12位加上pc的值然后存到rd中&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;只保留了func3和opcode,剩下的20位全部用来存储imm20。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;j-type-instructions&#34;&gt;J-type instructions
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;和branch类似，jal保证了16位对齐，所以imm[0]不存储，实际使用了[0:20]一共21位的偏移量。&lt;/li&gt;
+&lt;li&gt;2^21 / 2 / 4 = 2^18,所以是-2^18到2^18-1个指令（32位）。&lt;/li&gt;
+&lt;li&gt;它的opcode是1101111,func3被省略掉了，剩下的20位用来存储imm。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;j Label = jal x0,Label # Discard return address
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;jal ra, FuncName # call function and store pc+4 to ra
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;还有一个披着羊皮的狼：jalr rd,rs,imm，看起来是跳转指令，但是使用的其实是I-type格式。如果忘了，点这里&lt;a class=&#34;link&#34; href=&#34;#instruction-formats&#34; &gt;Instruction Formats&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;write pc+4 to rd
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;set pc = (rs + imm) &amp;amp; ~1 （注意最后还是要保证偶数的）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;由于实际使用的是I-type，所以最低位并不是0！
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对了这个pc是绝对地址欧！
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;some examples:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# ret and jr psuedo-instructions
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;ret = jr ra = jalr x0,ra,0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# call function at any 32-bit absolute address
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;lui x1, &amp;lt;hi20bits&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;jalr ra, x1, &amp;lt;lo12bits&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# Jump PC-relative with 32-bit offset
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;auipc x1, &amp;lt;hi20bits&amp;gt; # x1 = pc + offset_high
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;jalr x0, x1, &amp;lt;lo12bits&amp;gt; # pc = x1 + offset_low 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;总结&#34;&gt;总结
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;最重要的图&lt;a class=&#34;link&#34; href=&#34;#instruction-formats&#34; &gt;RISC-V Instruction Formats&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我们用指令排版的难以理解，换来了寄存器和立即数位置的对齐，使得硬件解码更加方便，这是值得的。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>CS61c_2 — RISC-V procedures and Lab3</title>
         <link>https://fuquan99666.github.io/p/cs61c_2-risc-v-procedures-and-lab3/</link>
         <pubDate>Fri, 16 Jan 2026 15:29:16 +0800</pubDate>
