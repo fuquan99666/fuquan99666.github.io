@@ -347,7 +347,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 6 分钟
+                    阅读时长: 5 分钟
                 </time>
             </div>
         
@@ -646,7 +646,7 @@ n的地址是0x10000010.
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h4 id="感受">感受
-</h4><p>写完了对寄存器的save和restore有了更加深入的理解，尤其是对于calling convention的理解。比如说a0系列，函数之中又有函数，所以a0系列必然会被覆盖掉，所以caller必须保存一下，而t0系列就是caller保存一下供函数内部随便使用的，而s0系列则是callee保存一下供函数内部使用的。之所以为什么不在caller的时候就保存s系列呢，节省加载到内存的开销啊！想通这个就明白为什么寄存器为什么分为caller saved和callee saved了。</p>
+</h4><p>写完了对寄存器的save和restore有了更加深入的理解，尤其是对于calling convention的理解。caller寄存器是调用者负责保存，它调用的函数可以自由的使用，储存中间计算状态，减少内存的使用；callee寄存器是被调用者负责保存，确保了一致性（外部函数不需要担心callee会修改这些寄存器的值），可以确保一些状态的一致性。</p>
 
 </section>
 
@@ -712,6 +712,25 @@ n的地址是0x10000010.
     <h2 class="section-title">相关文章</h2>
     <div class="related-content">
         <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/cs61c_4-compilationassemblylinking-and-loading/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/%e8%bf%9b%e5%87%bb%e7%9a%84%e5%b7%a8%e4%ba%ba.jpeg" loading="lazy" data-key="" data-hash="/进击的巨人.jpeg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CS61c_4 — Compilation,Assembly,Linking and Loading</h2>
+        </div>
+    </a>
+</article>
+
             
                 
 <article class="has-image">

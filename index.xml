@@ -7,7 +7,185 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Mon, 19 Jan 2026 09:57:58 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 21 Jan 2026 19:02:32 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_4 — Compilation,Assembly,Linking and Loading</title>
+        <link>https://fuquan99666.github.io/p/cs61c_4-compilationassemblylinking-and-loading/</link>
+        <pubDate>Wed, 21 Jan 2026 19:02:32 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_4-compilationassemblylinking-and-loading/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E8%BF%9B%E5%87%BB%E7%9A%84%E5%B7%A8%E4%BA%BA.jpeg" alt="Featured image of post CS61c_4 — Compilation,Assembly,Linking and Loading" /&gt;&lt;h3 id=&#34;call&#34;&gt;CAll
+&lt;/h3&gt;&lt;p&gt;Compiling,Assembling,Linking and Loading.
+ISA之下都是硬件，ISA之上就是软件。&lt;/p&gt;
+&lt;h3 id=&#34;解释器和编译器&#34;&gt;解释器和编译器
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Interpreter is a program that executes other programs.&lt;/li&gt;
+&lt;li&gt;Translator converts a program from the source language to an equivalent program in another language.&lt;/li&gt;
+&lt;li&gt;甚至可以有c解释器😆，虽然慢的离谱，（cs61a中写过一个scheme解释器，用的python），解释器有什么好处呢？比方说他可以在任意一个机器上跑，而且支持backward，对于旧的ISA的代码在新的上面不好执行，可以设计一个解释器来执行，interpreter slower(10x?),code smaller(2x?)&lt;/li&gt;
+&lt;li&gt;编译器就不一样了，类似流水线，编译成机器码，所以必须针对特定的ISA，这样可以在硬件上快速运行。还有一个重大的好处就是编译的最终可执行文件相比我想要送给别人一个python代码，我的源码别人看不到（反编译很难），所以安全一些。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;compilation&#34;&gt;Compilation
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;将.c文件编译成汇编文件.s&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;gcc -O2 -S -c foo.c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;input：foo.c
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;output：foo.s
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;-O2表示优化等级，-S表示生成汇编代码，-c表示只编译不链接。&lt;/li&gt;
+&lt;li&gt;.s文件的来源可以是编译生成，也可以自己手写，注意.s文件中可能含有伪指令(pseudo-instructions),简化了代码，感谢社区！&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;assembler&#34;&gt;Assembler
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;将.s文件汇编成目标文件.o&lt;/li&gt;
+&lt;li&gt;assembler directives ，告诉assembler一些额外的信息但是不生成机器码。
+&lt;ul&gt;
+&lt;li&gt;.text 告诉assembler接下来的代码是指令代码段&lt;/li&gt;
+&lt;li&gt;.data 告诉assembler接下来的代码是数据段&lt;/li&gt;
+&lt;li&gt;.global sym 告诉assembler符号sym是全局的，可以被其他文件引用&lt;/li&gt;
+&lt;li&gt;.string str 定义一个以null结尾的字符串&lt;/li&gt;
+&lt;li&gt;.word w1..wn 定义一个或多个32位字&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;replace pseudo-instructions with real instructions.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;mv to,t1       addi t0,x0,t1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;neg t0,t1      sub t0,x0,t1     # t0 = -t1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;li to imm      addi to, x0, imm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# 课程中给了这个例子我感觉不太对，addi中的imm是12位的，但是li可以是32位的，应该是先lui再addi才对。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;not t0, t1     xori t0, t1, -1 # t0 = ~t1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;beqz t0, loop  beq t0, x0, loop
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;la t0, str     lui t0, str[31:12] addi t0,  t0, str[11:0] # absolute address
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;               or auipc t0, str[31:12] addi t0,t0,str[11:0] # PC-relative address
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;总之不要忘了符号扩展，只要是imm都要符号扩展才可以和寄存器进行运算。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;object file format&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;1.png&#39; alt=&#39;object file format&#39; width=&#39;600&#39;/&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;relocation info is something to be discussed later,比如说一些无法确定的地址，需要到linking的时候才能确定。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;linker&#34;&gt;Linker
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;将多个目标文件.o链接成一个可执行文件.out&lt;/li&gt;
+&lt;li&gt;动态链接和静态链接&lt;/li&gt;
+&lt;li&gt;None&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;loader&#34;&gt;Loader
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;将可执行文件加载到内存中运行,本质上是一个操作系统的功能。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;an-example-hello-world&#34;&gt;An example: Hello World
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt;&lt;span class=&#34;cpf&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(){&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nf&#34;&gt;printf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Hello, %s&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;World&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如何将这个转换成最终的机器码呢？&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Compilation - from .c to .s&lt;/li&gt;
+&lt;/ol&gt;
+&lt;center&gt;
+    &lt;img src=&#39;2.png&#39; alt=&#39;.s&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+2. Assembling - from .s to .o
+&lt;center&gt;
+    &lt;img src=&#39;3.png&#39; alt=&#39;.o&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+可以看到操作码和寄存器都转换成了二进制，还有一些伪指令被转换成了真实指令，但是还有一些地址有待确定，比如需要调用外部的printf函数（在哪呢），比如需要使用的字符串数据在哪呢，现在只能先用0作为占位符。
+&lt;ul&gt;
+&lt;li&gt;为什么.rodata的相对位置会变？ 因为linker会合并各个.o文件中的.text和.rodata段，然后重新分配地址。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;Linking - from .o to .out&lt;/li&gt;
+&lt;/ol&gt;
+&lt;center&gt;
+    &lt;img src=&#39;4.png&#39; alt=&#39;.out&#39; width=&#39;700&#39;/&gt;
+&lt;/center&gt;
+可以看到不确定的.string地址被linker重新分配了，而且main函数入口的地址也被重新分配了（这也是代码移动的原因，再次印证了PC-relative addressing的重要性）。
+&lt;h3 id=&#34;lab4-risc-functionpointers&#34;&gt;Lab4 RISC function,pointers
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;继续用venus模拟器做两个小题目&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;exercise-1-debugging-megalistmanipss&#34;&gt;Exercise 1: Debugging megalistmanips.s
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;和上一次的类似，只不过这次里面操作的是一个int数组。
+找到bug并修正：首先是mapLoop的第一行的加载数组地址写成add了，第二个是t0作为偏移量没有乘上4，需要用t寄存器操作一下，第三个是下一个node的地址加载用了la，第四个是s1作为作用函数的地址，本身直接被jalr调用，不需要什么lw，第五个还是很隐蔽的，推荐大家自己用venus跑一下，debug一下，当然直接看出来那我没话说😭&lt;/li&gt;
+&lt;/ul&gt;
+&lt;details&gt;
+&lt;summary&gt;第五个在这，点我！&lt;/summary&gt;
+在秘密函数中，t1被用来存储临时值，但是在maploop中没有保存和恢复，导致t1的值被覆盖，结果错误，所以记得caller保存和恢复t1就可以了。而且这个bug挺坑的，-cc检测似乎只针对callee-saved寄存器，t寄存器不报错，需要我们自己衡量😃
+&lt;/details&gt;
+&lt;ul&gt;
+&lt;li&gt;还有问题就是这个函数流程设计的有点不合理，每次maploop结束后直接跳到map函数，在开头再一次的保存ra，s0，s1，后面两个无关紧要，最大的问题是这个ra在jal map的时候已经ra已经被覆盖了（其实之前jalr s1的时候也覆盖了），所以存进栈的就是错误的ra，但是搞笑的是最后的结果还是对的：由于最后结束是在done中，而done中会jr ra，此时的ra已经是jal map下一个指令，恰好就是done!!!,所以局部小循环🐶，不断的从栈中读取地址，知道最终读回正确的ra地址，然后返回到main的正确位置。&lt;/li&gt;
+&lt;li&gt;早知如此，直接在map保存寄存器和bne done的中间放个zzz标志，然后maploop的最后jal zzz就可以了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;exercise-2-write-a-function-without-branches&#34;&gt;Exercise 2: Write a function without branches
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;要求实现一个函数，输入一个整数，返回一个固定值，但是不允许使用分支。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;定义如下
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;f(-3) = 6
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;f(-2) = 61
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;f(-1) = 17
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;f(0) = -38
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;f(1) = 19
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;f(2) = 42
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;f(3) = 5
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这题很简单，只需要填写一个f函数，输入a0是我们的输入参数-3到3，a1是output的地址，由于题目不允许使用跳转和分支，考虑到输入是连续的，直接加三，然后乘上4作为偏移量，lw到a0中即可。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>CS61c_3 — Instruction formats</title>
         <link>https://fuquan99666.github.io/p/cs61c_3-instruction-formats/</link>
         <pubDate>Mon, 19 Jan 2026 09:57:58 +0800</pubDate>
@@ -965,7 +1143,7 @@ n的地址是0x10000010.
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;h4 id=&#34;感受&#34;&gt;感受
-&lt;/h4&gt;&lt;p&gt;写完了对寄存器的save和restore有了更加深入的理解，尤其是对于calling convention的理解。比如说a0系列，函数之中又有函数，所以a0系列必然会被覆盖掉，所以caller必须保存一下，而t0系列就是caller保存一下供函数内部随便使用的，而s0系列则是callee保存一下供函数内部使用的。之所以为什么不在caller的时候就保存s系列呢，节省加载到内存的开销啊！想通这个就明白为什么寄存器为什么分为caller saved和callee saved了。&lt;/p&gt;
+&lt;/h4&gt;&lt;p&gt;写完了对寄存器的save和restore有了更加深入的理解，尤其是对于calling convention的理解。caller寄存器是调用者负责保存，它调用的函数可以自由的使用，储存中间计算状态，减少内存的使用；callee寄存器是被调用者负责保存，确保了一致性（外部函数不需要担心callee会修改这些寄存器的值），可以确保一些状态的一致性。&lt;/p&gt;
 </description>
         </item>
         <item>
