@@ -7,7 +7,252 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Wed, 21 Jan 2026 19:02:32 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 07 Feb 2026 15:28:16 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_5 — Intro to Synchronous Digital Systems</title>
+        <link>https://fuquan99666.github.io/p/cs61c_5-intro-to-synchronous-digital-systems/</link>
+        <pubDate>Sat, 07 Feb 2026 15:28:16 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_5-intro-to-synchronous-digital-systems/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/cool.png" alt="Featured image of post CS61c_5 — Intro to Synchronous Digital Systems" /&gt;&lt;h3 id=&#34;logic-design&#34;&gt;Logic Design
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;And , Or&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;transistors&#34;&gt;Transistors
+&lt;/h3&gt;&lt;h4 id=&#34;mos-transistor&#34;&gt;MOS Transistor
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;n-type MOSFET (NMOS)&lt;/li&gt;
+&lt;li&gt;p-type MOSFET (PMOS)&lt;/li&gt;
+&lt;li&gt;有三个端口：gate, source, drain，当gate电压高于source电压时，NMOS导通；当gate电压低于source电压时，PMOS导通。记住：DGS。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#34;1.png&#34; alt=&#34;MOSFET&#34; width=&#34;700&#34;/&gt;
+&lt;/center&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;how to make not gate using MOSFETs?
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;如下图, 可以知道当X输入0时，PMOS导通，输出为1；当X输入1时，NMOS导通，输出为0。X与Y的关系就是NOT关系。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#34;2.png&#34; alt=&#34;NOT Gate&#34; width=&#34;700&#34;/&gt;
+&lt;/center&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;其实也可以做一个NAND gate.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;如下图：上方是两个PMOS并联，下方是两个NMOS串联。当A和B都为1时，下方的串联N通过，上方的并联P断开，输出为0；否则输出为1。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;C = A NAND B = NOT (A AND B) 
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#34;3.png&#34; alt=&#34;NAND Gate&#34; width=&#34;700&#34;/&gt;
+&lt;/center&gt;
+&lt;h3 id=&#34;signals-and-waveforms&#34;&gt;Signals and Waveforms
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;notice delay！&lt;/li&gt;
+&lt;li&gt;Combinational logic(CL) circuits: output only depends on current input ; similar to a pure function in mathematics, y = f(x). (No way to store information from one invocation to the next. NO side effects.)&lt;/li&gt;
+&lt;li&gt;state element: a device that can store information. (e.g., flip-flop, latch, register)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;accumulator-累加器&#34;&gt;accumulator 累加器
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;feedback loop: output feeds back into input&lt;/li&gt;
+&lt;li&gt;一个寄存器是n个flip-flop并行组成的，可以存储n位二进制数。&lt;/li&gt;
+&lt;li&gt;其中涉及到DQ flip-flop，D是data input，Q是output。当时钟上升沿到来时，D的值被锁存到Q中。建立时间、保持时间、Clock-to-Q时间等都是设计时需要考虑的因素。往往我们都希望D的值在建立时间和保持时间保持稳定，希望Q时间越短说明电路越快。&lt;/li&gt;
+&lt;li&gt;这个D触发器在我之前的&lt;a class=&#34;link&#34; href=&#34;https://fuquan99666.github.io/p/fpga1-%e9%98%bb%e5%a1%9e%e8%b5%8b%e5%80%bc%e4%b8%8e%e9%9d%9e%e9%98%bb%e5%a1%9e%e8%b5%8b%e5%80%bc/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;fpga的博客&lt;/a&gt;里有介绍过。&lt;/li&gt;
+&lt;li&gt;超频可能会导致时序问题，即数据在建立时间和保持时间内的一些错误值被锁存到寄存器中，导致电路行动异常。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;pipelining-to-improve-performance&#34;&gt;Pipelining to improve performance
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;对于一个简单的CL循环电路，一次迭代的时间是Clock-to-Q + CL delay + setup time(必须有一段稳定的建立时间)。&lt;/li&gt;
+&lt;li&gt;可以通过流水线来提升性能，比如一个电路中有一个add 和一个shift,直接通过的话会有一个巨大的CL delay; 但是如果我们在中间添加一个寄存器，那么add和shift就可以同时进行，CL delay被分成两部分，性能提升了。（bottleneck被打破了）&lt;/li&gt;
+&lt;li&gt;但是流水线也有一些缺点，比如增加了寄存器的数量，增加了时钟周期的数量，增加了时序问题的风险等。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;logic-gates&#34;&gt;logic gates
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;我们都知道基本的逻辑门有AND, OR, NOT, NAND, NOR, XOR, XNOR等。&lt;/li&gt;
+&lt;li&gt;对于n个输入的xor门，如何判断输出是0还是1呢？其实很简单，输出为1当且仅当输入中有奇数个1；输出为0当且仅当输入中有偶数个1。&lt;/li&gt;
+&lt;li&gt;例如对于4输入的xor门，输入为0，0，0，0时输出为0；输入为1，0，0，0时输出为1；输入为1，1，0，0时输出为0；输入为1，1，1，0时输出为1；输入为1，1，1，1时输出为0。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;bool-algebra&#34;&gt;bool algebra
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;or : A + B = A OR B&lt;/li&gt;
+&lt;li&gt;and : A * B = A AND&lt;/li&gt;
+&lt;li&gt;not : A&amp;rsquo; = NOT A (其实是A头上一个小横线)&lt;/li&gt;
+&lt;li&gt;一些算术定律：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#34;4.png&#34; alt=&#34;bool algebra&#34; width=&#34;700&#34;/&gt;
+&lt;/center&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;其中可以推导一下distribution law:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;x + yz = (x + y)(x + z)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;证明：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. 右式 = x * x + x * z + y * x + y * z
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. 由于 xy + x = x, 所以 x * x + x * z + x * y + y * z = 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;x + x * z + x * y + y * z = x + y * z 得证
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;布尔代数有什么用？对于一个复杂的逻辑电路，我们可以通过布尔代数来简化它，从而得到更加简答的等效电路，减少门的数量。&lt;/li&gt;
+&lt;li&gt;注意真值表、电路图和布尔表达式之间的关系，一般来说后面二者可以随意转化，真值表和布尔算式也可以相互转化，但是一般我们不会从真值表直接到电路图，一般都是先要搞成布尔表达式然后简化一下得到电路图。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;project-2-cs61classify&#34;&gt;project 2: CS61Classify
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;提前声明：这个项目的venus.jar也不太行，可以换一个更新版本的。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;part-a-mathematical-functions&#34;&gt;part A: Mathematical Functions
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;这个部分主要是完成一些基础的函数，比如abs，relu，dot，argmax等，个人感觉venus在这里用处不大，不怎么需要逐步调试。&lt;/li&gt;
+&lt;li&gt;一个小问题：在relu中要求如果array长度小于1，就要以78的错误码退出程序(用法参考QA，t.execute(code=78))，但是提供的测试类中的checkarray函数里面有一个assert语句要求array长度大于0，所以要么就把这个assert注释了，要么就不用checkarray了，或者不考虑78了，反正要求是测试覆盖率是100%（&lt;/li&gt;
+&lt;li&gt;abs，argmax，dot都是简单的，但是matmul就很麻烦了，看起来原理很简单，但是涉及到很多寄存器的时候一些鸡毛蒜皮的小事情让代码变得屎山.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;在matmul中：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;思路很简单，对于每个输出元素C[i][j]，我们需要计算A的第i行和B的第j列的点积。（直接调用之前写好的dot函数就行）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. 错误判断：如果行列数小于1，或者A的列数不匹配B的行数，按照给定的错误码退出。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. 我们将用到大量的寄存器用来保存一些重要的变量，用s还是t呢，
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   这里考虑到后面我们将会大量的使用dot函数，而这个函数会肆无忌惮的使用t寄存器，如果我们使用t寄存器，那么需要在调用前保存，调用后恢复，这样需要重复做很多次，
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   所以使用S寄存器，一是dot保证了自己负责s系列寄存器，所以我们不用担心被dot修改，而是这样的话我们只需要在开始的时候保存一次，结束的时候恢复一次就行了（从内存移动次数来说也是更好的）。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   所以我们在prologue阶段开32字节栈空间来保存ra，s0-6.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3. 由于后面会调用dot函数，所以一开始需要把a系列保存到s系列。（这里我们不需要存a4，因为和a2一样）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4. 后面我们会用到A矩阵一行的地址偏移量（字节），所以可以提前使用slli s6, a2,2来计算出这个偏移量。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;5. 外层循环条件：i &amp;lt; a1 (bge t0, s3, outer_loop_end)， li t1,0 (j = 0)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;6. 内存循环开始： bge t1, s4, inner_loop_end (j &amp;lt; b1)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   我们需要确定dot的几个参数：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   - a0，A的第i行地址
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   - a1，B的第j列地址
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   - a2，A的列数（也是B的行数）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   - a3，stride of A
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   - a4, stride of B
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   对于a0，鉴于前面我们已经计算了一行的字节偏移量，所以a0 = s0 + i * s6
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   对于a1，先用slli t3, t1, 2计算出列的字节偏移量，然后a1 = s1 + t3
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   a2 直接就是s2， a3 就是1， a4 就是s4（B的一行）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   注意在call dot之前， 我们可能需要保存一些变量，比如之前有一些临时计算出来的t寄存器的值，可能后面可以接着用，但是recompute一下也行。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   然后call dot
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   之后dot的结果会保存在a0中，我们需要把它存到C
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   比如如果之前如果行偏移量保存在了t2，列偏移量保存在了t3，那么C的地址就是a6(s5) + t2 + t3, sw一下。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;   最后列t1+1，内循环跳回去。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;7. 内循环结束： i+1，外循环跳回去。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;8. 外循环结束： 恢复寄存器，返回。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;总结一下就是对于基准指针，步长一类的变量我们通常使用s寄存器稳定存储，临时变量比如位置、临时偏移量等都用t寄存器。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;part-b-file-operations-and-main&#34;&gt;part B: File Operations and Main
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;ReadMatrix函数：需要将一个bin格式的矩阵读到内存中&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;txt格式矩阵：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3 3 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 2 3 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4 5 6 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;7 8 9
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;bin格式矩阵：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;前8个字节用来存储行数和列数。没有空格直接衔接矩阵内容。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;例如: 03 00 00 00 03 00 00 00 01 00 00 00 02 00 00 00 03 00 00 00 ...
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;bin文件默认采用小端序存储，刚好RISC-V也是小端序。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;有了上次matmul的经验，这次我所有的重要的变量都用s寄存器存放，因为我们将会大量使用各种file函数，以防万一，只有一些临时的计算结果使用t寄存器。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;唯一需要注意的点是malloc的返回值，这个在util.s中并没有明确指出，在文档中也没写？反正经过实测当malloc失败的时候返回0就是了，beq a0, x0, malloc_failed就行了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;WriteMatrix函数，写过了read这个就很简单了，直接把a1里的东西原装写入（二进制），唯一要加的就是两个4字节的行列数。我是用malloc了一个8字节的空间来lw了行列数的值，然后分两次fwrite到文件中的。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;对了，这里有点奇怪的是在outpus的test_write_matrix文件夹中只有用来测试正确性的reference.bin，但是我们的函数中需要一个a1是内存中的数组地址，这玩意没给啊🤣，所以我们需要面向答案编程，先用utils的工具convert把bin转换成txt，得到正确矩阵后作为参数传入a1.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;还有就是unit测试中只有当code是0的时候我们需要check_file_output,不然就算代码对了这里会报错assert file_output !=
+expected_output, 加一个if就好了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Put all components together in classify.s ， 将之前写好的函数按照神经网络的结构依次调用就行了，唯一一个坑（我不知道是不是TA故意的）是在matmul函数中最终的结果是保存在a6里返回的，而我是用s6来存储中间矩阵运算的结果的，所以必须先free掉第一层的矩阵结果，但是free这个函数在util中可以发现它竟然使用了a6，修改了这个值，所以我们必须保存一下a6，等free完了再恢复。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;一些小细节： fopen函数确实如同材料所说可以用w模式打开，如果不存在这个文件会自动创建，问题是比如我们的output路径如果指定的是一个不存在的文件夹，不好意思会报错，所以得提前手动创建一下。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;自己手写数字测试：emmm，感觉这个提供的分类器准确率还有提升空间🤣&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
         <title>CS61c_4 — Compilation,Assembly,Linking and Loading</title>
         <link>https://fuquan99666.github.io/p/cs61c_4-compilationassemblylinking-and-loading/</link>
         <pubDate>Wed, 21 Jan 2026 19:02:32 +0800</pubDate>
@@ -2178,8 +2423,7 @@ to ppm, for example:&lt;/li&gt;
 &lt;li&gt;最后也是成功仿真出来了😇&lt;/li&gt;
 &lt;li&gt;如何在板子上跑？恐怕很难，毕竟32位的Time和8位的Ctrl信号不好输入啊，以我目前的实力还做不到😭，仿真足以。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;爽爽爽&#34;&gt;爽爽爽🐶
-&lt;/h3&gt;</description>
+</description>
         </item>
         <item>
         <title>A Simple Wordcloud with Python</title>
