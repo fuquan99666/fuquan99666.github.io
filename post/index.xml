@@ -7,7 +7,153 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Sat, 07 Feb 2026 15:28:16 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 18 Feb 2026 15:55:17 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_6 — Combinational Logic Blocks</title>
+        <link>https://fuquan99666.github.io/p/cs61c_6-combinational-logic-blocks/</link>
+        <pubDate>Wed, 18 Feb 2026 15:55:17 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_6-combinational-logic-blocks/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C5.jpg" alt="Featured image of post CS61c_6 — Combinational Logic Blocks" /&gt;&lt;h3 id=&#34;mux-多路选择器&#34;&gt;MUX 多路选择器
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;A，B两个n位的输入，S为选择信号，输出是A或者B中的一个&lt;/li&gt;
+&lt;li&gt;我们可以首先构建一个1位的MUX，然后通过级联来构建n位的MUX&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;使用上次学到的思想，先写出真值表（2^3=8）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;S A B | Out
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 0 0 | 0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 0 1 | 0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 1 0 | 1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 1 1 | 1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 0 0 | 0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 0 1 | 1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 1 0 | 0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 1 1 | 1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;out = A(~S)(~B) + A(~S)B + (~A)SB + ASB 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    = A(~S) + SB    // 感谢伟大的布尔代数法则
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;如下图所示，MUX的简化表示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#34;1.png&#34; alt=&#34;mux&#34; width=&#34;600&#34;/&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;如果是一个4选1的MUX呢，只需要把S选择信号改为2位即可，输出是A，B，C，D中的一个。
+out = (~S1)(~S0)A + (~S1)S0B + S1(~S0)C + S1S0D, (emm,就不用写出真值表了，直接上公式)&lt;/li&gt;
+&lt;li&gt;问题是这里的2位信号我们如何产生呢？不考虑什么强大的操作，只考虑使用已经实现的2选1MUX来实现4选1MUX。&lt;/li&gt;
+&lt;li&gt;4选1可以看成是二层（3个）2选1MUX，第一层从AB中选一个，CD中选一个，第二层从赢家中选择一个。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#34;2.png&#34; alt=&#34;mux&#34; width=&#34;600&#34;/&gt;
+&lt;/center&gt;
+&lt;h3 id=&#34;arithmetic-logic-unit-alu&#34;&gt;Arithmetic Logic Unit (ALU)
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;ALU是计算机中的算术逻辑单元，负责执行算术和逻辑运算。&lt;/li&gt;
+&lt;li&gt;ALU的输入通常包括两个操作数和一个控制信号，输出是运算结果。&lt;/li&gt;
+&lt;li&gt;ALU可以实现多种运算，如加法、减法、与、或、异或等。&lt;/li&gt;
+&lt;li&gt;示意图：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#34;3.png&#34; alt=&#34;alu&#34; width=&#34;600&#34;/&gt;
+&lt;/center&gt;
+- 可以看到输入有66位，如果我们真的削尖了铅笔，准备写一个真值表，那要老大徒伤悲了，所以考虑使用一个模块化设计。
+&lt;center&gt;
+    &lt;img src=&#34;4.png&#34; alt=&#34;alu&#34; width=&#34;600&#34;/&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;这里头的A和B输入都是32位的，and和or模块只需要并联32个and，or门即可，只剩下较复杂的加法器和减法器了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;addersubtractor&#34;&gt;Adder/Subtractor
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;首先实现一个4位（半个字节）的加法器。&lt;/li&gt;
+&lt;li&gt;对于最低位的加法，S_i = A_i XOR B_i, C_i = A_i and B_i&lt;/li&gt;
+&lt;li&gt;对于其他位的加法，考虑到进位的存在，写出真值表：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;A B C | S C_out 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 0 0 | 0 0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 0 1 | 1 0 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 1 0 | 1 0 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 0 0 | 1 0 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;0 1 1 | 0 1 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 0 1 | 0 1 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 1 0 | 0 1 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1 1 1 | 1 1 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;通过观察可以得出: S_i = XOR(A_i, B_i, C_i)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;C_i = (A_i and B_i) or (B_i and C_i) or (A_i and C_i) = Majority(A_i, B_i, C_i) 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Majority 就是表示一群输入中占多数的值。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对于XOR，我们可以直接使用3输入的xor门？（似乎还没有说怎么构建3输入的xor门）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;从布尔表达式角度output = A(~B)(~C) + (~A)B(~C) + (~A)(~B)C + ABC, 似乎无法进一步化简。。。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;但是似乎xor有结合律：xor(a,b,c) = xor(xor(a,b),c),我们可以先用一个xor计算A和B的异或结果，然后再和C进行异或，这样就可以用两个2输入的xor门来实现了。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;其实，直接布尔展开的电路图和用xor级联得到的电路图使用到的门的数量是相当的，级联的方式更加简洁清爽，结构清晰。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对于Majority,由表达式可以轻松的画出电路图,output = AB + BC + AC,so easy!
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;这样一个加法器不就搞完了，接着我们将n个cascade起来就可以得到n位的加法器了。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对了，不要忘记第一个carry in是0.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#34;5.png&#34; alt=&#34;adder&#34; width=&#34;600&#34;/&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;对于overflow的判断，如果是无符号整数，那么overflow发生在c_n不为0的时候； 如果是有符号整数，那么overflow发生在
+xor(c_n-1, c_n)不为0的时候，如果c_n-1 = 0 , c_n = 1,说明负数溢出，如果是c_n-1 = 1, c_n = 0,说明正数溢出。
+溢出的另一种体现就是溢出时的二进制已经无法在当前位数表达实际的数值了，比如对于4位的有符号整数，范围是-8~7，如果我们计算5+4=9，结果在二进制中是1001，但是这个结果在4位有符号整数中表示的是-7，所以就发生了溢出。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;subtractor的实现其实很简单，a - b = a + (-b), -b = ~b + 1,所以我们可以先把b的每一位进行取反，然后在开头c0设置为1，巧妙的是当xor的一个元素是1，它会把另一个元素取反，所以我们不需要单独的线来处理，直接把c0的那条线接到xor的输入就行了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#34;6.png&#34; alt=&#34;subtractor&#34; width=&#34;600&#34;/&gt;
+&lt;/center&gt;
+&lt;h3 id=&#34;偷偷喵了一眼project3和4感觉很带劲啊&#34;&gt;偷偷喵了一眼project3和4，感觉很带劲啊。
+&lt;/h3&gt;</description>
+        </item>
+        <item>
         <title>CS61c_5 — Intro to Synchronous Digital Systems</title>
         <link>https://fuquan99666.github.io/p/cs61c_5-intro-to-synchronous-digital-systems/</link>
         <pubDate>Sat, 07 Feb 2026 15:28:16 +0800</pubDate>
@@ -55,6 +201,9 @@
 &lt;/div&gt;&lt;center&gt;
     &lt;img src=&#34;3.png&#34; alt=&#34;NAND Gate&#34; width=&#34;700&#34;/&gt;
 &lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;突然发现把1V和0V反过来不就是and了吗，但是ai又说工业上是用NAND + NOT 来实现and的，不懂（&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3 id=&#34;signals-and-waveforms&#34;&gt;Signals and Waveforms
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;notice delay！&lt;/li&gt;
