@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="CAll Compiling,Assembling,Linking and Loading. ISA之下都是硬件，ISA之上就是软件。\n解释器和编译器 Interpreter is a program that executes other programs. Translator converts a program from the source language to an equivalent program in another language. 甚至可以有c解释器😆，虽然慢的离谱，（cs61a中写过一个scheme解释器，用的python），解释器有什么好处呢？比方说他可以在任意一个机器上跑，而且支持backward，对于旧的ISA的代码在新的上面不好执行，可以设计一个解释器来执行，interpreter slower(10x?),code smaller(2x?) 编译器就不一样了，类似流水线，编译成机器码，所以必须针对特定的ISA，这样可以在硬件上快速运行。还有一个重大的好处就是编译的最终可执行文件相比我想要送给别人一个python代码，我的源码别人看不到（反编译很难），所以安全一些。 Compilation 将.c文件编译成汇编文件.s 1 2 3 gcc -O2 -S -c foo.c input：foo.c output：foo.s -O2表示优化等级，-S表示生成汇编代码，-c表示只编译不链接。 .s文件的来源可以是编译生成，也可以自己手写，注意.s文件中可能含有伪指令(pseudo-instructions),简化了代码，感谢社区！ Assembler 将.s文件汇编成目标文件.o assembler directives ，告诉assembler一些额外的信息但是不生成机器码。 .text 告诉assembler接下来的代码是指令代码段 .data 告诉assembler接下来的代码是数据段 .global sym 告诉assembler符号sym是全局的，可以被其他文件引用 .string str 定义一个以null结尾的字符串 .word w1..wn 定义一个或多个32位字 replace pseudo-instructions with real instructions. 1 2 3 4 5 6 7 8 9 mv to,t1 addi t0,x0,t1 neg t0,t1 sub t0,x0,t1 # t0 = -t1 li to imm addi to, x0, imm # 课程中给了这个例子我感觉不太对，addi中的imm是12位的，但是li可以是32位的，应该是先lui再addi才对。 not t0, t1 xori t0, t1, -1 # t0 = ~t1 beqz t0, loop beq t0, x0, loop la t0, str lui t0, str[31:12] addi t0, t0, str[11:0] # absolute address or auipc t0, str[31:12] addi t0,t0,str[11:0] # PC-relative address 总之不要忘了符号扩展，只要是imm都要符号扩展才可以和寄存器进行运算。 object file format relocation info is something to be discussed later,比如说一些无法确定的地址，需要到linking的时候才能确定。 Linker 将多个目标文件.o链接成一个可执行文件.out 动态链接和静态链接 None Loader 将可执行文件加载到内存中运行,本质上是一个操作系统的功能。 An example: Hello World 1 2 3 4 5 #include&lt;stdio.h&gt; int main(){ printf(&#34;Hello, %s\\n&#34;, &#34;World&#34;); return 0; } 如何将这个转换成最终的机器码呢？\n">
-<title>CS61c_4 — Compilation,Assembly,Linking and Loading</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="这个部分我们将开始构建一个RISC-V处理器，实现软件和硬件的交互。 The CPU Processor (CPU): the active part of th computer that does all the work(data manipulation and decision-amking) Datapath: portion of the processor that contains hardware necessary to perform operations specified by the instruction set architecture (ISA) Control: portion of the processor that tells the datapath what needs to be done to execute the instructions 1 2 根据前面的知识，我们知道RISC32大概有30多条指令（整数），我们可以设计三十多个datapath来分别执行这些指令。 但是这样是十分低效的，我们可以设计一个通用的datapath来执行所有指令，这样就需要一个控制器来告诉datapath如何执行每条指令。 Five stages of the Datapath 这个和x86的流水线是类似的（\n">
+<title>CS61c_7 — RISC-V Processor Design</title>
 
-<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_4-compilationassemblylinking-and-loading/'>
+<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_7-risc-v-processor-design/'>
 
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_4 — Compilation,Assembly,Linking and Loading">
-<meta property='og:description' content="CAll Compiling,Assembling,Linking and Loading. ISA之下都是硬件，ISA之上就是软件。\n解释器和编译器 Interpreter is a program that executes other programs. Translator converts a program from the source language to an equivalent program in another language. 甚至可以有c解释器😆，虽然慢的离谱，（cs61a中写过一个scheme解释器，用的python），解释器有什么好处呢？比方说他可以在任意一个机器上跑，而且支持backward，对于旧的ISA的代码在新的上面不好执行，可以设计一个解释器来执行，interpreter slower(10x?),code smaller(2x?) 编译器就不一样了，类似流水线，编译成机器码，所以必须针对特定的ISA，这样可以在硬件上快速运行。还有一个重大的好处就是编译的最终可执行文件相比我想要送给别人一个python代码，我的源码别人看不到（反编译很难），所以安全一些。 Compilation 将.c文件编译成汇编文件.s 1 2 3 gcc -O2 -S -c foo.c input：foo.c output：foo.s -O2表示优化等级，-S表示生成汇编代码，-c表示只编译不链接。 .s文件的来源可以是编译生成，也可以自己手写，注意.s文件中可能含有伪指令(pseudo-instructions),简化了代码，感谢社区！ Assembler 将.s文件汇编成目标文件.o assembler directives ，告诉assembler一些额外的信息但是不生成机器码。 .text 告诉assembler接下来的代码是指令代码段 .data 告诉assembler接下来的代码是数据段 .global sym 告诉assembler符号sym是全局的，可以被其他文件引用 .string str 定义一个以null结尾的字符串 .word w1..wn 定义一个或多个32位字 replace pseudo-instructions with real instructions. 1 2 3 4 5 6 7 8 9 mv to,t1 addi t0,x0,t1 neg t0,t1 sub t0,x0,t1 # t0 = -t1 li to imm addi to, x0, imm # 课程中给了这个例子我感觉不太对，addi中的imm是12位的，但是li可以是32位的，应该是先lui再addi才对。 not t0, t1 xori t0, t1, -1 # t0 = ~t1 beqz t0, loop beq t0, x0, loop la t0, str lui t0, str[31:12] addi t0, t0, str[11:0] # absolute address or auipc t0, str[31:12] addi t0,t0,str[11:0] # PC-relative address 总之不要忘了符号扩展，只要是imm都要符号扩展才可以和寄存器进行运算。 object file format relocation info is something to be discussed later,比如说一些无法确定的地址，需要到linking的时候才能确定。 Linker 将多个目标文件.o链接成一个可执行文件.out 动态链接和静态链接 None Loader 将可执行文件加载到内存中运行,本质上是一个操作系统的功能。 An example: Hello World 1 2 3 4 5 #include&lt;stdio.h&gt; int main(){ printf(&#34;Hello, %s\\n&#34;, &#34;World&#34;); return 0; } 如何将这个转换成最终的机器码呢？\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_4-compilationassemblylinking-and-loading/'>
+<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_7 — RISC-V Processor Design">
+<meta property='og:description' content="这个部分我们将开始构建一个RISC-V处理器，实现软件和硬件的交互。 The CPU Processor (CPU): the active part of th computer that does all the work(data manipulation and decision-amking) Datapath: portion of the processor that contains hardware necessary to perform operations specified by the instruction set architecture (ISA) Control: portion of the processor that tells the datapath what needs to be done to execute the instructions 1 2 根据前面的知识，我们知道RISC32大概有30多条指令（整数），我们可以设计三十多个datapath来分别执行这些指令。 但是这样是十分低效的，我们可以设计一个通用的datapath来执行所有指令，这样就需要一个控制器来告诉datapath如何执行每条指令。 Five stages of the Datapath 这个和x86的流水线是类似的（\n">
+<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_7-risc-v-processor-design/'>
 <meta property='og:site_name' content='My Site'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-21T19:02:32&#43;08:00'/><meta property='article:modified_time' content='2026-01-21T19:02:32&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/%E8%BF%9B%E5%87%BB%E7%9A%84%E5%B7%A8%E4%BA%BA.jpeg' />
-<meta name="twitter:title" content="CS61c_4 — Compilation,Assembly,Linking and Loading">
-<meta name="twitter:description" content="CAll Compiling,Assembling,Linking and Loading. ISA之下都是硬件，ISA之上就是软件。\n解释器和编译器 Interpreter is a program that executes other programs. Translator converts a program from the source language to an equivalent program in another language. 甚至可以有c解释器😆，虽然慢的离谱，（cs61a中写过一个scheme解释器，用的python），解释器有什么好处呢？比方说他可以在任意一个机器上跑，而且支持backward，对于旧的ISA的代码在新的上面不好执行，可以设计一个解释器来执行，interpreter slower(10x?),code smaller(2x?) 编译器就不一样了，类似流水线，编译成机器码，所以必须针对特定的ISA，这样可以在硬件上快速运行。还有一个重大的好处就是编译的最终可执行文件相比我想要送给别人一个python代码，我的源码别人看不到（反编译很难），所以安全一些。 Compilation 将.c文件编译成汇编文件.s 1 2 3 gcc -O2 -S -c foo.c input：foo.c output：foo.s -O2表示优化等级，-S表示生成汇编代码，-c表示只编译不链接。 .s文件的来源可以是编译生成，也可以自己手写，注意.s文件中可能含有伪指令(pseudo-instructions),简化了代码，感谢社区！ Assembler 将.s文件汇编成目标文件.o assembler directives ，告诉assembler一些额外的信息但是不生成机器码。 .text 告诉assembler接下来的代码是指令代码段 .data 告诉assembler接下来的代码是数据段 .global sym 告诉assembler符号sym是全局的，可以被其他文件引用 .string str 定义一个以null结尾的字符串 .word w1..wn 定义一个或多个32位字 replace pseudo-instructions with real instructions. 1 2 3 4 5 6 7 8 9 mv to,t1 addi t0,x0,t1 neg t0,t1 sub t0,x0,t1 # t0 = -t1 li to imm addi to, x0, imm # 课程中给了这个例子我感觉不太对，addi中的imm是12位的，但是li可以是32位的，应该是先lui再addi才对。 not t0, t1 xori t0, t1, -1 # t0 = ~t1 beqz t0, loop beq t0, x0, loop la t0, str lui t0, str[31:12] addi t0, t0, str[11:0] # absolute address or auipc t0, str[31:12] addi t0,t0,str[11:0] # PC-relative address 总之不要忘了符号扩展，只要是imm都要符号扩展才可以和寄存器进行运算。 object file format relocation info is something to be discussed later,比如说一些无法确定的地址，需要到linking的时候才能确定。 Linker 将多个目标文件.o链接成一个可执行文件.out 动态链接和静态链接 None Loader 将可执行文件加载到内存中运行,本质上是一个操作系统的功能。 An example: Hello World 1 2 3 4 5 #include&lt;stdio.h&gt; int main(){ printf(&#34;Hello, %s\\n&#34;, &#34;World&#34;); return 0; } 如何将这个转换成最终的机器码呢？\n"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://fuquan99666.github.io/%E8%BF%9B%E5%87%BB%E7%9A%84%E5%B7%A8%E4%BA%BA.jpeg' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-03-08T16:29:22&#43;08:00'/><meta property='article:modified_time' content='2026-03-08T16:29:22&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg' />
+<meta name="twitter:title" content="CS61c_7 — RISC-V Processor Design">
+<meta name="twitter:description" content="这个部分我们将开始构建一个RISC-V处理器，实现软件和硬件的交互。 The CPU Processor (CPU): the active part of th computer that does all the work(data manipulation and decision-amking) Datapath: portion of the processor that contains hardware necessary to perform operations specified by the instruction set architecture (ISA) Control: portion of the processor that tells the datapath what needs to be done to execute the instructions 1 2 根据前面的知识，我们知道RISC32大概有30多条指令（整数），我们可以设计三十多个datapath来分别执行这些指令。 但是这样是十分低效的，我们可以设计一个通用的datapath来执行所有指令，这样就需要一个控制器来告诉datapath如何执行每条指令。 Five stages of the Datapath 这个和x86的流水线是类似的（\n"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg' />
     <link rel="shortcut icon" href="/favicon.ico" />
 
     </head>
@@ -248,21 +248,24 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li>
+    <li><a href="#这个部分我们将开始构建一个risc-v处理器实现软件和硬件的交互">这个部分我们将开始构建一个RISC-V处理器，实现软件和硬件的交互。</a>
       <ol>
-        <li><a href="#call">CAll</a></li>
-        <li><a href="#解释器和编译器">解释器和编译器</a></li>
-        <li><a href="#compilation">Compilation</a></li>
-        <li><a href="#assembler">Assembler</a></li>
-        <li><a href="#linker">Linker</a></li>
-        <li><a href="#loader">Loader</a></li>
-        <li><a href="#an-example-hello-world">An example: Hello World</a></li>
-        <li><a href="#lab4-risc-functionpointers">Lab4 RISC function,pointers</a>
+        <li><a href="#the-cpu">The CPU</a></li>
+        <li><a href="#five-stages-of-the-datapath">Five stages of the Datapath</a></li>
+        <li><a href="#some-combinations">Some Combinations</a></li>
+        <li><a href="#r-type-add-datapath">R-Type Add Datapath</a>
           <ol>
-            <li><a href="#exercise-1-debugging-megalistmanipss">Exercise 1: Debugging megalistmanips.s</a></li>
-            <li><a href="#exercise-2-write-a-function-without-branches">Exercise 2: Write a function without branches</a></li>
+            <li><a href="#sub-datapath">Sub Datapath</a></li>
           </ol>
         </li>
+        <li><a href="#datapath-with-immediate">Datapath With Immediate</a></li>
+        <li><a href="#load-is-also-immediate-type">Load is also Immediate Type</a></li>
+        <li><a href="#adding-sw-instruction">adding sw instruction</a></li>
+        <li><a href="#branches">Branches</a></li>
+        <li><a href="#jalr-特殊的跳转">Jalr 特殊的跳转</a></li>
+        <li><a href="#j-format-for-jump-instruction">J-Format for Jump Instruction</a></li>
+        <li><a href="#adding-u-types">Adding U-Types</a></li>
+        <li><a href="#summary">Summary</a></li>
       </ol>
     </li>
   </ol>
@@ -279,9 +282,9 @@
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
-            <a href="/p/cs61c_4-compilationassemblylinking-and-loading/">
+            <a href="/p/cs61c_7-risc-v-processor-design/">
                 
-                    <img src="/%e8%bf%9b%e5%87%bb%e7%9a%84%e5%b7%a8%e4%ba%ba.jpeg" loading="lazy" alt="Featured image of post CS61c_4 — Compilation,Assembly,Linking and Loading" />
+                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c6.jpg" loading="lazy" alt="Featured image of post CS61c_7 — RISC-V Processor Design" />
                 
             </a>
         </div>
@@ -304,7 +307,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/cs61c_4-compilationassemblylinking-and-loading/">CS61c_4 — Compilation,Assembly,Linking and Loading</a>
+            <a href="/p/cs61c_7-risc-v-processor-design/">CS61c_7 — RISC-V Processor Design</a>
         </h2>
     
         
@@ -326,7 +329,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published" datetime='2026-01-21T19:02:32&#43;08:00'>2026-01-21</time>
+                <time class="article-time--published" datetime='2026-03-08T16:29:22&#43;08:00'>2026-03-08</time>
             </div>
         
 
@@ -341,7 +344,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 5 分钟
+                    阅读时长: 7 分钟
                 </time>
             </div>
         
@@ -356,20 +359,36 @@
     <section class="article-content">
     
     
-    <h3 id="call">CAll
-</h3><p>Compiling,Assembling,Linking and Loading.
-ISA之下都是硬件，ISA之上就是软件。</p>
-<h3 id="解释器和编译器">解释器和编译器
+    <h2 id="这个部分我们将开始构建一个risc-v处理器实现软件和硬件的交互">这个部分我们将开始构建一个RISC-V处理器，实现软件和硬件的交互。
+</h2><h3 id="the-cpu">The CPU
 </h3><ul>
-<li>Interpreter is a program that executes other programs.</li>
-<li>Translator converts a program from the source language to an equivalent program in another language.</li>
-<li>甚至可以有c解释器😆，虽然慢的离谱，（cs61a中写过一个scheme解释器，用的python），解释器有什么好处呢？比方说他可以在任意一个机器上跑，而且支持backward，对于旧的ISA的代码在新的上面不好执行，可以设计一个解释器来执行，interpreter slower(10x?),code smaller(2x?)</li>
-<li>编译器就不一样了，类似流水线，编译成机器码，所以必须针对特定的ISA，这样可以在硬件上快速运行。还有一个重大的好处就是编译的最终可执行文件相比我想要送给别人一个python代码，我的源码别人看不到（反编译很难），所以安全一些。</li>
+<li>Processor (CPU): the active part of th computer that does all the work(data manipulation and decision-amking)</li>
+<li>Datapath: portion of the processor that contains hardware necessary to perform operations specified by the instruction set architecture (ISA)</li>
+<li>Control: portion of the processor that tells the datapath what needs to be done to execute the instructions</li>
 </ul>
-<h3 id="compilation">Compilation
-</h3><ul>
-<li>将.c文件编译成汇编文件.s</li>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">根据前面的知识，我们知道RISC32大概有30多条指令（整数），我们可以设计三十多个datapath来分别执行这些指令。
+</span></span><span class="line"><span class="cl">但是这样是十分低效的，我们可以设计一个通用的datapath来执行所有指令，这样就需要一个控制器来告诉datapath如何执行每条指令。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="five-stages-of-the-datapath">Five stages of the Datapath
+</h3><p>这个和x86的流水线是类似的（</p>
+<ul>
+<li>Stage 1: Instruction Fetch (IF)</li>
+<li>Stage 2: Instruction Decode (ID)</li>
+<li>Stage 3: Execute (EX) - ALU (Arithmetic-Logic Unit)</li>
+<li>Stage 4: Memory Access (MEM)</li>
+<li>Stage 5: Write Back to Register (WB)</li>
 </ul>
+<p>上图！</p>
+<center>
+    <img src='1.png' alt='5 stages of the Datapath' />
+</center>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -377,155 +396,204 @@ ISA之下都是硬件，ISA之上就是软件。</p>
 </span><span class="lnt">3
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">gcc -O2 -S -c foo.c
-</span></span><span class="line"><span class="cl">input：foo.c
-</span></span><span class="line"><span class="cl">output：foo.s
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">这里有一个细节是我们将指令内存和数据内存分开了，
+</span></span><span class="line"><span class="cl">但是实际上他们就是一个物理内存的，为什么呢？
+</span></span><span class="line"><span class="cl">我们可以在cpu中设计两个单独的cache来存放经常使用的指令和数据，一个叫imem,一个叫dmem，这样就可以提高访问速度了。
 </span></span></code></pre></td></tr></table>
 </div>
-</div><ul>
-<li>-O2表示优化等级，-S表示生成汇编代码，-c表示只编译不链接。</li>
-<li>.s文件的来源可以是编译生成，也可以自己手写，注意.s文件中可能含有伪指令(pseudo-instructions),简化了代码，感谢社区！</li>
-</ul>
-<h3 id="assembler">Assembler
+</div><h3 id="some-combinations">Some Combinations
 </h3><ul>
-<li>将.s文件汇编成目标文件.o</li>
-<li>assembler directives ，告诉assembler一些额外的信息但是不生成机器码。
-<ul>
-<li>.text 告诉assembler接下来的代码是指令代码段</li>
-<li>.data 告诉assembler接下来的代码是数据段</li>
-<li>.global sym 告诉assembler符号sym是全局的，可以被其他文件引用</li>
-<li>.string str 定义一个以null结尾的字符串</li>
-<li>.word w1..wn 定义一个或多个32位字</li>
+<li>Register: 注意有一个write-enable信号，只有当这个信号为1时，寄存器才会被写入数据。</li>
+<li>Register File: 在RB32i中，我们有32个寄存器，每个寄存器都是32位的，所以我们需要一个32x32的寄存器文件。</li>
+<li>之前在x86中我们会发现寄存器文件一般都是two-read,single-write的，这里也一样，原因就是我们使用到的指令一般都是2个源寄存器和1个目的寄存器。</li>
 </ul>
+<center>
+    <img src='2.png' alt='Register File' />
+</center>
+<ul>
+<li>
+<p>我们可以看到register file的细节，值得注意的是我们如何判断哪一个register写和读呢，可以注意到上方的三个n=5的输入，他们都是0-31的数，代表了目标寄存器的编号。</p>
 </li>
-<li>replace pseudo-instructions with real instructions.</li>
+<li>
+<p>内存：和register file类似，如图所示：</p>
+</li>
 </ul>
+<center>
+    <img src='3.png' alt='Memory' />
+</center>
+<h3 id="r-type-add-datapath">R-Type Add Datapath
+</h3><p>很显然我们不可能一开始就直接搞出一个全通用的datapath来执行所有的指令，我们先从最简单的add开始。
+首先我们要回忆一下add指令的格式:</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">mv to,t1       addi t0,x0,t1
-</span></span><span class="line"><span class="cl">neg t0,t1      sub t0,x0,t1     # t0 = -t1
-</span></span><span class="line"><span class="cl">li to imm      addi to, x0, imm
-</span></span><span class="line"><span class="cl"># 课程中给了这个例子我感觉不太对，addi中的imm是12位的，但是li可以是32位的，应该是先lui再addi才对。
-</span></span><span class="line"><span class="cl">not t0, t1     xori t0, t1, -1 # t0 = ~t1
-</span></span><span class="line"><span class="cl">beqz t0, loop  beq t0, x0, loop
-</span></span><span class="line"><span class="cl">la t0, str     lui t0, str[31:12] addi t0,  t0, str[11:0] # absolute address
-</span></span><span class="line"><span class="cl">               or auipc t0, str[31:12] addi t0,t0,str[11:0] # PC-relative address
-</span></span><span class="line"><span class="cl">总之不要忘了符号扩展，只要是imm都要符号扩展才可以和寄存器进行运算。
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">add rd, rs1, rs2
+</span></span><span class="line"><span class="cl">funct7 |  rs2 |  rs1 | funct3 | rd  | opcode
+</span></span><span class="line"><span class="cl">31-25  | 24-20| 19-15|  14-12 | 11-7| 6-0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里需要控制模块加一个enable-write信号来允许rd的写入。</p>
+<center>
+    <img src='4.png' alt='add datapath' width='700' />
+</center>
+<h4 id="sub-datapath">Sub Datapath
+</h4><p>sub指令和add指令几乎一样，只有func7不同。
+大部分的path都可以复用，唯一需要改变的是在alu上添加一个控制信号来区分add和sub。
+其他的R-Format指令也是一个道理，先decode出对应的func序号，然后在alu上添加一个控制信号来区分不同的指令。</p>
+<h3 id="datapath-with-immediate">Datapath With Immediate
+</h3><p>I-Format 格式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">immediate | rs1 | funct3 | rd  | opcode
+</span></span><span class="line"><span class="cl">31-20     |19-15| 14-12  | 11-7| 6-0
+</span></span></code></pre></td></tr></table>
+</div>
+</div><center>
+    <img src='5.png' alt='I-Format Datapath' width='700' />
+</center>
+<p>我们使用了一个mux来选择是使用立即数还是rs2中的值，控制逻辑需要设置一个信号Bsel来选择。
+同时，我们需要生成一个32位的立即数，这个过程叫做immediate generation，我们需要根据指令的格式来生成对应的立即数。
+在i-type指令中，我们已经有了12位的立即数，只需要进行符号扩展就行了。
+至于rs2，依然会自动read，但是不选择。
+这里我们才能深刻领会各种指令格式为什么需要对齐，只有对齐寄存器和imm，我们才能使用同一个datapath来decode不同类型的指令。</p>
+<h3 id="load-is-also-immediate-type">Load is also Immediate Type
+</h3><p>load指令也是i-type的一种，只不过多了一个memory access的阶段，我们需要在datapath中添加一个memory access的模块来处理load指令。</p>
+<center>
+    <img src='6.png' alt='Load Datapath' width='700' />
+</center>
+<ul>
+<li>无非是在将要写会寄存器之前加一个mux选择是用alu的结果还是memory access的结果，都是由控制逻辑的信号来决定的。</li>
+<li>当然我们还有一些其他的load指令类型，比如lb, lh, lbu, lhu等，他们的datapath也是在load的基础上进行的，需要添加一些gate、mux来处理不同的情况。</li>
+</ul>
+<h3 id="adding-sw-instruction">adding sw instruction
+</h3><p>sw指令是s-type的一种，格式如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">31-25     | 24-20| 19-15| 14-12  | 11-7     | 6-0
+</span></span><span class="line"><span class="cl">imm[11:5] | rs2  | rs1  | funct3 | imm[4:0] | opcode
+</span></span></code></pre></td></tr></table>
+</div>
+</div><center>
+    <img src='7.png' alt='Store Datapath' width='700' />
+</center>
+<ul>
+<li>由于save指令需要将目标寄存器的值写入内存，所以我们需要将rs2的值连一条线到memory access模块的输入端。</li>
+<li>同时由于S-type的立即数是分成两部分的，所以我们需要修改immediate generation的逻辑来生成正确的立即数。</li>
+</ul>
+<center>
+    <img src='8.png' alt='Immediate Generation' width='700' />
+</center>
+<ul>
+<li>这里我们会发现5-10位的立即数都是一样的，直接使用指令的25-30位即可，然后31位的进行符号扩展，至于0-4位的立即数一个来源是指令的20-24位，一个来源是指令的7-11位，我们可以用一个mux来选择。</li>
+<li>至于sb，sh等其他的store指令我们完全可以复用当前的datapath，当然需要加一些控制来防止写入不应该写入的内存。</li>
+</ul>
+<h3 id="branches">Branches
+</h3><ul>
+<li>首先我们要回忆一下branch指令的格式：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">     31-25        | 24-20| 19-15| 14-12  | 11-7             | 6-0
+</span></span><span class="line"><span class="cl">imm[12],imm[10:5] | rs2  | rs1  | funct3 | imm[4:1],imm[11] | opcode
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
-<li>object file format</li>
+<li>之前我们说过由于risc-v32中的指令基本上都是32位4字节的，但是考虑到一些压缩指令的存在（2字节），所以这里我们默认imm的第零位是0，然后多存了一个imm[12]扩大了imm的范围。</li>
 </ul>
 <center>
-    <img src='1.png' alt='object file format' width='600'/>
+    <img src='9.png' alt='Branch Datapath' width='700' />
 </center>
 <ul>
-<li>relocation info is something to be discussed later,比如说一些无法确定的地址，需要到linking的时候才能确定。</li>
+<li>我们将添加一个新的组件Branch Comp,在sr1的选择端添加一个mux（Asel）来选择是用rs1还是pc的值，同时pc的输入端也要添加一个mux来选择是用pc+4还是pc+imm。</li>
+<li>在Branch Comp中，我们有6种已知的比较方式（beq, bne, blt, bge, bltu, bgeu），最后两个是前者的无符号版本，而前面4个都是可以通过取反得到另一个的，如果我们想得到bne的结果，只需要在control logic中取反即可，bge同理。至于具体如何计算beq和blt的结果，我们可以在alu中添加一个sub来计算rs1-rs2的结果（符号相同的情况下），如果结果为0则beq为真，如果结果小于0则blt为真？这个对于有符号整数来说是可以的，对于无符号整数呢？其实可以搞一个逐位比较器？</li>
 </ul>
-<h3 id="linker">Linker
-</h3><ul>
-<li>将多个目标文件.o链接成一个可执行文件.out</li>
-<li>动态链接和静态链接</li>
-<li>None</li>
-</ul>
-<h3 id="loader">Loader
-</h3><ul>
-<li>将可执行文件加载到内存中运行,本质上是一个操作系统的功能。</li>
-</ul>
-<h3 id="an-example-hello-world">An example: Hello World
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span><span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span></span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
-</span></span><span class="line"><span class="cl">    <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Hello, %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;World&#34;</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>如何将这个转换成最终的机器码呢？</p>
-<ol>
-<li>Compilation - from .c to .s</li>
-</ol>
 <center>
-    <img src='2.png' alt='.s' width='700'/>
+    <img src='10.png' alt='Branch immediate generation' width='700' />
 </center>
-2. Assembling - from .s to .o
 <center>
-    <img src='3.png' alt='.o' width='700'/>
+    <img src='11.png' alt='Branch immediate generation' width='700' />
 </center>
-可以看到操作码和寄存器都转换成了二进制，还有一些伪指令被转换成了真实指令，但是还有一些地址有待确定，比如需要调用外部的printf函数（在哪呢），比如需要使用的字符串数据在哪呢，现在只能先用0作为占位符。
 <ul>
-<li>为什么.rodata的相对位置会变？ 因为linker会合并各个.o文件中的.text和.rodata段，然后重新分配地址。</li>
+<li>这两个图充分展示了risc-v指令的设计之美，如果我们按照常规的方式（第一张图）来安排imm的位数，那么你会发现这里每一位都需要左移一位，这就导致了虽然我们的B-type和S-type类似，但是每一位的imm都不确定，需要一个mux来选择，这个的复杂度是不可接受的，于是伟大的risc-v设计者顺水推舟的在指令中直接左移了一位（第二个图），仅仅是把imm[11]换到了第0位，这样其他的位都是原封不动的，只有imm[11]需要mux来选择，大大简化了imm的生成逻辑。</li>
 </ul>
-<ol start="3">
-<li>Linking - from .o to .out</li>
-</ol>
-<center>
-    <img src='4.png' alt='.out' width='700'/>
-</center>
-可以看到不确定的.string地址被linker重新分配了，而且main函数入口的地址也被重新分配了（这也是代码移动的原因，再次印证了PC-relative addressing的重要性）。
-<h3 id="lab4-risc-functionpointers">Lab4 RISC function,pointers
+<h3 id="jalr-特殊的跳转">Jalr 特殊的跳转
 </h3><ul>
-<li>继续用venus模拟器做两个小题目</li>
-</ul>
-<h4 id="exercise-1-debugging-megalistmanipss">Exercise 1: Debugging megalistmanips.s
-</h4><ul>
-<li>和上一次的类似，只不过这次里面操作的是一个int数组。
-找到bug并修正：首先是mapLoop的第一行的加载数组地址写成add了，第二个是t0作为偏移量没有乘上4，需要用t寄存器操作一下，第三个是下一个node的地址加载用了la，第四个是s1作为作用函数的地址，本身直接被jalr调用，不需要什么lw，第五个还是很隐蔽的，推荐大家自己用venus跑一下，debug一下，当然直接看出来那我没话说😭</li>
-</ul>
-<details>
-<summary>第五个在这，点我！</summary>
-在秘密函数中，t1被用来存储临时值，但是在maploop中没有保存和恢复，导致t1的值被覆盖，结果错误，所以记得caller保存和恢复t1就可以了。而且这个bug挺坑的，-cc检测似乎只针对callee-saved寄存器，t寄存器不报错，需要我们自己衡量😃
-</details>
-<ul>
-<li>还有问题就是这个函数流程设计的有点不合理，每次maploop结束后直接跳到map函数，在开头再一次的保存ra，s0，s1，后面两个无关紧要，最大的问题是这个ra在jal map的时候已经ra已经被覆盖了（其实之前jalr s1的时候也覆盖了），所以存进栈的就是错误的ra，但是搞笑的是最后的结果还是对的：由于最后结束是在done中，而done中会jr ra，此时的ra已经是jal map下一个指令，恰好就是done!!!,所以局部小循环🐶，不断的从栈中读取地址，知道最终读回正确的ra地址，然后返回到main的正确位置。</li>
-<li>早知如此，直接在map保存寄存器和bne done的中间放个zzz标志，然后maploop的最后jal zzz就可以了。</li>
-</ul>
-<h4 id="exercise-2-write-a-function-without-branches">Exercise 2: Write a function without branches
-</h4><ul>
-<li>要求实现一个函数，输入一个整数，返回一个固定值，但是不允许使用分支。</li>
+<li>以jalr指令为例子，指令格式如下： (属于是I-type的一种)</li>
 </ul>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">定义如下
-</span></span><span class="line"><span class="cl">f(-3) = 6
-</span></span><span class="line"><span class="cl">f(-2) = 61
-</span></span><span class="line"><span class="cl">f(-1) = 17
-</span></span><span class="line"><span class="cl">f(0) = -38
-</span></span><span class="line"><span class="cl">f(1) = 19
-</span></span><span class="line"><span class="cl">f(2) = 42
-</span></span><span class="line"><span class="cl">f(3) = 5
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">31-20     | 19-15| 14-12  | 11-7| 6-0
+</span></span><span class="line"><span class="cl">immediate | rs1  | funct3 | rd  | opcode
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>这题很简单，只需要填写一个f函数，输入a0是我们的输入参数-3到3，a1是output的地址，由于题目不允许使用跳转和分支，考虑到输入是连续的，直接加三，然后乘上4作为偏移量，lw到a0中即可。</p>
+</div><ul>
+<li>jalr指令的功能是将pc+4的值写入rd寄存器，然后将rs1+imm的值作为新的pc值。</li>
+<li>由于jalr的指令格式和I-type一样，所以他的imm生成不用担心，所以rs1+imm的计算也可以复用，而将这个计算值传递给pc的线路我们在刚才的branch中国已经设计好了，直接把PCsel控制设置成taken即可，唯一需要添加的就是将这个pc+4的值传递到rd寄存器，我们可以添加一条线从pc+4的输出端到writeback的输入端，同时把writeback的mux设置成3种选择：alu的结果，memory access的结果，pc+4的值。其中2对应pc+4，其实也完全可以用mux级联替代这里的3选1mux。</li>
+</ul>
+<center>
+    <img src='12.png' alt='Jump Datapath' width='700' />
+</center>
+<h3 id="j-format-for-jump-instruction">J-Format for Jump Instruction
+</h3><ul>
+<li>J-type指令的格式如下：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">31        | 30-21       | 20     | 19-12      | 11-7| 6-0
+</span></span><span class="line"><span class="cl">imm[20]   | imm[10:1]   | imm[11]| imm[19:12] | rd  | opcode
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>jal指令干了两件事：1是将pc+4的值写入rd寄存器（这个我们在jalr中已经实现），2是将pc+imm的值作为新的pc值（也在branch中实现了），唯一需要改变的就是的imm的生成逻辑（比I-type复杂一些）。</li>
+</ul>
+<h3 id="adding-u-types">Adding U-Types
+</h3><ul>
+<li>U-type指令的格式如下：</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">31-12     | 11-7| 6-0
+</span></span><span class="line"><span class="cl">immediate | rd  | opcode
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>lui指令将20位高位立即数加载到目标寄存器中，并将低12位清零。</li>
+<li>auipc 指令将20位高位立即数加上当前pc的值，并将结果存储到目标寄存器中。</li>
+<li>所有的硬件组件都已经设计好了，只需要修改Imm Gen的逻辑即可，直接加一个mux来选择高20位绕过符号扩展等一些复杂的判断似乎是最简单的办法了。</li>
+</ul>
+<h3 id="summary">Summary
+</h3><ul>
+<li>恭喜🎉，通过复杂的设计，我们得到了一个可以执行任何一条risc-v32指令的处理器！</li>
+<li>但其实我们有一个重要的东西还没有实现，那就是control logic，之前我们都是假设有一个控制逻辑来告诉datapath如何执行指令，但是我们还没有设计这个控制逻辑，下一部分我们将设计这个控制逻辑来完成整个处理器的设计。</li>
+</ul>
 
 </section>
 
@@ -594,25 +662,6 @@ ISA之下都是硬件，ISA之上就是软件。</p>
             
                 
 <article class="has-image">
-    <a href="/p/cs61c_7-risc-v-processor-design/">
-        
-        
-            <div class="article-image">
-                
-                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c6.jpg" loading="lazy" data-key="" data-hash="/伊蕾娜6.jpg"/>
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">CS61c_7 — RISC-V Processor Design</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="has-image">
     <a href="/p/cs61c_6-combinational-logic-blocks/">
         
         
@@ -644,6 +693,25 @@ ISA之下都是硬件，ISA之上就是软件。</p>
 
         <div class="article-details">
             <h2 class="article-title">CS61c_5 — Intro to Synchronous Digital Systems</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/cs61c_4-compilationassemblylinking-and-loading/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/%e8%bf%9b%e5%87%bb%e7%9a%84%e5%b7%a8%e4%ba%ba.jpeg" loading="lazy" data-key="" data-hash="/进击的巨人.jpeg"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CS61c_4 — Compilation,Assembly,Linking and Loading</h2>
         </div>
     </a>
 </article>

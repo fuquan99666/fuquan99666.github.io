@@ -7,7 +7,250 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Wed, 18 Feb 2026 15:55:17 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/cs61c/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 08 Mar 2026 16:29:22 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/cs61c/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_7 — RISC-V Processor Design</title>
+        <link>https://fuquan99666.github.io/p/cs61c_7-risc-v-processor-design/</link>
+        <pubDate>Sun, 08 Mar 2026 16:29:22 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_7-risc-v-processor-design/</guid>
+        <description>&lt;img src="https://fuquan99666.github.io/%E4%BC%8A%E8%95%BE%E5%A8%9C6.jpg" alt="Featured image of post CS61c_7 — RISC-V Processor Design" /&gt;&lt;h2 id=&#34;这个部分我们将开始构建一个risc-v处理器实现软件和硬件的交互&#34;&gt;这个部分我们将开始构建一个RISC-V处理器，实现软件和硬件的交互。
+&lt;/h2&gt;&lt;h3 id=&#34;the-cpu&#34;&gt;The CPU
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Processor (CPU): the active part of th computer that does all the work(data manipulation and decision-amking)&lt;/li&gt;
+&lt;li&gt;Datapath: portion of the processor that contains hardware necessary to perform operations specified by the instruction set architecture (ISA)&lt;/li&gt;
+&lt;li&gt;Control: portion of the processor that tells the datapath what needs to be done to execute the instructions&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;根据前面的知识，我们知道RISC32大概有30多条指令（整数），我们可以设计三十多个datapath来分别执行这些指令。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;但是这样是十分低效的，我们可以设计一个通用的datapath来执行所有指令，这样就需要一个控制器来告诉datapath如何执行每条指令。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;five-stages-of-the-datapath&#34;&gt;Five stages of the Datapath
+&lt;/h3&gt;&lt;p&gt;这个和x86的流水线是类似的（&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Stage 1: Instruction Fetch (IF)&lt;/li&gt;
+&lt;li&gt;Stage 2: Instruction Decode (ID)&lt;/li&gt;
+&lt;li&gt;Stage 3: Execute (EX) - ALU (Arithmetic-Logic Unit)&lt;/li&gt;
+&lt;li&gt;Stage 4: Memory Access (MEM)&lt;/li&gt;
+&lt;li&gt;Stage 5: Write Back to Register (WB)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;上图！&lt;/p&gt;
+&lt;center&gt;
+    &lt;img src=&#39;1.png&#39; alt=&#39;5 stages of the Datapath&#39; /&gt;
+&lt;/center&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;这里有一个细节是我们将指令内存和数据内存分开了，
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;但是实际上他们就是一个物理内存的，为什么呢？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我们可以在cpu中设计两个单独的cache来存放经常使用的指令和数据，一个叫imem,一个叫dmem，这样就可以提高访问速度了。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;some-combinations&#34;&gt;Some Combinations
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Register: 注意有一个write-enable信号，只有当这个信号为1时，寄存器才会被写入数据。&lt;/li&gt;
+&lt;li&gt;Register File: 在RB32i中，我们有32个寄存器，每个寄存器都是32位的，所以我们需要一个32x32的寄存器文件。&lt;/li&gt;
+&lt;li&gt;之前在x86中我们会发现寄存器文件一般都是two-read,single-write的，这里也一样，原因就是我们使用到的指令一般都是2个源寄存器和1个目的寄存器。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;2.png&#39; alt=&#39;Register File&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;我们可以看到register file的细节，值得注意的是我们如何判断哪一个register写和读呢，可以注意到上方的三个n=5的输入，他们都是0-31的数，代表了目标寄存器的编号。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;内存：和register file类似，如图所示：&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;3.png&#39; alt=&#39;Memory&#39; /&gt;
+&lt;/center&gt;
+&lt;h3 id=&#34;r-type-add-datapath&#34;&gt;R-Type Add Datapath
+&lt;/h3&gt;&lt;p&gt;很显然我们不可能一开始就直接搞出一个全通用的datapath来执行所有的指令，我们先从最简单的add开始。
+首先我们要回忆一下add指令的格式:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;add rd, rs1, rs2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;funct7 |  rs2 |  rs1 | funct3 | rd  | opcode
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;31-25  | 24-20| 19-15|  14-12 | 11-7| 6-0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这里需要控制模块加一个enable-write信号来允许rd的写入。&lt;/p&gt;
+&lt;center&gt;
+    &lt;img src=&#39;4.png&#39; alt=&#39;add datapath&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;h4 id=&#34;sub-datapath&#34;&gt;Sub Datapath
+&lt;/h4&gt;&lt;p&gt;sub指令和add指令几乎一样，只有func7不同。
+大部分的path都可以复用，唯一需要改变的是在alu上添加一个控制信号来区分add和sub。
+其他的R-Format指令也是一个道理，先decode出对应的func序号，然后在alu上添加一个控制信号来区分不同的指令。&lt;/p&gt;
+&lt;h3 id=&#34;datapath-with-immediate&#34;&gt;Datapath With Immediate
+&lt;/h3&gt;&lt;p&gt;I-Format 格式：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;immediate | rs1 | funct3 | rd  | opcode
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;31-20     |19-15| 14-12  | 11-7| 6-0
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#39;5.png&#39; alt=&#39;I-Format Datapath&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;p&gt;我们使用了一个mux来选择是使用立即数还是rs2中的值，控制逻辑需要设置一个信号Bsel来选择。
+同时，我们需要生成一个32位的立即数，这个过程叫做immediate generation，我们需要根据指令的格式来生成对应的立即数。
+在i-type指令中，我们已经有了12位的立即数，只需要进行符号扩展就行了。
+至于rs2，依然会自动read，但是不选择。
+这里我们才能深刻领会各种指令格式为什么需要对齐，只有对齐寄存器和imm，我们才能使用同一个datapath来decode不同类型的指令。&lt;/p&gt;
+&lt;h3 id=&#34;load-is-also-immediate-type&#34;&gt;Load is also Immediate Type
+&lt;/h3&gt;&lt;p&gt;load指令也是i-type的一种，只不过多了一个memory access的阶段，我们需要在datapath中添加一个memory access的模块来处理load指令。&lt;/p&gt;
+&lt;center&gt;
+    &lt;img src=&#39;6.png&#39; alt=&#39;Load Datapath&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;无非是在将要写会寄存器之前加一个mux选择是用alu的结果还是memory access的结果，都是由控制逻辑的信号来决定的。&lt;/li&gt;
+&lt;li&gt;当然我们还有一些其他的load指令类型，比如lb, lh, lbu, lhu等，他们的datapath也是在load的基础上进行的，需要添加一些gate、mux来处理不同的情况。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;adding-sw-instruction&#34;&gt;adding sw instruction
+&lt;/h3&gt;&lt;p&gt;sw指令是s-type的一种，格式如下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;31-25     | 24-20| 19-15| 14-12  | 11-7     | 6-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;imm[11:5] | rs2  | rs1  | funct3 | imm[4:0] | opcode
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#39;7.png&#39; alt=&#39;Store Datapath&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;由于save指令需要将目标寄存器的值写入内存，所以我们需要将rs2的值连一条线到memory access模块的输入端。&lt;/li&gt;
+&lt;li&gt;同时由于S-type的立即数是分成两部分的，所以我们需要修改immediate generation的逻辑来生成正确的立即数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;8.png&#39; alt=&#39;Immediate Generation&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;这里我们会发现5-10位的立即数都是一样的，直接使用指令的25-30位即可，然后31位的进行符号扩展，至于0-4位的立即数一个来源是指令的20-24位，一个来源是指令的7-11位，我们可以用一个mux来选择。&lt;/li&gt;
+&lt;li&gt;至于sb，sh等其他的store指令我们完全可以复用当前的datapath，当然需要加一些控制来防止写入不应该写入的内存。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;branches&#34;&gt;Branches
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;首先我们要回忆一下branch指令的格式：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;     31-25        | 24-20| 19-15| 14-12  | 11-7             | 6-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;imm[12],imm[10:5] | rs2  | rs1  | funct3 | imm[4:1],imm[11] | opcode
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;之前我们说过由于risc-v32中的指令基本上都是32位4字节的，但是考虑到一些压缩指令的存在（2字节），所以这里我们默认imm的第零位是0，然后多存了一个imm[12]扩大了imm的范围。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;9.png&#39; alt=&#39;Branch Datapath&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;我们将添加一个新的组件Branch Comp,在sr1的选择端添加一个mux（Asel）来选择是用rs1还是pc的值，同时pc的输入端也要添加一个mux来选择是用pc+4还是pc+imm。&lt;/li&gt;
+&lt;li&gt;在Branch Comp中，我们有6种已知的比较方式（beq, bne, blt, bge, bltu, bgeu），最后两个是前者的无符号版本，而前面4个都是可以通过取反得到另一个的，如果我们想得到bne的结果，只需要在control logic中取反即可，bge同理。至于具体如何计算beq和blt的结果，我们可以在alu中添加一个sub来计算rs1-rs2的结果（符号相同的情况下），如果结果为0则beq为真，如果结果小于0则blt为真？这个对于有符号整数来说是可以的，对于无符号整数呢？其实可以搞一个逐位比较器？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;10.png&#39; alt=&#39;Branch immediate generation&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;center&gt;
+    &lt;img src=&#39;11.png&#39; alt=&#39;Branch immediate generation&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;这两个图充分展示了risc-v指令的设计之美，如果我们按照常规的方式（第一张图）来安排imm的位数，那么你会发现这里每一位都需要左移一位，这就导致了虽然我们的B-type和S-type类似，但是每一位的imm都不确定，需要一个mux来选择，这个的复杂度是不可接受的，于是伟大的risc-v设计者顺水推舟的在指令中直接左移了一位（第二个图），仅仅是把imm[11]换到了第0位，这样其他的位都是原封不动的，只有imm[11]需要mux来选择，大大简化了imm的生成逻辑。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;jalr-特殊的跳转&#34;&gt;Jalr 特殊的跳转
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;以jalr指令为例子，指令格式如下： (属于是I-type的一种)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;31-20     | 19-15| 14-12  | 11-7| 6-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;immediate | rs1  | funct3 | rd  | opcode
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;jalr指令的功能是将pc+4的值写入rd寄存器，然后将rs1+imm的值作为新的pc值。&lt;/li&gt;
+&lt;li&gt;由于jalr的指令格式和I-type一样，所以他的imm生成不用担心，所以rs1+imm的计算也可以复用，而将这个计算值传递给pc的线路我们在刚才的branch中国已经设计好了，直接把PCsel控制设置成taken即可，唯一需要添加的就是将这个pc+4的值传递到rd寄存器，我们可以添加一条线从pc+4的输出端到writeback的输入端，同时把writeback的mux设置成3种选择：alu的结果，memory access的结果，pc+4的值。其中2对应pc+4，其实也完全可以用mux级联替代这里的3选1mux。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;12.png&#39; alt=&#39;Jump Datapath&#39; width=&#39;700&#39; /&gt;
+&lt;/center&gt;
+&lt;h3 id=&#34;j-format-for-jump-instruction&#34;&gt;J-Format for Jump Instruction
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;J-type指令的格式如下：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;31        | 30-21       | 20     | 19-12      | 11-7| 6-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;imm[20]   | imm[10:1]   | imm[11]| imm[19:12] | rd  | opcode
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;jal指令干了两件事：1是将pc+4的值写入rd寄存器（这个我们在jalr中已经实现），2是将pc+imm的值作为新的pc值（也在branch中实现了），唯一需要改变的就是的imm的生成逻辑（比I-type复杂一些）。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;adding-u-types&#34;&gt;Adding U-Types
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;U-type指令的格式如下：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;31-12     | 11-7| 6-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;immediate | rd  | opcode
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;lui指令将20位高位立即数加载到目标寄存器中，并将低12位清零。&lt;/li&gt;
+&lt;li&gt;auipc 指令将20位高位立即数加上当前pc的值，并将结果存储到目标寄存器中。&lt;/li&gt;
+&lt;li&gt;所有的硬件组件都已经设计好了，只需要修改Imm Gen的逻辑即可，直接加一个mux来选择高20位绕过符号扩展等一些复杂的判断似乎是最简单的办法了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;summary&#34;&gt;Summary
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;恭喜🎉，通过复杂的设计，我们得到了一个可以执行任何一条risc-v32指令的处理器！&lt;/li&gt;
+&lt;li&gt;但其实我们有一个重要的东西还没有实现，那就是control logic，之前我们都是假设有一个控制逻辑来告诉datapath如何执行指令，但是我们还没有设计这个控制逻辑，下一部分我们将设计这个控制逻辑来完成整个处理器的设计。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
         <title>CS61c_6 — Combinational Logic Blocks</title>
         <link>https://fuquan99666.github.io/p/cs61c_6-combinational-logic-blocks/</link>
         <pubDate>Wed, 18 Feb 2026 15:55:17 +0800</pubDate>
