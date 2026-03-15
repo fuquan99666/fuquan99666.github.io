@@ -7,7 +7,199 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Mon, 09 Mar 2026 19:23:56 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 11 Mar 2026 16:47:32 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_8 — Control logic and lab05</title>
+        <link>https://fuquan99666.github.io/p/cs61c_8-control-logic-and-lab05/</link>
+        <pubDate>Wed, 11 Mar 2026 16:47:32 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_8-control-logic-and-lab05/</guid>
+        <description>&lt;h2 id=&#34;lab05-熟悉logisim&#34;&gt;Lab05: 熟悉logisim
+&lt;/h2&gt;&lt;h3 id=&#34;setup&#34;&gt;setup
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;本次lab我们将使用一个叫做logisim的工具来设计和模拟我们的电路，这个工具十分好用，只需要java -jar logisim-evolution.jar即可使用。&lt;/li&gt;
+&lt;li&gt;鄙人在基于archlinux的niri界面上使用时遇到了一些问题，特此记录一下。&lt;/li&gt;
+&lt;li&gt;故障现象：启动后界面可以正常显示1s，之后会变成白屏，无法操作。&lt;/li&gt;
+&lt;li&gt;起初我以为和之前的一些jar一样是年久失修的问题，于是下载了最新的logisim-evolution,但是问题依旧，于是我开始怀疑是不是平台问题，毕竟niri存在一些小毛病很正常，于是我在windows上跑了一下，正常，说明就是niri的问题。&lt;/li&gt;
+&lt;li&gt;根本原因：java程序默认用一种老窗口管理器(reparenting)（源于古老的x11），但是新的niri使用wayland合成器，要求程序各扫门前雪，所以就导致了这个问题。&lt;/li&gt;
+&lt;li&gt;解决方法：export _JAVA_AWT_WM_NONREPARENTING=1，这个指令要求java的awt窗口使用non-reparenting的方式来管理窗口，这个就符合niri了。&lt;/li&gt;
+&lt;li&gt;说多了都是泪啊😰&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;电路设计&#34;&gt;电路设计
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;这次lab让我们通过一个模拟软件来体验电路设计的乐趣，大大减轻了实际操作的困难，具体内容不加以赘述，just try it，lab设计的很有意思，并且最后提到在第三个project中会继续用到，这让我对cs61c的课程设计更加膜拜，在上完cs61c课程后我将出一篇比较cs61c和csapp的文章，锐评一下😈&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;control-logic&#34;&gt;Control Logic
+&lt;/h2&gt;&lt;h3 id=&#34;control-and-status-registers-csrs&#34;&gt;Control and Status Registers (CSRs)
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;CSRs are separate from the register file (x0-x31).&lt;/li&gt;
+&lt;li&gt;Used for monitoring the status and performance, and they can up to 4096 CSRs.&lt;/li&gt;
+&lt;li&gt;Not in the base ISA , but almost mandatory in every implementation, which is necessary for counters and timers, and communication with peripherals. 本来CSRs是基础ISA的一部分，但是后来由于ISA的模块化，就把它删了，现在属于是extension部分。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;大家经常遇到一个叫flag的东西，通常指的是一位的信号，比如carry flag，zero flag，为什么一位信号我们用flag呢？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;这个是由于人们在使用邮箱的时候，如果有新的邮件就会在邮箱上放一个小旗子，这样邮递员来取邮件的时候就知道有新的邮件，
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;然后他们会降下（清除）flag🤣
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CSRs的常见指令：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;csrrw rd, csr, rs1  # read the value of csr into rd, and write the value of rs1 into csr
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;csrrwi rd, csr, imm # just like csrrw, but change the value of rs1 to an immediate value 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;csrrs rd, csr, rs1  # read the value of csr into rd, and set the bits in csr that are the result of bitwise OR between 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                      rs1 and csr
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;csrrsi rd, csr, imm # just like csrrs, but change the value of rs1 to an immediate value
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;csrrc rd, csr, rs1  # just like csrrs, but change the bitwise OR to bitwise AND NOT , rs1按位取反然后按位与
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;csrrci rd, csr, imm # 。。。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;指令格式：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;31-20 ｜ 19-15 ｜ 14-12 ｜ 11-7 ｜ 6-0
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;imm[11:0] ｜ rs1 ｜ funct3 ｜ rd ｜ opcode（1110011）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;这里的12位imm用来选择哪一个csr，故而我们说有4096个csr。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;当这个rs1的5位作为imm的时候，我们需要将其扩展成32位的，（无符号扩展即可），然后再写入csr中。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pseudoinstructions:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;csrw csr, rs1 = csrrw x0, csr, rs1 # just write rs1 into csr， 可以把一些不常用的信号放到csr中。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;csrrwi x0, csr, uimm = csrrw x0, csr, uimm # just write the immediate value into csr
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;system-instructions&#34;&gt;System Instructions
+&lt;/h3&gt;&lt;center&gt;
+    &lt;img src=&#39;1.png&#39; alt=&#39;System Instructions&#39; /&gt;
+&lt;/center&gt;
+&lt;h3 id=&#34;instruction-timing&#34;&gt;Instruction Timing
+&lt;/h3&gt;&lt;p&gt;通过在脑子中假想一条指令执行过程中control logic所做的事情，我们发现时序是非常重要的，对此我们以add指令为例来分析一下时序：&lt;/p&gt;
+&lt;center&gt;
+    &lt;img src=&#39;2.png&#39; alt=&#39;Instruction Timing&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;之前我们提到过前往内存是很慢的，但是这里的Instruction Fetch是从指令cache中取的，所以和加法器差不多。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Critical path = $t_{clk-q} + \max{t_{Add}+t_{mux},t_{Imem}+t_{Reg}+t_{mux}+t_{ALU}+t_{mux}} + t_{setup}$,由于Control logic的delay很小（在这个公式中直接没标注），所以那一条路线直接忽略，而上式进一步简化为 Critical path = $t_{clk-q} + t_{Imem} + t_{Reg} + t_{mux} + t_{ALU} + t_{mux} + t_{setup}$。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;换一个例子，比如lw指令（5个阶段），Critical path = $t_{clk-q} + \max{t_{Add}+t_{mux},t_{Imem} + t_{imm} + t_{mux} + t_{ALU} + t_{mux} + t_{Dmem} + t_{mux}} + t_{setup}$ = $t_{clk-q}+t_{Imem}+t_{imm}+t_{mux}+t_{ALU}+t_{mux}+t_{Dmem}+t_{mux}+t_{setup}$，可以看到lw指令的critical path比add指令更长,多了一个Dmm的delay。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;下图是更抽象意义上的各个阶段的时序图。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;3.png&#39; alt=&#39;Instruction Timing&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;可以注意到的是不同类型的指令的时序是不同的，有的会经历5阶段，有的只有3或4阶段，这些会影响cpu的频率。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;control-logic-truth-table&#34;&gt;Control Logic Truth Table
+&lt;/h3&gt;&lt;center&gt;
+    &lt;img src=&#39;4.png&#39; alt=&#39;Control Logic Truth Table&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;这个图详细的展示了每条指令的control signal如何控制，非常全面，现在的问题是，我们该如何实现这个呢？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol&gt;
+&lt;li&gt;ROM&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;Read-Only memory,我们只需要提前填充好每一个指令对应的信号word，在使用时我们判断出指令的类型然后选择对应的即可。&lt;/li&gt;
+&lt;li&gt;这种方式很方便，如果有扩展指令或者压缩指令需要添加，我们只需要在ROM中添加对应的信号word即可。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;Combinatorial&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;在现代芯片工艺中，通常直接设计一堆gates，这样更快也更紧凑。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;针对第一种ROM，我们需要判断一个32位指令是哪一种，这个如何做到呢？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;注意到我们的32位指令的某些部分的名字：func3，func7，opcode，这些都是指令的特征位，我们可以通过这些特征位来判断指令的类型。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;center&gt;
+    &lt;img src=&#39;5.png&#39; alt=&#39;Decoding&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;对于opcode的最低两位默认都是11，如果有扩展指令集或者压缩指令集，可能需要考虑，但是对于RV32I来说，可以不考虑，总共需要考虑9位（1+3+5）。&lt;/li&gt;
+&lt;li&gt;除了这个9位指令特征外，我们还有Compare bit，即BrEq和BrLt,一共是11位。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;6.png&#39; alt=&#39;ROM&#39; width=&#39;600&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;这个ROM的输入是11位的判断信息，输出是15位的control singal word，可以计算就算11位全都用的到，那么最多存储量是2048*15=30720位，约等于3.75KB，这个存储量是完全可以接受的。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在真正读取ROM的内容之前，肯定需要有一个decoder来根据指令的11位特征然后选择ROM的地址（one-hot）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;7.png&#39; alt=&#39;ROM&#39; width=&#39;600&#39; /&gt;
+&lt;/center&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-gdscript3&#34; data-lang=&#34;gdscript3&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;对于这个&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;decoder的实现&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，他可以是一个很宽的&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;and门&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，就是&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;11&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;位输入后面连着指令种类数量的一条&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;and路线&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，这样连续的&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;and保证了one&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;hot&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;至于&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ROM&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，我们可以先将&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;one&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;hot与word按位与&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;，然后所有的结果进行或运算，这样就得到了我们需要的&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;control&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;signal&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;word&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;当然这种简单的实现方式必然效率不高。&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;上述的方法会有很多冗余，我们可以有很大的优化空间，比如下图是针对无符号的一个优化，对于branch类，想要判断是BrUn其实很简单，像Inst[14]就不需要判断，BrUn = Inst[13] * Branch(Inst[6] * Inst[5] * &amp;hellip;),如果想要判断具体是Lt还是Eq，在看inst[12]即可，节省了一位。&lt;/li&gt;
+&lt;li&gt;通过这个我们也可以理解直接用combinatorial logic的方式来实现control logic了，针对每一个输出信号位，写出所有成立的输入组合即可，和ROM相比是每一个每一个输出信号复杂了，但是不不需要先判断指令类型了，而ROM是输出都搞好了，但是得先复杂地判断指令类型，互有利弊吧！&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;8.png&#39; alt=&#39;example&#39; width=&#39;600&#39; /&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;一般来说对于某一个指令想要解码，首先是type opcode的5位，然后是func3的3位，最后是func7的1位，对于RV32I , 只需Inst[0]*Inst[1]即可。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;泪目了，我们从高级语言c出发，逐步搞清楚了代码是如何一步步变成机器码在机器上执行的，然后我们从布尔单元出发，逐步设计了一个处理器，硬件和软件相遇了！&lt;/li&gt;
+&lt;li&gt;用伟大的Bora教授的话来说，我们应该和父母朋友打个电话，庆祝这一伟大的时刻，WE MADE CONTACT !&lt;/li&gt;
+&lt;li&gt;当然这肯定不是性能好的处理器，毕竟它有着长长的关键路径，但我们会持续优化的！&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
         <title>中史地_1 — 中国历史地理疆域变迁</title>
         <link>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_1-%E4%B8%AD%E5%9B%BD%E5%8E%86%E5%8F%B2%E5%9C%B0%E7%90%86%E7%96%86%E5%9F%9F%E5%8F%98%E8%BF%81/</link>
         <pubDate>Mon, 09 Mar 2026 19:23:56 +0800</pubDate>
