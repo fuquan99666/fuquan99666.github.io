@@ -7,7 +7,23 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Wed, 11 Mar 2026 16:47:32 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 16 Mar 2026 18:56:47 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>地理</title>
+        <link>https://fuquan99666.github.io/categories/%E5%9C%B0%E7%90%86/</link>
+        <pubDate>Mon, 16 Mar 2026 18:56:47 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/categories/%E5%9C%B0%E7%90%86/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>历史</title>
+        <link>https://fuquan99666.github.io/categories/%E5%8E%86%E5%8F%B2/</link>
+        <pubDate>Mon, 16 Mar 2026 18:56:47 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/categories/%E5%8E%86%E5%8F%B2/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>CS61c</title>
         <link>https://fuquan99666.github.io/categories/cs61c/</link>
         <pubDate>Wed, 11 Mar 2026 16:47:32 +0800</pubDate>
@@ -22,22 +38,6 @@
         
         <guid>https://fuquan99666.github.io/categories/risc-v/</guid>
         <description>&lt;img src="https://fuquan99666.github.io/categories/risc-v/1.png" alt="Featured image of post RISC V" /&gt;</description>
-        </item>
-        <item>
-        <title>地理</title>
-        <link>https://fuquan99666.github.io/categories/%E5%9C%B0%E7%90%86/</link>
-        <pubDate>Mon, 09 Mar 2026 19:23:56 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/categories/%E5%9C%B0%E7%90%86/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>历史</title>
-        <link>https://fuquan99666.github.io/categories/%E5%8E%86%E5%8F%B2/</link>
-        <pubDate>Mon, 09 Mar 2026 19:23:56 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/categories/%E5%8E%86%E5%8F%B2/</guid>
-        <description></description>
         </item>
         <item>
         <title>FPGA</title>
