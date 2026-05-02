@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Generative Model on My Site</title>
+        <link>https://fuquan99666.github.io/categories/generative-model/</link>
+        <description>Recent content in Generative Model on My Site</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <copyright>zz486</copyright>
+        <lastBuildDate>Fri, 01 May 2026 08:29:30 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/generative-model/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>MIT_6.S184_0</title>
+        <link>https://fuquan99666.github.io/p/mit_6.s184_0/</link>
+        <pubDate>Fri, 01 May 2026 08:29:30 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/mit_6.s184_0/</guid>
+        <description>&lt;h3 id=&#34;写在前面的&#34;&gt;写在前面的
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;宗门心法&#34;&gt;宗门心法
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;All of these generative models generate objects by iteratively converting noise into data.&lt;/li&gt;
+&lt;li&gt;至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。&lt;/li&gt;
+&lt;li&gt;当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;a-reminder-on-probability-theory&#34;&gt;A Reminder on Probability Theory
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;均值的定义不仅仅是&lt;/p&gt;
+$$\int x \, p(x) \, dx$$&lt;p&gt;
+可以证明它也是&lt;/p&gt;
+$$
+\mathbb{E}[X] = \arg\min_{z \in \mathbb{R}^d} \int \|x - z\|^2 \, p_X(x) \, dx = \int x \, p_X(x) \, dx
+$$&lt;p&gt;
+二次误差期望的最小参数就是均值。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;对于两个随机变量X和Y，它们的联合概率对其中一个变量积分得到的是另一个变量的边缘概率。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;文档中花了不少篇幅讲述E(X|Y)的定义。本人之前的理解就是Y是条件，那么要先确定条件，外层对y积分，然后在y确定的条件下对X求期望。文档中通过一个二次误差的最优函数来定义：
+&lt;/p&gt;
+$$
+g_* := \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \mathbb{E}\left[\|X - g(Y)\|^2\right]
+= \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \int \|x - g(y)\|^2 \, p_{X,Y}(x,y) \, dx dy
+= \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \int \left[ \int \|x - g(y)\|^2 \, p_{X \mid Y}(x \mid y) \, dx \right] p_Y(y) \, dy
+$$&lt;p&gt;
+对于这个我们可以理解为先遍历Y，对于每一个y，都可以对应唯一的一个值g(y)，可以由上面一阶期望的结论知道内层对x的积分误差如果想要取最小，那么一定有&lt;/p&gt;
+$$
+\mathbb{E}[X \mid Y = y] := g_*(y) = \int x \, p_{X \mid Y}(x \mid y) \, dx
+$$&lt;p&gt;
+由于Y是一个随机变量，每一个y对应一个g(y)，那么g(Y)也是一个随机变量。&lt;/p&gt;
+$$
+\mathbb{E}[X \mid Y] := g_*(Y)
+$$&lt;p&gt;
+请注意这里的E(X|Y)和E(X|Y=y)不是一个东西，后者是前者的一个特殊位置的值，前者则是关于Y的一个函数, 这个函数的意义是：对于每一个可能的 y，它给出一个数值，这个数值是在已知Y=y 的条件下，用二次距离来衡量最接近X的那个数。(唉唉，有点绕就对了😇)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;一个性质：&lt;/p&gt;
+$$
+\mathbb{E}[\mathbb{E}[X \mid Y]] = \mathbb{E}[X]
+$$&lt;p&gt;
+证明如下：
+&lt;/p&gt;
+$$
+\mathbb{E}[\mathbb{E}[X \mid Y]]
+= \int \left[ \int x \, p_{X \mid Y}(x \mid y) \, dx \right] p_Y(y) \, dy
+= \int \int x \, p_{X,Y}(x,y) \, dx \, dy
+= \int x \, p_X(x) \, dx
+= \mathbb{E}[X]
+$$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;lec1&#34;&gt;Lec1
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;第一节课主要讲了生成模型的目标 ( p_init -&amp;gt; p_data ), 以及如何使用ODE和SDE来实现simulate这个过程，简单的理解就是将ODE中的常数项参数表示为$∇\log𝑝(𝑋_𝑡)$此类的关于当前分布在目标分布上的概率(或者score)，从而将轨迹朝着增大data分布概率的方向前进。至于SED中的噪声项，暂时没看出有什么深远的意义，或许是增大选择路径，丰富最终的收敛结果？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;lab0&#34;&gt;Lab0
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;友情提醒，lab中的一些函数没有具体实现，只有一个pass的不用写，它们的作用是函数示范。只有标注了raise NotImplementedError的函数才是需要我们自己实现的。&lt;/li&gt;
+&lt;li&gt;这个lab个人感觉没有难度，基本上都是照着公式填就对了，但是官方的代码提供了非常牛逼的演示效果(包括过程图，视频)，以及几种函数分布供我们自由组合，可以说非常的亲民，做到了用最小的任务量，理解最核心的知识点，展示最生动的效果！&lt;/li&gt;
+&lt;li&gt;核心是理解$∇\log𝑝(𝑋_𝑡)$作为$U_t(X)$的作用即可。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

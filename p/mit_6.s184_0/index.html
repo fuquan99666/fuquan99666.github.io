@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
+<title>MIT_6.S184_0</title>
+
+<link rel='canonical' href='https://fuquan99666.github.io/p/mit_6.s184_0/'>
+
+<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="MIT_6.S184_0">
+<meta property='og:description' content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
+<meta property='og:url' content='https://fuquan99666.github.io/p/mit_6.s184_0/'>
+<meta property='og:site_name' content='My Site'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-05-01T08:29:30&#43;08:00'/><meta property='article:modified_time' content='2026-05-01T08:29:30&#43;08:00'/>
+<meta name="twitter:title" content="MIT_6.S184_0">
+<meta name="twitter:description" content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_e94f98a3296399de.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">My Site</a></h1>
+            <h2 class="site-description">欢迎来到我的网站！</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://github.com/fuquan99666'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/%E5%8F%8B%E9%93%BE/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>友链</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#写在前面的">写在前面的</a></li>
+        <li><a href="#宗门心法">宗门心法</a></li>
+        <li><a href="#a-reminder-on-probability-theory">A Reminder on Probability Theory</a></li>
+        <li><a href="#lec1">Lec1</a></li>
+        <li><a href="#lab0">Lab0</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/diffusion/" >
+                Diffusion
+            </a>
+        
+            <a href="/categories/flow-matching/" >
+                Flow Matching
+            </a>
+        
+            <a href="/categories/generative-model/" >
+                Generative Model
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/mit_6.s184_0/">MIT_6.S184_0</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2026-05-01T08:29:30&#43;08:00'>2026-05-01</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 4 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h3 id="写在前面的">写在前面的
+</h3><ul>
+<li>在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！</li>
+</ul>
+<h3 id="宗门心法">宗门心法
+</h3><ul>
+<li>All of these generative models generate objects by iteratively converting noise into data.</li>
+<li>至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。</li>
+<li>当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！</li>
+</ul>
+<h3 id="a-reminder-on-probability-theory">A Reminder on Probability Theory
+</h3><ul>
+<li>
+<p>文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：</p>
+</li>
+<li>
+<p>均值的定义不仅仅是</p>
+$$\int x \, p(x) \, dx$$<p>
+可以证明它也是</p>
+$$
+\mathbb{E}[X] = \arg\min_{z \in \mathbb{R}^d} \int \|x - z\|^2 \, p_X(x) \, dx = \int x \, p_X(x) \, dx
+$$<p>
+二次误差期望的最小参数就是均值。</p>
+</li>
+<li>
+<p>对于两个随机变量X和Y，它们的联合概率对其中一个变量积分得到的是另一个变量的边缘概率。</p>
+</li>
+<li>
+<p>文档中花了不少篇幅讲述E(X|Y)的定义。本人之前的理解就是Y是条件，那么要先确定条件，外层对y积分，然后在y确定的条件下对X求期望。文档中通过一个二次误差的最优函数来定义：
+</p>
+$$
+g_* := \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \mathbb{E}\left[\|X - g(Y)\|^2\right]
+= \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \int \|x - g(y)\|^2 \, p_{X,Y}(x,y) \, dx dy
+= \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \int \left[ \int \|x - g(y)\|^2 \, p_{X \mid Y}(x \mid y) \, dx \right] p_Y(y) \, dy
+$$<p>
+对于这个我们可以理解为先遍历Y，对于每一个y，都可以对应唯一的一个值g(y)，可以由上面一阶期望的结论知道内层对x的积分误差如果想要取最小，那么一定有</p>
+$$
+\mathbb{E}[X \mid Y = y] := g_*(y) = \int x \, p_{X \mid Y}(x \mid y) \, dx
+$$<p>
+由于Y是一个随机变量，每一个y对应一个g(y)，那么g(Y)也是一个随机变量。</p>
+$$
+\mathbb{E}[X \mid Y] := g_*(Y)
+$$<p>
+请注意这里的E(X|Y)和E(X|Y=y)不是一个东西，后者是前者的一个特殊位置的值，前者则是关于Y的一个函数, 这个函数的意义是：对于每一个可能的 y，它给出一个数值，这个数值是在已知Y=y 的条件下，用二次距离来衡量最接近X的那个数。(唉唉，有点绕就对了😇)</p>
+</li>
+<li>
+<p>一个性质：</p>
+$$
+\mathbb{E}[\mathbb{E}[X \mid Y]] = \mathbb{E}[X]
+$$<p>
+证明如下：
+</p>
+$$
+\mathbb{E}[\mathbb{E}[X \mid Y]]
+= \int \left[ \int x \, p_{X \mid Y}(x \mid y) \, dx \right] p_Y(y) \, dy
+= \int \int x \, p_{X,Y}(x,y) \, dx \, dy
+= \int x \, p_X(x) \, dx
+= \mathbb{E}[X]
+$$</li>
+</ul>
+<h3 id="lec1">Lec1
+</h3><ul>
+<li>第一节课主要讲了生成模型的目标 ( p_init -&gt; p_data ), 以及如何使用ODE和SDE来实现simulate这个过程，简单的理解就是将ODE中的常数项参数表示为$∇\log𝑝(𝑋_𝑡)$此类的关于当前分布在目标分布上的概率(或者score)，从而将轨迹朝着增大data分布概率的方向前进。至于SED中的噪声项，暂时没看出有什么深远的意义，或许是增大选择路径，丰富最终的收敛结果？</li>
+</ul>
+<h3 id="lab0">Lab0
+</h3><ul>
+<li>友情提醒，lab中的一些函数没有具体实现，只有一个pass的不用写，它们的作用是函数示范。只有标注了raise NotImplementedError的函数才是需要我们自己实现的。</li>
+<li>这个lab个人感觉没有难度，基本上都是照着公式填就对了，但是官方的代码提供了非常牛逼的演示效果(包括过程图，视频)，以及几种函数分布供我们自由组合，可以说非常的亲民，做到了用最小的任务量，理解最核心的知识点，展示最生动的效果！</li>
+<li>核心是理解$∇\log𝑝(𝑋_𝑡)$作为$U_t(X)$的作用即可。</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        const elementsToRender = [".main-article", ".widget--toc"];
+
+        elementsToRender.forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) {
+                renderMathInElement(element, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false },
+                        { left: "\\[", right: "\\]", display: true }
+                    ],
+                    ignoredClasses: ["gist"]
+                });
+            }
+        });
+    });
+</script>
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <script
+    src="https://giscus.app/client.js"
+    data-repo="fuquan99666/fuquan99666.github.io"
+    data-repo-id="R_kgDOQuvzsw"
+    data-category="Announcements"
+    data-category-id="DIC_kwDOQuvzs84C0tAQ"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="light"
+    data-lang="en"
+    data-loading=""
+    crossorigin="anonymous"
+    async
+></script>
+<script>
+    function setGiscusTheme(theme) {
+        let giscus = document.querySelector("iframe.giscus-frame");
+        if (giscus) {
+            giscus.contentWindow.postMessage(
+                {
+                    giscus: {
+                        setConfig: {
+                            theme: theme,
+                        },
+                    },
+                },
+                "https://giscus.app"
+            );
+        }
+    }
+
+    (function () {
+        addEventListener("message", (e) => {
+            if (event.origin !== "https://giscus.app") return;
+            handler();
+        });
+        window.addEventListener("onColorSchemeChange", handler);
+
+        function handler() {
+            if (document.documentElement.dataset.scheme === "light") {
+                setGiscusTheme('light');
+            } else {
+                setGiscusTheme('dark');
+            }
+        }
+    })();
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2025 - 
+        
+        2026 zz486
+    </section>
+    
+    <section class="powerby">
+        
+            啊啊啊啊啊啊啊 <br/>
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.33.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
