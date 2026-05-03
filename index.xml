@@ -454,6 +454,9 @@ $$&lt;/li&gt;
 &lt;li&gt;LRU: Least Recently Used, 替换掉最近最久未使用的block。&lt;/li&gt;
 &lt;li&gt;FIFO: First In First Out, 替换掉最早进入cache的block。&lt;/li&gt;
 &lt;li&gt;Random: 随机替换一个block。&lt;/li&gt;
+&lt;li&gt;课程中提供的那个模拟缓存网站似乎打不开了，我搜到了同一个作者的另一个&lt;a class=&#34;link&#34; href=&#34;https://www.ecs.umass.edu/ece/koren/architecture/CacheTr/cacheSim.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;网站&lt;/a&gt;,
+可以设置block数量，set数量，并随机生成内存访问顺序来实时观测miss rate，hit rate。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
