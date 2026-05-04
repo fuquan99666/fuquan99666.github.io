@@ -7,7 +7,148 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Fri, 01 May 2026 08:29:30 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 04 May 2026 10:42:29 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>MIT_6.S184_1 — Flow Matching</title>
+        <link>https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/</link>
+        <pubDate>Mon, 04 May 2026 10:42:29 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/</guid>
+        <description>&lt;h3 id=&#34;lec2&#34;&gt;Lec2
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;一个值得思考的问题，在上一讲中我们通过$∇\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。
+我们将用训练神经网络的方式学习每一步的$U_t(x)$.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;第二节课主要讲了Flow Matching的原理，具体包括了conditional path 和 marginal path，以及它们对应的loss，最终的Flow Matching训练算法。本节课对应的视频部分地方可能讲的不是很清楚，所以一些数学推导细节可能需要自己结合文档来进一步理解。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;conditional-and-marginal-probability-path&#34;&gt;Conditional and Marginal Probability Path
+&lt;/h3&gt;&lt;h4 id=&#34;conditional-path的定义&#34;&gt;Conditional path的定义：
+&lt;/h4&gt;$$p_0(\cdot|z) = p_{\text{init}},\quad p_1(\cdot|z) = \delta_z \quad \text{for all } z\in\mathbb{R}^d$$&lt;ul&gt;
+&lt;li&gt;这里的$\delta_z$是一个Dirac delta distribution，表示只在z这个点上有概率，是一个确定性的分布。简单理解就是让一个随机初始化的分布经过一系列变化最终收缩到一个确定性的z上。当然这里的z你不要以为真的是一个点了，它是从一个$p_{data}$中sample得到的，如果$p_{data}$是一个点集，那么z就是一个点；如果$p_{data}$是一个图像集合，那么z就是一张图片。&lt;/li&gt;
+&lt;li&gt;Conditional path 就是从0-1过程中每一个t时，$p_{init}$和$p_{\delta_z}$之间的一个插值分布，一种过渡状态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;one-example-gaussian-conditional-probability-path&#34;&gt;One example: Gaussian Conditional Probability Path
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;我们希望得到一个从标准高斯分布到一个确定性的z的conditional path，即&lt;/li&gt;
+&lt;li&gt;
+$$p_t(\cdot|z) = \mathcal{N}(\alpha_t z,\; \beta_t^2 I_d)$$或者写成
+
+$$z \sim p_{\text{data}},\; \epsilon \sim p_{\text{init}} = \mathcal{N}(0, I_d) \;\Rightarrow\; x = \alpha_t z + \beta_t \epsilon \sim p_t$$&lt;/li&gt;
+&lt;li&gt;其中t=0时，$\alpha=0, \beta=1$, t=1时，$\alpha=1, \beta=0$, 所以 t=0时， $p_0(\cdot|z) = \mathcal{N}(0, I_d)$, t=1时，$p_1(\cdot|z) = \mathcal{N}(z, 0) = \delta_z$。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;marginal-probability-path&#34;&gt;marginal probability path
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;在知道了conditional path大概是个什么东西后，我们可以定义marginal path了，
+
+$$z \sim p_{\text{data}},\; x \sim p_t(\cdot|z) \;\Rightarrow\; x \sim p_t $$
+对于dataset中的每一个z，我们都能得到一个$p_t(\cdot|z)$, marginal path就是按照z的概率对它们的conditional path进行积分加权。
+
+$$ p_t(x) = \int p_t(x|z) \, p_{\text{data}}(z) \, dz $$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;conditional-and-marginal-vector-fields-&#34;&gt;Conditional and Marginal Vector Fields ‼️
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;对于conditional path, 我们按照定义有：
+&lt;/p&gt;
+$$\frac{d X_t}{d t} = u^{\text{target}}_t (X_t | z)$$&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;以之前提到的 Gaussian conditional path 为例，我们来求解一下它的 vector field。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;已知：
+&lt;/p&gt;
+\[
+x = \alpha_t z + \beta_t \epsilon
+\]&lt;p&gt;直接求导得到：
+&lt;/p&gt;
+\[
+\frac{d x}{d t} = \dot{\alpha_t} z + \dot{\beta_t} \epsilon
+\]&lt;p&gt;
+其中 \(\dot{\alpha_t} = \frac{d \alpha_t}{d t}, \dot{\beta_t} = \frac{d \beta_t}{d t}\)。&lt;/p&gt;
+&lt;p&gt;由于
+&lt;/p&gt;
+\[
+\epsilon = \frac{x - \alpha_t z}{\beta_t}
+\]&lt;p&gt;
+所以
+&lt;/p&gt;
+\[
+\frac{d x}{d t} = \dot{\alpha_t} z + \dot{\beta_t} \frac{x - \alpha_t z}{\beta_t}
+= \dot{\alpha_t} z + \frac{\dot{\beta_t}}{\beta_t} x - \frac{\dot{\beta_t}}{\beta_t} \alpha_t z
+= \frac{\dot{\beta_t}}{\beta_t} x + \left( \dot{\alpha_t} - \frac{\dot{\beta_t}}{\beta_t} \alpha_t \right) z
+\]&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;对于marginal path,
+&lt;/p&gt;
+$$u^{\text{target}}_t (x) = \int u^{\text{target}}_t (x|z) \, \frac{p_t(x|z) \, p_{\text{data}}(z)}{p_t(x)} \, dz$$&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;其中
+&lt;/p&gt;
+$$\frac{p_t(x|z) \, p_{\text{data}}(z)}{p_t(x)}$$&lt;p&gt;
+is &amp;ldquo;posterior over data points z given noisy data x&amp;rdquo;
+where pdata(z) is the prior distribution.
+The marginal vector field then is simply a average: for every possible data point z it takes the velocity ut(x|z) - i.e. the direction that would bring us to z - and then weighs this velocity by how much we believe that x comes from z. Averaging over all data points, we obtain the marginal vector field.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;对于conditional vector field，我们毫无疑问直接对X求导得到u。但是对于marginal vector field,我们这样定义的u，你是否怀疑过它的正确性？我们在上一个模块marginal path中定义了:
+&lt;/p&gt;
+$$ p_t(x) = \int p_t(x|z) \, p_{\text{data}}(z) \, dz $$&lt;p&gt;
+我认为这个定义是合理的，所以我们需要证明u的定义和它是自洽的，怎么证明呢？
+唉哎，只要我们能证明下面这个式子，那么u的定义就是合理的。
+&lt;/p&gt;
+$$ \partial_t p_t(x) = -\operatorname{div}\left(p_t \, u_t^{\text{target}}\right)(x), \quad \forall x \in \mathbb{R}^d,\; 0 \le t \le 1 $$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div style=&#34;border: 2px solid #ccc; padding: 10px; border-radius: 5px; margin: 10px 0;&#34;&gt;
+&lt;p&gt;The left-hand side $\partial_t p_t(x)$ describes how much the probability $p_t(x)$ at $x$ changes over time. Intuitively, the change should correspond to the net inflow of probability mass. For a flow model, a particle $X_t$ follows along the vector field $u^{\text{target}}_t$. As you might recall from physics, the divergence measures a sort of net outflow from the vector field. Therefore, the negative divergence measures the net inflow. Scaling this by the total probability mass currently residing at $x$, we get that the net $-\operatorname{div}(p_t \cdot u_t)$ measures the total inflow of probability mass. Since probability mass is conserved (always integrates to 1), the left-hand and right-hand side of the equation should be the same!&lt;/p&gt;
+&lt;/div&gt;
+上面的note原文解释了这个式子的原理，就是概率质量守恒，只要我们的u能让概率质量守恒，那么说明它作为vector field就是正确的。
+证明如下：
+$$
+\begin{aligned}
+\partial_t p_t(x) 
+&amp;= \partial_t \int p_t(x|z) \, p_{\text{data}}(z) \, dz \quad &amp;\text{(i)} \\
+&amp;= \int \partial_t p_t(x|z) \, p_{\text{data}}(z) \, dz \quad &amp;\text{(ii)} \\
+&amp;= -\int \operatorname{div}\left( p_t(\cdot|z) \, u_t^{\text{target}}(\cdot|z) \right)(x) \, p_{\text{data}}(z) \, dz \quad &amp;\text{(iii)} \\
+&amp;= -\operatorname{div} \int p_t(x|z) \, u_t^{\text{target}}(x|z) \, p_{\text{data}}(z) \, dz \quad &amp;\text{(iv)} \\
+&amp;= -\operatorname{div} \left( p_t(x) \int u_t^{\text{target}}(x|z) \, \frac{p_t(x|z) \, p_{\text{data}}(z)}{p_t(x)} \, dz \right) \quad &amp;\text{(v)} \\
+&amp;= -\operatorname{div} \left( p_t \, u_t^{\text{target}} \right)(x) \quad &amp;\text{(vi)}
+\end{aligned} $$&lt;p&gt;
+这里面由于对x，z，t的微分和积分变量都是独立的，所以可以交换顺序，同时前后各引入了$p_t(x)$来凑出我们定义的u的形式，最终得到了我们想要的结果。&lt;/p&gt;
+&lt;h3 id=&#34;learning-the-marginal-vector-field&#34;&gt;Learning the Marginal Vector Field
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;上一部分的理解我认为是本次课程最硬核的部分，现在我们在定义了vector field之后，接下来我们就可以用神经网络来学习这个vector field了，想要训练神经网络，首先要定义损失函数。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;flow-matching-loss&#34;&gt;flow matching loss
+&lt;/h4&gt;$$
+\mathcal{L}_{\text{FM}}(\theta) = \mathbb{E}_{t \sim \text{Unif}, \, x \sim p_t} \left[ \left\| u^\theta_t(x) - u^{\text{target}}_t(x) \right\|^2 \right]
+$$&lt;p&gt;
+这个看似很合理，但是有一个巨大的问题：我们需要计算$u^{\text{target}}_t(x)$，而这个是一个关于z的积分，而z所在的dataset有可能非常大，甚至是无穷的，无法计算！&lt;/p&gt;
+&lt;h4 id=&#34;conditional-flow-matching-loss&#34;&gt;conditional flow matching loss
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;由于上面的loss无法计算，所以我们引入了一个conditional flow matching loss，来代替上面的loss：
+
+$$
+\mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t \sim \text{Unif}, \, z \sim p_{\text{data}}, \, x \sim p_t(\cdot|z)} \left[ \left\| u^\theta_t(x) - u^{\text{target}}_t(x|z) \right\|^2 \right]
+$$&lt;/li&gt;
+&lt;li&gt;唉哎，不对啊，我们不是要让$u^\theta_t(x)$去逼近那个marginal vector field吗，用这conditional vector field来训练，难道没有问题吗？可以证明：
+
+$$
+\mathcal{L}_{\text{FM}}(\theta) = \mathcal{L}_{\text{CFM}}(\theta) + C $$其中C是一个和$\theta$无关的常数，即
+
+$$ \nabla_\theta \mathcal{L}_{\text{FM}}(\theta) = \nabla_\theta \mathcal{L}_{\text{CFM}}(\theta) $$
+这里的证明思路主要是先用$|a - b|^2 = |a|^2 - 2a^T b + |b|^2$将loss展开，然后第三项明显是与$\theta$无关的C1，第二项要经过一系列神奇的妙妙变换直接和CFM的第二项相等了🤣，配凑一下得证。具体证明见&lt;a class=&#34;link&#34; href=&#34;https://diffusion.csail.mit.edu/2026/docs/lecture_notes.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Note&lt;/a&gt;(实在肝不动了，还是看note轻松)。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;训练算法&#34;&gt;训练算法
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;这部分比较简单，不写了。&lt;/li&gt;
+&lt;li&gt;结合note中gaussian conditional path的例子理解即可。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
         <title>MIT_6.S184_0</title>
         <link>https://fuquan99666.github.io/p/mit_6.s184_0/</link>
         <pubDate>Fri, 01 May 2026 08:29:30 +0800</pubDate>

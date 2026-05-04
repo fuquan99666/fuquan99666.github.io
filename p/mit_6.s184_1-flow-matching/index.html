@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
-<title>MIT_6.S184_0</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Lec2 一个值得思考的问题，在上一讲中我们通过$∇\\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。 我们将用训练神经网络的方式学习每一步的$U_t(x)$.\n">
+<title>MIT_6.S184_1 — Flow Matching</title>
 
-<link rel='canonical' href='https://fuquan99666.github.io/p/mit_6.s184_0/'>
+<link rel='canonical' href='https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/'>
 
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="MIT_6.S184_0">
-<meta property='og:description' content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/mit_6.s184_0/'>
+<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="MIT_6.S184_1 — Flow Matching">
+<meta property='og:description' content="Lec2 一个值得思考的问题，在上一讲中我们通过$∇\\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。 我们将用训练神经网络的方式学习每一步的$U_t(x)$.\n">
+<meta property='og:url' content='https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/'>
 <meta property='og:site_name' content='My Site'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-05-01T08:29:30&#43;08:00'/><meta property='article:modified_time' content='2026-05-01T08:29:30&#43;08:00'/>
-<meta name="twitter:title" content="MIT_6.S184_0">
-<meta name="twitter:description" content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-05-04T10:42:29&#43;08:00'/><meta property='article:modified_time' content='2026-05-04T10:42:29&#43;08:00'/>
+<meta name="twitter:title" content="MIT_6.S184_1 — Flow Matching">
+<meta name="twitter:description" content="Lec2 一个值得思考的问题，在上一讲中我们通过$∇\\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。 我们将用训练神经网络的方式学习每一步的$U_t(x)$.\n">
     <link rel="shortcut icon" href="/favicon.ico" />
 
     </head>
@@ -249,11 +249,22 @@
   <ol>
     <li>
       <ol>
-        <li><a href="#写在前面的">写在前面的</a></li>
-        <li><a href="#宗门心法">宗门心法</a></li>
-        <li><a href="#a-reminder-on-probability-theory">A Reminder on Probability Theory</a></li>
-        <li><a href="#lec1">Lec1</a></li>
-        <li><a href="#lab0">Lab0</a></li>
+        <li><a href="#lec2">Lec2</a></li>
+        <li><a href="#conditional-and-marginal-probability-path">Conditional and Marginal Probability Path</a>
+          <ol>
+            <li><a href="#conditional-path的定义">Conditional path的定义：</a></li>
+            <li><a href="#one-example-gaussian-conditional-probability-path">One example: Gaussian Conditional Probability Path</a></li>
+            <li><a href="#marginal-probability-path">marginal probability path</a></li>
+          </ol>
+        </li>
+        <li><a href="#conditional-and-marginal-vector-fields-">Conditional and Marginal Vector Fields ‼️</a></li>
+        <li><a href="#learning-the-marginal-vector-field">Learning the Marginal Vector Field</a>
+          <ol>
+            <li><a href="#flow-matching-loss">flow matching loss</a></li>
+            <li><a href="#conditional-flow-matching-loss">conditional flow matching loss</a></li>
+            <li><a href="#训练算法">训练算法</a></li>
+          </ol>
+        </li>
       </ol>
     </li>
   </ol>
@@ -291,7 +302,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/mit_6.s184_0/">MIT_6.S184_0</a>
+            <a href="/p/mit_6.s184_1-flow-matching/">MIT_6.S184_1 — Flow Matching</a>
         </h2>
     
         
@@ -313,7 +324,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published" datetime='2026-05-01T08:29:30&#43;08:00'>2026-05-01</time>
+                <time class="article-time--published" datetime='2026-05-04T10:42:29&#43;08:00'>2026-05-04</time>
             </div>
         
 
@@ -328,7 +339,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 4 分钟
+                    阅读时长: 5 分钟
                 </time>
             </div>
         
@@ -343,75 +354,138 @@
     <section class="article-content">
     
     
-    <h3 id="写在前面的">写在前面的
+    <h3 id="lec2">Lec2
 </h3><ul>
-<li>在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！</li>
+<li>
+<p>一个值得思考的问题，在上一讲中我们通过$∇\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。
+我们将用训练神经网络的方式学习每一步的$U_t(x)$.</p>
+</li>
+<li>
+<p>第二节课主要讲了Flow Matching的原理，具体包括了conditional path 和 marginal path，以及它们对应的loss，最终的Flow Matching训练算法。本节课对应的视频部分地方可能讲的不是很清楚，所以一些数学推导细节可能需要自己结合文档来进一步理解。</p>
+</li>
 </ul>
-<h3 id="宗门心法">宗门心法
-</h3><ul>
-<li>All of these generative models generate objects by iteratively converting noise into data.</li>
-<li>至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。</li>
-<li>当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！</li>
+<h3 id="conditional-and-marginal-probability-path">Conditional and Marginal Probability Path
+</h3><h4 id="conditional-path的定义">Conditional path的定义：
+</h4>$$p_0(\cdot|z) = p_{\text{init}},\quad p_1(\cdot|z) = \delta_z \quad \text{for all } z\in\mathbb{R}^d$$<ul>
+<li>这里的$\delta_z$是一个Dirac delta distribution，表示只在z这个点上有概率，是一个确定性的分布。简单理解就是让一个随机初始化的分布经过一系列变化最终收缩到一个确定性的z上。当然这里的z你不要以为真的是一个点了，它是从一个$p_{data}$中sample得到的，如果$p_{data}$是一个点集，那么z就是一个点；如果$p_{data}$是一个图像集合，那么z就是一张图片。</li>
+<li>Conditional path 就是从0-1过程中每一个t时，$p_{init}$和$p_{\delta_z}$之间的一个插值分布，一种过渡状态。</li>
 </ul>
-<h3 id="a-reminder-on-probability-theory">A Reminder on Probability Theory
+<h4 id="one-example-gaussian-conditional-probability-path">One example: Gaussian Conditional Probability Path
+</h4><ul>
+<li>我们希望得到一个从标准高斯分布到一个确定性的z的conditional path，即</li>
+<li>
+$$p_t(\cdot|z) = \mathcal{N}(\alpha_t z,\; \beta_t^2 I_d)$$或者写成
+
+$$z \sim p_{\text{data}},\; \epsilon \sim p_{\text{init}} = \mathcal{N}(0, I_d) \;\Rightarrow\; x = \alpha_t z + \beta_t \epsilon \sim p_t$$</li>
+<li>其中t=0时，$\alpha=0, \beta=1$, t=1时，$\alpha=1, \beta=0$, 所以 t=0时， $p_0(\cdot|z) = \mathcal{N}(0, I_d)$, t=1时，$p_1(\cdot|z) = \mathcal{N}(z, 0) = \delta_z$。</li>
+</ul>
+<h4 id="marginal-probability-path">marginal probability path
+</h4><ul>
+<li>在知道了conditional path大概是个什么东西后，我们可以定义marginal path了，
+
+$$z \sim p_{\text{data}},\; x \sim p_t(\cdot|z) \;\Rightarrow\; x \sim p_t $$
+对于dataset中的每一个z，我们都能得到一个$p_t(\cdot|z)$, marginal path就是按照z的概率对它们的conditional path进行积分加权。
+
+$$ p_t(x) = \int p_t(x|z) \, p_{\text{data}}(z) \, dz $$</li>
+</ul>
+<h3 id="conditional-and-marginal-vector-fields-">Conditional and Marginal Vector Fields ‼️
 </h3><ul>
 <li>
-<p>文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：</p>
-</li>
-<li>
-<p>均值的定义不仅仅是</p>
-$$\int x \, p(x) \, dx$$<p>
-可以证明它也是</p>
-$$
-\mathbb{E}[X] = \arg\min_{z \in \mathbb{R}^d} \int \|x - z\|^2 \, p_X(x) \, dx = \int x \, p_X(x) \, dx
-$$<p>
-二次误差期望的最小参数就是均值。</p>
-</li>
-<li>
-<p>对于两个随机变量X和Y，它们的联合概率对其中一个变量积分得到的是另一个变量的边缘概率。</p>
-</li>
-<li>
-<p>文档中花了不少篇幅讲述E(X|Y)的定义。本人之前的理解就是Y是条件，那么要先确定条件，外层对y积分，然后在y确定的条件下对X求期望。文档中通过一个二次误差的最优函数来定义：
+<p>对于conditional path, 我们按照定义有：
 </p>
-$$
-g_* := \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \mathbb{E}\left[\|X - g(Y)\|^2\right]
-= \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \int \|x - g(y)\|^2 \, p_{X,Y}(x,y) \, dx dy
-= \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \int \left[ \int \|x - g(y)\|^2 \, p_{X \mid Y}(x \mid y) \, dx \right] p_Y(y) \, dy
-$$<p>
-对于这个我们可以理解为先遍历Y，对于每一个y，都可以对应唯一的一个值g(y)，可以由上面一阶期望的结论知道内层对x的积分误差如果想要取最小，那么一定有</p>
-$$
-\mathbb{E}[X \mid Y = y] := g_*(y) = \int x \, p_{X \mid Y}(x \mid y) \, dx
-$$<p>
-由于Y是一个随机变量，每一个y对应一个g(y)，那么g(Y)也是一个随机变量。</p>
-$$
-\mathbb{E}[X \mid Y] := g_*(Y)
-$$<p>
-请注意这里的E(X|Y)和E(X|Y=y)不是一个东西，后者是前者的一个特殊位置的值，前者则是关于Y的一个函数, 这个函数的意义是：对于每一个可能的 y，它给出一个数值，这个数值是在已知Y=y 的条件下，用二次距离来衡量最接近X的那个数。(唉唉，有点绕就对了😇)</p>
+$$\frac{d X_t}{d t} = u^{\text{target}}_t (X_t | z)$$</li>
+<li>
+<p>以之前提到的 Gaussian conditional path 为例，我们来求解一下它的 vector field。</p>
+</li>
+</ul>
+<p>已知：
+</p>
+\[
+x = \alpha_t z + \beta_t \epsilon
+\]<p>直接求导得到：
+</p>
+\[
+\frac{d x}{d t} = \dot{\alpha_t} z + \dot{\beta_t} \epsilon
+\]<p>
+其中 \(\dot{\alpha_t} = \frac{d \alpha_t}{d t}, \dot{\beta_t} = \frac{d \beta_t}{d t}\)。</p>
+<p>由于
+</p>
+\[
+\epsilon = \frac{x - \alpha_t z}{\beta_t}
+\]<p>
+所以
+</p>
+\[
+\frac{d x}{d t} = \dot{\alpha_t} z + \dot{\beta_t} \frac{x - \alpha_t z}{\beta_t}
+= \dot{\alpha_t} z + \frac{\dot{\beta_t}}{\beta_t} x - \frac{\dot{\beta_t}}{\beta_t} \alpha_t z
+= \frac{\dot{\beta_t}}{\beta_t} x + \left( \dot{\alpha_t} - \frac{\dot{\beta_t}}{\beta_t} \alpha_t \right) z
+\]<ul>
+<li>
+<p>对于marginal path,
+</p>
+$$u^{\text{target}}_t (x) = \int u^{\text{target}}_t (x|z) \, \frac{p_t(x|z) \, p_{\text{data}}(z)}{p_t(x)} \, dz$$</li>
+<li>
+<p>其中
+</p>
+$$\frac{p_t(x|z) \, p_{\text{data}}(z)}{p_t(x)}$$<p>
+is &ldquo;posterior over data points z given noisy data x&rdquo;
+where pdata(z) is the prior distribution.
+The marginal vector field then is simply a average: for every possible data point z it takes the velocity ut(x|z) - i.e. the direction that would bring us to z - and then weighs this velocity by how much we believe that x comes from z. Averaging over all data points, we obtain the marginal vector field.</p>
 </li>
 <li>
-<p>一个性质：</p>
-$$
-\mathbb{E}[\mathbb{E}[X \mid Y]] = \mathbb{E}[X]
-$$<p>
+<p>对于conditional vector field，我们毫无疑问直接对X求导得到u。但是对于marginal vector field,我们这样定义的u，你是否怀疑过它的正确性？我们在上一个模块marginal path中定义了:
+</p>
+$$ p_t(x) = \int p_t(x|z) \, p_{\text{data}}(z) \, dz $$<p>
+我认为这个定义是合理的，所以我们需要证明u的定义和它是自洽的，怎么证明呢？
+唉哎，只要我们能证明下面这个式子，那么u的定义就是合理的。
+</p>
+$$ \partial_t p_t(x) = -\operatorname{div}\left(p_t \, u_t^{\text{target}}\right)(x), \quad \forall x \in \mathbb{R}^d,\; 0 \le t \le 1 $$</li>
+</ul>
+<div style="border: 2px solid #ccc; padding: 10px; border-radius: 5px; margin: 10px 0;">
+<p>The left-hand side $\partial_t p_t(x)$ describes how much the probability $p_t(x)$ at $x$ changes over time. Intuitively, the change should correspond to the net inflow of probability mass. For a flow model, a particle $X_t$ follows along the vector field $u^{\text{target}}_t$. As you might recall from physics, the divergence measures a sort of net outflow from the vector field. Therefore, the negative divergence measures the net inflow. Scaling this by the total probability mass currently residing at $x$, we get that the net $-\operatorname{div}(p_t \cdot u_t)$ measures the total inflow of probability mass. Since probability mass is conserved (always integrates to 1), the left-hand and right-hand side of the equation should be the same!</p>
+</div>
+上面的note原文解释了这个式子的原理，就是概率质量守恒，只要我们的u能让概率质量守恒，那么说明它作为vector field就是正确的。
 证明如下：
-</p>
 $$
-\mathbb{E}[\mathbb{E}[X \mid Y]]
-= \int \left[ \int x \, p_{X \mid Y}(x \mid y) \, dx \right] p_Y(y) \, dy
-= \int \int x \, p_{X,Y}(x,y) \, dx \, dy
-= \int x \, p_X(x) \, dx
-= \mathbb{E}[X]
+\begin{aligned}
+\partial_t p_t(x) 
+&= \partial_t \int p_t(x|z) \, p_{\text{data}}(z) \, dz \quad &\text{(i)} \\
+&= \int \partial_t p_t(x|z) \, p_{\text{data}}(z) \, dz \quad &\text{(ii)} \\
+&= -\int \operatorname{div}\left( p_t(\cdot|z) \, u_t^{\text{target}}(\cdot|z) \right)(x) \, p_{\text{data}}(z) \, dz \quad &\text{(iii)} \\
+&= -\operatorname{div} \int p_t(x|z) \, u_t^{\text{target}}(x|z) \, p_{\text{data}}(z) \, dz \quad &\text{(iv)} \\
+&= -\operatorname{div} \left( p_t(x) \int u_t^{\text{target}}(x|z) \, \frac{p_t(x|z) \, p_{\text{data}}(z)}{p_t(x)} \, dz \right) \quad &\text{(v)} \\
+&= -\operatorname{div} \left( p_t \, u_t^{\text{target}} \right)(x) \quad &\text{(vi)}
+\end{aligned} $$<p>
+这里面由于对x，z，t的微分和积分变量都是独立的，所以可以交换顺序，同时前后各引入了$p_t(x)$来凑出我们定义的u的形式，最终得到了我们想要的结果。</p>
+<h3 id="learning-the-marginal-vector-field">Learning the Marginal Vector Field
+</h3><ul>
+<li>上一部分的理解我认为是本次课程最硬核的部分，现在我们在定义了vector field之后，接下来我们就可以用神经网络来学习这个vector field了，想要训练神经网络，首先要定义损失函数。</li>
+</ul>
+<h4 id="flow-matching-loss">flow matching loss
+</h4>$$
+\mathcal{L}_{\text{FM}}(\theta) = \mathbb{E}_{t \sim \text{Unif}, \, x \sim p_t} \left[ \left\| u^\theta_t(x) - u^{\text{target}}_t(x) \right\|^2 \right]
+$$<p>
+这个看似很合理，但是有一个巨大的问题：我们需要计算$u^{\text{target}}_t(x)$，而这个是一个关于z的积分，而z所在的dataset有可能非常大，甚至是无穷的，无法计算！</p>
+<h4 id="conditional-flow-matching-loss">conditional flow matching loss
+</h4><ul>
+<li>由于上面的loss无法计算，所以我们引入了一个conditional flow matching loss，来代替上面的loss：
+
+$$
+\mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t \sim \text{Unif}, \, z \sim p_{\text{data}}, \, x \sim p_t(\cdot|z)} \left[ \left\| u^\theta_t(x) - u^{\text{target}}_t(x|z) \right\|^2 \right]
 $$</li>
+<li>唉哎，不对啊，我们不是要让$u^\theta_t(x)$去逼近那个marginal vector field吗，用这conditional vector field来训练，难道没有问题吗？可以证明：
+
+$$
+\mathcal{L}_{\text{FM}}(\theta) = \mathcal{L}_{\text{CFM}}(\theta) + C $$其中C是一个和$\theta$无关的常数，即
+
+$$ \nabla_\theta \mathcal{L}_{\text{FM}}(\theta) = \nabla_\theta \mathcal{L}_{\text{CFM}}(\theta) $$
+这里的证明思路主要是先用$|a - b|^2 = |a|^2 - 2a^T b + |b|^2$将loss展开，然后第三项明显是与$\theta$无关的C1，第二项要经过一系列神奇的妙妙变换直接和CFM的第二项相等了🤣，配凑一下得证。具体证明见<a class="link" href="https://diffusion.csail.mit.edu/2026/docs/lecture_notes.pdf"  target="_blank" rel="noopener"
+    >Note</a>(实在肝不动了，还是看note轻松)。</li>
 </ul>
-<h3 id="lec1">Lec1
-</h3><ul>
-<li>第一节课主要讲了生成模型的目标 ( p_init -&gt; p_data ), 以及如何使用ODE和SDE来实现simulate这个过程，简单的理解就是将ODE中的常数项参数表示为$∇\log𝑝(𝑋_𝑡)$此类的关于当前分布在目标分布上的概率(或者score)，从而将轨迹朝着增大data分布概率的方向前进。至于SED中的噪声项，暂时没看出有什么深远的意义，或许是增大选择路径，丰富最终的收敛结果？</li>
-</ul>
-<h3 id="lab0">Lab0
-</h3><ul>
-<li>友情提醒，lab中的一些函数没有具体实现，只有一个pass的不用写，它们的作用是函数示范。只有标注了raise NotImplementedError的函数才是需要我们自己实现的。</li>
-<li>这个lab个人感觉没有难度，基本上都是照着公式填就对了，但是官方的代码提供了非常牛逼的演示效果(包括过程图，视频)，以及几种函数分布供我们自由组合，可以说非常的亲民，做到了用最小的任务量，理解最核心的知识点，展示最生动的效果！</li>
-<li>核心是理解$∇\log𝑝(𝑋_𝑡)$作为$U_t(X)$的作用即可。</li>
+<h4 id="训练算法">训练算法
+</h4><ul>
+<li>这部分比较简单，不写了。</li>
+<li>结合note中gaussian conditional path的例子理解即可。</li>
 </ul>
 
 </section>
@@ -481,12 +555,12 @@ $$</li>
             
                 
 <article class="">
-    <a href="/p/mit_6.s184_1-flow-matching/">
+    <a href="/p/mit_6.s184_0/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">MIT_6.S184_1 — Flow Matching</h2>
+            <h2 class="article-title">MIT_6.S184_0</h2>
         </div>
     </a>
 </article>
