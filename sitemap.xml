@@ -3,10 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://fuquan99666.github.io/</loc>
-    <lastmod>2026-05-04T10:42:29+08:00</lastmod>
+    <lastmod>2026-05-04T16:45:59+08:00</lastmod>
   </url><url>
     <loc>https://fuquan99666.github.io/categories/</loc>
-    <lastmod>2026-05-04T10:42:29+08:00</lastmod>
+    <lastmod>2026-05-04T16:45:59+08:00</lastmod>
+  </url><url>
+    <loc>https://fuquan99666.github.io/categories/cs61c/</loc>
+    <lastmod>2026-05-04T16:45:59+08:00</lastmod>
+  </url><url>
+    <loc>https://fuquan99666.github.io/p/cs61c_11-os-and-vm/</loc>
+    <lastmod>2026-05-04T16:45:59+08:00</lastmod>
+  </url><url>
+    <loc>https://fuquan99666.github.io/post/</loc>
+    <lastmod>2026-05-04T16:45:59+08:00</lastmod>
+  </url><url>
+    <loc>https://fuquan99666.github.io/categories/risc-v/</loc>
+    <lastmod>2026-05-04T16:45:59+08:00</lastmod>
   </url><url>
     <loc>https://fuquan99666.github.io/categories/diffusion/</loc>
     <lastmod>2026-05-04T10:42:29+08:00</lastmod>
@@ -18,9 +30,6 @@
     <lastmod>2026-05-04T10:42:29+08:00</lastmod>
   </url><url>
     <loc>https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/</loc>
-    <lastmod>2026-05-04T10:42:29+08:00</lastmod>
-  </url><url>
-    <loc>https://fuquan99666.github.io/post/</loc>
     <lastmod>2026-05-04T10:42:29+08:00</lastmod>
   </url><url>
     <loc>https://fuquan99666.github.io/p/mit_6.s184_0/</loc>
@@ -41,13 +50,7 @@
     <loc>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_5-%E4%B8%AD%E5%9B%BD%E5%8E%86%E5%8F%B2%E8%A1%8C%E6%94%BF%E5%8C%BA%E5%88%92/</loc>
     <lastmod>2026-04-13T18:48:01+08:00</lastmod>
   </url><url>
-    <loc>https://fuquan99666.github.io/categories/cs61c/</loc>
-    <lastmod>2026-04-12T15:21:19+08:00</lastmod>
-  </url><url>
     <loc>https://fuquan99666.github.io/p/cs61c_10-cache/</loc>
-    <lastmod>2026-04-12T15:21:19+08:00</lastmod>
-  </url><url>
-    <loc>https://fuquan99666.github.io/categories/risc-v/</loc>
     <lastmod>2026-04-12T15:21:19+08:00</lastmod>
   </url><url>
     <loc>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_4-%E4%B8%AD%E5%9B%BD%E5%8E%86%E5%8F%B2%E6%94%BF%E5%8C%BA%E4%B8%8E%E5%9C%B0%E6%96%B9%E8%A1%8C%E6%94%BF%E5%88%B6%E5%BA%A6/</loc>

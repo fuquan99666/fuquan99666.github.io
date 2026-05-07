@@ -7,7 +7,134 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Sun, 12 Apr 2026 15:21:19 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/risc-v/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 04 May 2026 16:45:59 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/risc-v/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_11 — OS and VM</title>
+        <link>https://fuquan99666.github.io/p/cs61c_11-os-and-vm/</link>
+        <pubDate>Mon, 04 May 2026 16:45:59 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_11-os-and-vm/</guid>
+        <description>&lt;h3 id=&#34;关于project-3&#34;&gt;关于Project 3
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;我之所以来写os，vm的新课，是因为project 3的part B部分难度有一点点点点大，尤其是control signal设计部分，我感觉ROM是更简单的，但文档推荐用hard-wire的方式来实现，感觉人有点麻了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;a-real-computer&#34;&gt;A real computer
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;按照视频的时间线，我们现在应该是已经实现了project 3，并且在下一个cache的lab中添加了缓存模块提升了它的性能，此时我们设计的processor能够执行所有的RISC-V指令了(整数？)，但是它还不是一个真正意义上的计算机，因为它没有Screen, Keyboard, Disk等外设，奥对了，还没有主内存呢。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;some-simple-small-computer&#34;&gt;Some simple small computer
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;有一些计算机是非常简单的，甚至没有外设，只有一个cpu和一些内存，我们将其称之为single-board computers, 其中一个非常受欢迎并且开创了单片机时代的是Raspberry Pi, 也就是我们熟知的树莓派，比如Raspberry Pi 4, 它有一个CPU，一个DRAM，一个Storage(用的不是硬盘，而是SD卡，就像很多相机一样)，两个hdmi视频输出口，4个usb接口，一个网线接口，一个无线wifi模块，真是麻雀虽小，五脏俱全。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;1.png&#39; width=&#39;400&#39;&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;你可能觉得这个小小的单片机没啥意思，但是如果我们将它的IO接口和外设都连起来，那么我们将得到一个真正意义上的计算机了，甚至我们完全可以使用它作为学习这门课程的主机。(作为一个装机小白，我觉得单片机就是一个电脑主板装好了一个cpu和内存，闪存，剩下几个接口可以diy)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;2.png&#39; width=&#39;400&#39;&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;如图，连上两个显示屏，键盘，鼠标后是不是氛围感一下就拉满了😉，图中的单片机装上了linux以及配套工具，它完全能胜任学习计算机体系课程的任务，可惜的是树莓派是基于arm设计的，而arm开源程度有限，lab设计会很麻烦，伟大的Nikolic老师说等以后risc-v的板子变得便宜且好用的话会考虑在cs61c中引入！&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;一个值得思考的问题，我们之前使用过的venus是一个risc-v的模拟执行器，它仅仅能够执行单个程序并且stop，但是屏幕中的是一个UI界面，我们可以同时进行很多的活动，比如打开多个窗口，运行多个程序，这些都是一个venus无法做到的。令人震惊的是为了实现这个目的，我们并没有对硬件做出太大的改变，我们只是通过软件的方式实现了一个叫做操作系统的东西，来管理这些程序的运行，分配资源，调度任务，这就是我们这节课的主题 —— The Operating System(OS). &lt;del&gt;ps：这个课引入os也太好了吧，还和前面用过的venus互动了，一做对比立马明白os的作用了&lt;/del&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;operating-system-basics&#34;&gt;Operating System Basics
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Well, &amp;ldquo;Just software&amp;rdquo;, but a very important one. 有一个妙妙&lt;a class=&#34;link&#34; href=&#34;https://informationisbeautiful.net/visualizations/million-lines-of-code/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;网站&lt;/a&gt;展示了从小到大各种软件的代码量，其中有不少我们的老熟人。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;what-does-the-os-do&#34;&gt;What Does the OS do?
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;我们从计算机开机开始说起：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol&gt;
+&lt;li&gt;在按下开机键后，首先执行 UEFI 固件。UEFI 负责检查硬件是否正常，然后扫描 EFI 系统分区（ESP），在分区里找到 bootloader（一个 .efi 文件）并执行它，由 bootloader 负责加载操作系统。&lt;/li&gt;
+&lt;li&gt;So OS is the (first) thing that runs when computer starts.&lt;/li&gt;
+&lt;li&gt;Finds and controls all devices in the machine in a general way, relying on hardware specific &amp;ldquo;device drivers&amp;rdquo;. 在linux中，我们一般称之为hardware tree, 是一种树形结构。&lt;/li&gt;
+&lt;li&gt;Starts services (100+)
+&lt;ul&gt;
+&lt;li&gt;File system&lt;/li&gt;
+&lt;li&gt;Network stack (Ethernet, wifi, Bluetooth, etc.)&lt;/li&gt;
+&lt;li&gt;TTY (keyboard),&lt;/li&gt;
+&lt;li&gt;&amp;hellip;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Loads,runs and manages programs
+&lt;ul&gt;
+&lt;li&gt;Multiple programs at the same time (time-sharing)&lt;/li&gt;
+&lt;li&gt;Isolate programs from each other (isolation)&lt;/li&gt;
+&lt;li&gt;Multiplex resources between applications (e.g., devices)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;What Does the Core of the OS Do?
+&lt;ul&gt;
+&lt;li&gt;Provide isolation between running processes.&lt;/li&gt;
+&lt;li&gt;Provide interaction with the outside world.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;what-does-os-need-from-hardware&#34;&gt;What Does OS Need from Hardware?
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Memory translation
+&lt;ul&gt;
+&lt;li&gt;我们可以设想一下，如果我们有两个进程，都对physical address 0x1000进行操作，那么会发生打架；于是操作系统会为每一个进程提供一个map，将它们的virtual address映射到physical address上，这样就实现了进程之间的隔离。&lt;/li&gt;
+&lt;li&gt;我们在risc-v中使用load和store的时候，进程实际上也是发送了一个virtual address，我们需要添加一个address translation硬件来实现这种转换。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Protection and privilege
+&lt;ul&gt;
+&lt;li&gt;Split the processor into at least two running modes: &amp;ldquo;User&amp;rdquo; and &amp;ldquo;Supervisor&amp;rdquo;. In RISC-V, we have &amp;ldquo;Machine&amp;rdquo; between them.&lt;/li&gt;
+&lt;li&gt;Lesser privilege can not change its memory mapping. But &amp;ldquo;Supervisor&amp;rdquo; can change the mapping of any given program. And supervisor has its own set of mapping of virtual-&amp;gt;physical.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Traps &amp;amp; Interrupts
+&lt;ul&gt;
+&lt;li&gt;A way of going into Supervisor mode on demand. 比如当一个程序被外部信号打断了，或者是一个内部错误了，此时需要进入Supervisor mode或者说是进入内核态来处理这些异常情况。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;what-happens-at-boot&#34;&gt;What happens at Boot?
+&lt;/h4&gt;&lt;p&gt;&lt;del&gt;1. BIOS*: Find a storage device and load first sector(block of data)
+2. Bootloader (stored on,e.g., disk): Load the OS kernel from disk into a location in memory and jump to it.
+3. OS Boot: Initialize services, drivers, etc.
+4. Init: Launch an application that waits for input in loop (e.g., Terminal/Desktop/&amp;hellip;)&lt;/del&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;似乎前面写过一遍了，这里似乎还提到了flash ROM，呃呃，暂时没想明白。。。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;operating-system-functions&#34;&gt;Operating System Functions
+&lt;/h3&gt;&lt;h4 id=&#34;launching-applications&#34;&gt;Launching Applications
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Both threads and processes run (pseudo) simultaneously（伪同时）.&lt;/li&gt;
+&lt;li&gt;Apps 一般是被其他进程(e.g.,shell)调用系统命令启动的，比如在linux中我们通常使用fork来创建一个新的进程，并且使用execve来加载可执行文件到这个新进程中去运行。&lt;/li&gt;
+&lt;li&gt;我们将这个可行性文件加载到内存中(instruction &amp;amp; data)，并且设置堆栈，设置argc，argv，跳转到main开始执行，与此同时shell会等待main返回(join).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;supervisor-mode&#34;&gt;Supervisor Mode
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;操作系统需要在Super模式下运行，因为它需要强加一些资源上的限制到进程上，来管理这些进程。我们可以通过简单的修改一些csr状态寄存器的值来转换到super mode。&lt;/li&gt;
+&lt;li&gt;在super mode下，我们甚至可以执行一些特殊的指令。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;syscalls&#34;&gt;Syscalls
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;试想我们将要向wifi发送一段数据，如果我们直接使用自己写的传输代码，那么多个进程之间可能会冲突，所以我们使用syscall，当一个进程想要发送数据时，它需要在register中准备好函数的参数，然后raise一个software interrupt，进入内核态，由操作系统来完成这个发送数据的任务，这样就避免了多个进程之间的冲突了(由操作系统来安排对资源和设备的访问顺序).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;interrupts-exceptions&#34;&gt;Interrupts， Exceptions
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;我们需要进入内核态，当有一些事情发生的时候。&lt;/li&gt;
+&lt;li&gt;Interrupts: External events (e.g., timer, keyboard, network, etc.)&lt;/li&gt;
+&lt;li&gt;Exceptions: Internal events (e.g., page fault, illegal instruction, etc.)&lt;/li&gt;
+&lt;li&gt;ECALL: 这个指令用于将当前的用户状态转移到内核态，通常我们会设置一些参数(系统函数)来执行一些系统调用。它本质上是激发了一个exception。&lt;/li&gt;
+&lt;li&gt;EBREAK: 也会激发一个exception，但是不会进入内核态。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;tmd好大儿cyz找了个对象快活的不得了写不下去了&#34;&gt;TMD，好大儿cyz找了个对象快活的不得了，写不下去了😭😇😭
+&lt;/h3&gt;</description>
+        </item>
+        <item>
         <title>CS61c_10 — Cache</title>
         <link>https://fuquan99666.github.io/p/cs61c_10-cache/</link>
         <pubDate>Sun, 12 Apr 2026 15:21:19 +0800</pubDate>
