@@ -617,6 +617,7 @@
 </span><span class="lnt">45
 </span><span class="lnt">46
 </span><span class="lnt">47
+</span><span class="lnt">48
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="no">`timescale</span> <span class="mh">1</span><span class="n">ns</span> <span class="o">/</span> <span class="mh">1</span><span class="n">ns</span>
@@ -665,6 +666,7 @@
 </span></span><span class="line"><span class="cl">    <span class="n">Send_en</span> <span class="o">=</span> <span class="mh">0</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="p">#</span> <span class="mh">20000</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">    <span class="nb">$stop</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">end</span>
 </span></span><span class="line"><span class="cl"><span class="k">endmodule</span> 
 </span></span></code></pre></td></tr></table>
 </div>
@@ -673,9 +675,17 @@
 <li>上述两个疑问的回答：</li>
 </ul>
 <blockquote>
-<p>1.bps_cnt初始值设置为10是为了在reset的时候让uart_tx和Tx_done都处于空闲状态（高电平），即此时并没有数据发送。
-2. 为什么不可以使用Send_en来控制bps_cnt变成0，因为在实际仿真的过程中，在Tx_done上升时，看似Send_en=0，实际使用的Send_en信号并不是0而是1，导致bps_cnt变成0,进入了发送状态，然而我们要求bsp_cnt保持10的状态直到下一次Send_en变成1才开始发送数据。
-3. 为什么不可以写成div_cnt == 1,看似使用计数保证了有一个稳定的时间间隔，但是在实际仿真过程中，在Tx_done上升瞬间，和2一样，Send_en并不是0而是1，导致div_cnt并没有归零，而是继续计数，div_cnt=1，而在下一个时钟周期上升时，div_cnt恰好是1导致bps_cnt变成0，进入了发送状态，就和2一样了。</p>
+<p>1.bps_cnt初始值设置为10是为了在reset的时候让uart_tx和Tx_done都处于空闲状态（高电平），即此时并没有数据发送。</p>
+</blockquote>
+<blockquote>
+<ol start="2">
+<li>为什么不可以使用Send_en来控制bps_cnt变成0，因为在实际仿真的过程中，在Tx_done上升时，看似Send_en=0，实际使用的Send_en信号并不是0而是1，导致bps_cnt变成0,进入了发送状态，然而我们要求bsp_cnt保持10的状态直到下一次Send_en变成1才开始发送数据。</li>
+</ol>
+</blockquote>
+<blockquote>
+<ol start="3">
+<li>为什么不可以写成div_cnt == 1,看似使用计数保证了有一个稳定的时间间隔，但是在实际仿真过程中，在Tx_done上升瞬间，和2一样，Send_en并不是0而是1，导致div_cnt并没有归零，而是继续计数，div_cnt=1，而在下一个时钟周期上升时，div_cnt恰好是1导致bps_cnt变成0，进入了发送状态，就和2一样了。</li>
+</ol>
 </blockquote>
 <ul>
 <li>总结：深入分析仿真中实际的信号变化情况，考虑到信号的竞争与冒险问题，设计出合理的代码是关键。还有就是善用仿真。</li>

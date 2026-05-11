@@ -284,6 +284,7 @@
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;45
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;46
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;47
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;48
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-verilog&#34; data-lang=&#34;verilog&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;no&#34;&gt;`timescale&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ns&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ns&lt;/span&gt;
@@ -332,6 +333,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;Send_en&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;#&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;20000&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nb&#34;&gt;$stop&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;end&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;endmodule&lt;/span&gt; 
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
@@ -340,9 +342,17 @@
 &lt;li&gt;上述两个疑问的回答：&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;1.bps_cnt初始值设置为10是为了在reset的时候让uart_tx和Tx_done都处于空闲状态（高电平），即此时并没有数据发送。
-2. 为什么不可以使用Send_en来控制bps_cnt变成0，因为在实际仿真的过程中，在Tx_done上升时，看似Send_en=0，实际使用的Send_en信号并不是0而是1，导致bps_cnt变成0,进入了发送状态，然而我们要求bsp_cnt保持10的状态直到下一次Send_en变成1才开始发送数据。
-3. 为什么不可以写成div_cnt == 1,看似使用计数保证了有一个稳定的时间间隔，但是在实际仿真过程中，在Tx_done上升瞬间，和2一样，Send_en并不是0而是1，导致div_cnt并没有归零，而是继续计数，div_cnt=1，而在下一个时钟周期上升时，div_cnt恰好是1导致bps_cnt变成0，进入了发送状态，就和2一样了。&lt;/p&gt;
+&lt;p&gt;1.bps_cnt初始值设置为10是为了在reset的时候让uart_tx和Tx_done都处于空闲状态（高电平），即此时并没有数据发送。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;为什么不可以使用Send_en来控制bps_cnt变成0，因为在实际仿真的过程中，在Tx_done上升时，看似Send_en=0，实际使用的Send_en信号并不是0而是1，导致bps_cnt变成0,进入了发送状态，然而我们要求bsp_cnt保持10的状态直到下一次Send_en变成1才开始发送数据。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;为什么不可以写成div_cnt == 1,看似使用计数保证了有一个稳定的时间间隔，但是在实际仿真过程中，在Tx_done上升瞬间，和2一样，Send_en并不是0而是1，导致div_cnt并没有归零，而是继续计数，div_cnt=1，而在下一个时钟周期上升时，div_cnt恰好是1导致bps_cnt变成0，进入了发送状态，就和2一样了。&lt;/li&gt;
+&lt;/ol&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;总结：深入分析仿真中实际的信号变化情况，考虑到信号的竞争与冒险问题，设计出合理的代码是关键。还有就是善用仿真。&lt;/li&gt;

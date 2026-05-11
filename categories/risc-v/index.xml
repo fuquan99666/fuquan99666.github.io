@@ -7,7 +7,35 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Mon, 04 May 2026 16:45:59 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/risc-v/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 11 May 2026 10:17:20 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/risc-v/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_12 — Project 3: 古法编程CPU</title>
+        <link>https://fuquan99666.github.io/p/cs61c_12-project-3-%E5%8F%A4%E6%B3%95%E7%BC%96%E7%A8%8Bcpu/</link>
+        <pubDate>Mon, 11 May 2026 10:17:20 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_12-project-3-%E5%8F%A4%E6%B3%95%E7%BC%96%E7%A8%8Bcpu/</guid>
+        <description>&lt;h3 id=&#34;写在前面的&#34;&gt;写在前面的
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;当你学完课程的datapath部分，就可以把这些思想付诸实践，去实现一个真正的 CPU 了！（虽然是文档说是两级流水，严格来说是三个阶段）&lt;br&gt;
+我可以毫不夸张地说，这个 Project 是我遇到过与体系结构相关的最牛的教学项目。虽然难度很大，但当你完成它之后，你会对 RISC-V CPU 的每一个细节都了如指掌。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;而且，这个 Project 几乎没法用 AI 完成。你只需要对datapath和指令集了如指掌（熟练查表），就能靠自己的努力实现它。某些模块（比如控制信号）可能需要一点提示，但理解了一个模块，其他自然就通了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;我参考了 flyingpig 大佬在6年前的&lt;a class=&#34;link&#34; href=&#34;https://github.com/PKUFlyingPig/RISC-V_CPU&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;实现&lt;/a&gt;。值得一提的是，我发现大佬的实现里有一个小小的疏漏：有一个控制信号忘接了 SW，导致内存测试无法通过😉。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在做这个 Project 的过程中，遇到困难时我也想过 Google 一下，看看有没有相关博客讲解。遗憾的是，我没有找到任何一篇讲解这个 Project 的博客。所以，我决定单独写一篇，详细拆解实现细节，帮助后面的同学更好地理解这个 Project。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;有趣的是我成功用这个project把一个物院大佬带入csdiy的坑🤣&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
         <title>CS61c_11 — OS and VM</title>
         <link>https://fuquan99666.github.io/p/cs61c_11-os-and-vm/</link>
         <pubDate>Mon, 04 May 2026 16:45:59 +0800</pubDate>
@@ -132,7 +160,10 @@
 &lt;li&gt;EBREAK: 也会激发一个exception，但是不会进入内核态。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id=&#34;tmd好大儿cyz找了个对象快活的不得了写不下去了&#34;&gt;TMD，好大儿cyz找了个对象快活的不得了，写不下去了😭😇😭
-&lt;/h3&gt;</description>
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;正好剩下的内容都是一些细枝末节，就不写了。。。&lt;/li&gt;
+&lt;/ul&gt;
+</description>
         </item>
         <item>
         <title>CS61c_10 — Cache</title>
