@@ -115,8 +115,8 @@
         <pubDate>Mon, 11 May 2026 10:17:20 +0800</pubDate>
         
         <guid>https://fuquan99666.github.io/p/cs61c_12-project-3-%E5%8F%A4%E6%B3%95%E7%BC%96%E7%A8%8Bcpu/</guid>
-        <description>&lt;h3 id=&#34;写在前面的&#34;&gt;写在前面的
-&lt;/h3&gt;&lt;ul&gt;
+        <description>&lt;h2 id=&#34;写在前面的&#34;&gt;写在前面的
+&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;当你学完课程的datapath部分，就可以把这些思想付诸实践，去实现一个真正的 CPU 了！（虽然是文档说是两级流水，严格来说是三个阶段）&lt;br&gt;
 我可以毫不夸张地说，这个 Project 是我遇到过与体系结构相关的最牛的教学项目。虽然难度很大，但当你完成它之后，你会对 RISC-V CPU 的每一个细节都了如指掌。&lt;/p&gt;
@@ -134,6 +134,165 @@
 &lt;li&gt;
 &lt;p&gt;有趣的是我成功用这个project把一个物院大佬带入csdiy的坑🤣&lt;/p&gt;
 &lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;project-overview&#34;&gt;Project Overview
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;我们先总体了解一下这个project的情况，它分成了两个部分，partA部分最终是让你通过一个具体指令（addi）的datapath设计来熟悉整个CPU的结构以及各个模块的功能，partB部分则是给了RISC-V的绝大多数指令，要求你在partA的基础上实现它们。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;parta&#34;&gt;PartA
+&lt;/h2&gt;&lt;h3 id=&#34;some-tips&#34;&gt;Some tips
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;如果你使用的是archlinux,请先看&lt;a class=&#34;link&#34; href=&#34;https://fuquan99666.github.io/p/cs61c_8-control-logic-and-lab05/#setup&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;这个&lt;/a&gt;来防止白屏。&lt;/li&gt;
+&lt;li&gt;Tips中提到了有一些logisim&amp;rsquo;s built-in blocks 我们是不可以使用的：Wiring(except Transistor, Transmission Gate, POR, Pull Resistor, Power, Ground), Arithmetic(except Divider), Memory(except RAM, Random Generator), 特别提到说ROM是可以使用的。&lt;/li&gt;
+&lt;li&gt;同时，注意一定要及时保存，ctrl+s是logisim的快捷键，在我的使用过程中由于logisim的一些小bug，偶尔会出现莫名其妙的崩溃，所以一定要及时保存。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;task1-arithmetic-logic-unit-alu&#34;&gt;Task1: Arithmetic Logic Unit (ALU)
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;在任务一中我们将完成一个ALU的设计，ALU是CPU中非常重要的一个模块，它负责执行各种算术和逻辑运算。作为一个模块，它接受了三个输入：input A(32 bits), input B(32 bits), ALUSel(4 bits), 一个输出Result(32 bits). 其中ALUSel包括了0-14共15种不同的运算类型(8，9都是unused), 我们按照文档的提示open alu.circ, 可以看到它的输入和输出都是用的之前lab中提到的tunnel来连接的，这样我们就不用在不同的模块之间拉线了，直接再写一个tunnel即可。&lt;/li&gt;
+&lt;li&gt;现在的问题是我们有两个输入，一个Sel，我们需要根据Sel的值来判断应该执行哪种运算。需要明白的是我们不太可能用类似if-else的方式先判断再去执行对应的操作，我们应该是同时执行所有的操作，然后根据Sel的值来选择最终的输出结果。这里就需要用到mux了，设置合理的data bits和select bits即可。&lt;/li&gt;
+&lt;li&gt;基本的指令都可以使用logisim内置的算术模块来实现，唯一需要注意的是mul类指令，我们有mul,mulh,mulhu, 分别是符号乘法的低32位，高32位，无符号乘法的高32位.（这里可能有人问，为什么没有无符号乘法的低32位呢？因为对于符号乘法，它和无符号乘法的唯一区别就是它会做一个符号扩展，但是由于符号扩展位于高位，所以它和被乘数的结果一定在高32位，不会影响低32位，所以二者的低32位是一样的，所以我们没必要单独设置一个mulu），文档中提示我们需要注意乘法模块有一个carry out输出，这就是我们需要的高32位了。还有就是对于sra,sll,srl等位移类指令，我们需要注意需要注意我们的输入只有32位，所以超过32的位移是没必要的，我们可以使用一个splitter来选择[4:0]的位来作为位移量。&lt;/li&gt;
+&lt;li&gt;在完成了ALU的设计后，可以去peek一眼alu_harness.circ, 以及tests/part_a/alu/alu-add.circ, 你会发现harness就是一个测试模版，而tests中对应名字的文件就是具体指令的测试，它在ROM中预设置了一些指令和数据，然后通过模拟几个时钟来观察是否输出正确。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;顺便提一嘴，当初寒假购置一个二手电脑，安装一个archlinux，现在做这些基于各种linux原生工具的lab和project，感觉非常丝滑，也是见识到了命令行工具的强大。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;task2-register-file-regfile&#34;&gt;Task2: Register File (RegFile)
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;在任务二中我们将完成一个寄存器文件的设计，什么是寄存器文件呢，可以理解为一群寄存器(RISC-V有32个寄存器)堆叠在一起，形成一个模块。它有如下几个input: Clock(1 bit), RegWEn(1 bit), Read Register 1(5 bits), Read Register 2(5 bits), Write Register(5 bits), Write Data(32 bits). 同时为了方便测试，文档要求我们输出一些特定寄存器的值，它们是: ra, sp, t0, t1, t2, s0, s1, a0, 而它们的真实寄存器名字是: x1,x2,x5,x6,x7,x8,x9,x10. 文档中特别提到了x0寄存器很特殊，永远都是0，所以千万不要write to x0。&lt;/li&gt;
+&lt;li&gt;如何实操呢？当看到logisim中的一篇空白的时候，你是否脑子一空，不知如何下手了呢。我可以很负责的告诉你，现在还算简单的，hhh🤣。文档中提到我们可以利用copy-paste，先设计好一个寄存器模版，然后复制粘贴其他的31个寄存器. 对于一个寄存器，它应该接受write_data在D端，在Clk上升沿写入(当然得write_en=1)；同时Q端设置read_data,在除了时钟上升沿的时候读取数据。这样我们就完成了32个寄存器，对于x0寄存器，我们应该把它的write_en设置为0（可以利用logisim的wiring中的constant模块）。&lt;/li&gt;
+&lt;li&gt;现在和ALU一样，我们需要根据rs1,rs2,rd的值来选择我们读取，写入的寄存器。对于读取，我们同理使用一个很大的mux来选择即可。在这里我可以好心提醒一下，一定要使用tunnel，即便是使用了tunnel，在logisim中拉32条线也是非常麻烦的，PATIENCE! 对于写入，情况恰好相反，我们有一个待写入的值，一个rd写入对象，之前说过我们无法直接挑出具体的那一个寄存器来写入，文档中提示了可以使用DMUX来实现，它的功能是根据select bits的值来选择一个输出为输入值，其他的输出则为0，这样我们就可以同时设置好写入和没有写入的寄存器的Write_en了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在这里再次安利一波archlinux，之前寒假在做cs336，使用的是windows上的wsl，能用是能用，就是感觉不舒服😆&lt;/p&gt;
+&lt;p&gt;最近也是看了大半的linux101, 更是深感linux的强大，windows上的那些cmd，powershell用起来就很难绷。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;task3-the-addi-instruction&#34;&gt;Task3: The addi Instruction
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;在任务三中我们将利用前两个任务的成果来构建一个addi的datapath设计. 这里有一些新出现的模块，Memory, Branch Comparator, Immediate Generator.
+其中mem模块已经实现好了，对于addi来说它用不上，暂且不提。对于Branch Comparator, 用不上暂且不提。 Immediate Generator，由于我们暂时只考虑addi，所以直接针对addi的指令格式来设计hard-wire即可，即splitter[31:20]直接输出。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;ok现在一些辅助的模块基本都看过了，我们先来做一个single-cycle 的processor， 一旦这个完成了，我们可以轻松的升级为2阶段的pipeline version。我们的cpu模块有三个输入：READ_DATA(32 bits), INSTRUCTION(32 bits), CLOCK(1 bit), 以及很多output: ra, sp, t0, t1, t2, s0, s1, a0, tohost, WRITE_ADDRESS, WRITE_DATA, WRITE_ENABLE, fetch_addr.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在具体看cpu.circ之前，我们先来看看test_harness.circ和run.circ，它们是用来测试我们设计的cpu的，首先看test_harness.circ, 打开后你会发现它是把cpu和mem给和在一起，它将cpu的输出WRITE_ADDRESS, WRITE_DATA, WRITE_ENABLE连接到mem的输入端，同时将mem的输出READ_DATA连接到cpu的输入端，这样就得到了一个闭环的cpu+mem系统了。对于run.circ, 它是将test_harness.circ这个整体和一个Instruction Memory，clk generator, halt checker连接在一起，这个Instruction Memory是一个ROM，它接受cpu的输出fetch_addr(其实就是pc)，根据这个地址来输出对应预存的指令，然后将这个指令作为cpu的输入INSTRUCTION, 从而实现了一个完整的取指令-&amp;gt;执行-&amp;gt;下一条指令的闭环过程。 而halt checker则是用了一个counter来记录时钟周期数量，达到一定值后就输出halt信号表示测试结束了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;对了，还有一个control logic, 这个东西将会是你在partB中最头大的一个模块设计，但是在partA中我们只需要针对addi来设计一些constant即可。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;现在我们打开cpu.circ, 看看有什么东西，首先是pc模块，它有一个clk，program_counter，register在进行周期累加。然后是一个regfile, 它的接口我们在前面已经介绍过了，还有一个alu, 一个control logic, 一个immediate_gen. 在最上方是cpu的所有input和output，包括Imem, register to test, Dmem.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;对于addi具体各个部分如何具体操作，我就不多加赘述，总之就是先用spliter 将指令的不同部分给拆分开(rs1,rs2,rd,opcode,func3,func7，当然是对于addi来说)，然后就可以把这些rs1,rs2,rd连接到regfile的输入端，同时我们前往对应的imm模块hard-wire出对应的imm值即可，对于control logic, 我们都不需要去对应文件，直接在cpu内写一些constant即可哈，其实imm也一样。总之addi就是easy and free的，按照你的理解怎么方便怎么来。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在完成了单周期的设计后，我们可以很轻松的升级为两级流水。文档提到我们应该将流水线分为两个stage，第一个stage是fetch, 第二个stage是decode+execute+mem+writeback. 这里的关键是如果我们想要将指令分为两级流水，那么不同stage的pc,instruction应该不同，因为不同stage可能用到自己的pc，所以我们需要用个寄存器来过渡一下，在我的实现中是用两个splitter先合再分，感觉不如直接两个register来的简单。注意一旦分了stage，第二个stage的一些输入就得用inst1和pc1了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;至此，我们的partA部分宣告完成，由于这个project的性质，所以我的博客不可能详细到所有细节如何实现，只能是梳理梳理文件关系，一些值得思考的设计问题。更多的实现细节需要你自己去探索，使用各种文档，工具，实在不行时和github上的参考参考，这个正是这个project的意义。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;partb&#34;&gt;PartB
+&lt;/h2&gt;&lt;h3 id=&#34;task4-more-instructions&#34;&gt;Task4: More Instructions
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;ok，终于来到了重头戏，如何从一个addi的单指令datapath扩展到支持大多数RISC-V指令的cpu！我将按照我自己的实现过程来分析一遍，并提出一些疑问。&lt;/li&gt;
+&lt;li&gt;首先请看文档中提供的The Instruction Set Architecture(ISA)这幅指令图，这个指令图你将在partB中反反复复的用到，非常非常重要‼️ 可以说partB 之所以繁琐的一个很大原因就是这个图挺复杂的，毕竟支持了那么多种不同类型的指令呢。&lt;/li&gt;
+&lt;li&gt;请看文档中提到的info: Memory, 总结一下就是我们传入了一个4 bit的Write_en, 这里的每一位都表示对应字节是否能写(比如1&amp;rsquo;b1000，就表示只有最高位字节可以写入)， 同时我们需要内存对齐，由于RISC-V的指令和寄存器都是32位的，所以为了方便，我们read和write内存的时候都要按照4的整数倍来，也就是设置Write_address的[1:0]为0 ，用之前提到的splitter即可。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;这里比较奇怪的一点是在写这篇博客时我还没注意到这个align，之前也通过了test，怪? 在修复这个问题后，我详细研究了mem.circ这个模块，恍然大悟，
+在这个模块中DRAM是先只取[15:2]，等于帮我们做了这个align🤣, 然后它用了4个子内存模块，每一个都是16k*8，这个16k表示有多少个word address，和那个[15:2]对应，每一个word address它会分别到每一个子内存块取对应address的一个8位数据(1 byte), 然后最后再用一个splitter汇总成一个word。 妙啊妙啊，所以真的推荐大家把每一个模块的设计都认真看一遍，而不是简简单单的为了通过test。看到了如此优雅的DRAM实现，你就会意识到为什么align这么重要，因为它大大简化了硬件的实现！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;请看Info: Branch Comparator, 这个模块非常简单，我们接受rs1，rs2，Brun(这个是信号位，后面说)，输出BrEq, BrLt. 我们可以使用logisim中自带的Comparator, 它可以设置sign和unsign, 由于Eq的情况对于二者是一样的，所以直接搞一个就行，Lt则需要根据BrUn来mux一下。&lt;/li&gt;
+&lt;li&gt;请看Info: Control Status Register (CSR), 这个模块是用来读写一些特殊的寄存器，它们一般是用来存储执行结果的额外信息，比如指令完成，失败等。在这个project中，没有啥实际作用（  ，先不管具体如何在cpu中拉线，直接进入csr.circ, 你会发现其实就是写入一个寄存器😆&lt;/li&gt;
+&lt;li&gt;至此，比较简单的独立模块我们都搞定了，剩下imm_gen.circ, control_logic.circ, 和最终实际的cpu拉线。这个顺序我觉得是比较合理的，毕竟这个projcet东西过多，很难一上来对着一个cpu.circ瞪眼瞪明白，先搞定简单的独立模块，在搞定难的独立模块，最后在cpu中拉线是正确的完成方式！&lt;/li&gt;
+&lt;li&gt;请看Info: Immediate Generator, 在这个模块中，我们接受inst(32 bits), immSel(3 bits), output: imm(32 bits). 首先明确有几种类型的imm，文档中直接看到有I,S,B,U,J,如果你看前面提到的那个ISA表格，会发现csr类指令它给划分到了I类，错误啊，请细看CSR部分，它明确指出了CSR的imm应该是[19:15],而且应该是uimm,即无符号扩展。所以我们最终敲定I,S,B,U,J,CSR。这里有人又要问了，题目中没有规定哪个Sel对应哪个imm啊，无所谓，这些规则都是我们制定的，我们在这里定好顺序后，别的地方在遵守它就行了。具体如何实现，我也不过多赘述，你只要根据所有imm能出现的[:]，用splitter拆分为几个部分，然后按照类型就行组合，配上对应的Bit extender扩展到32位即可。&lt;/li&gt;
+&lt;li&gt;好了，本关最大boss来了，control_logic.circ, 这个部分自由度非常高，用文档的话来说，你没必要面面俱到，只要能符合给定指令集合的需求就行，能让不同指令有不同control logic就行，你也可以添加输入和输出来增加你认为重要的信号位。有两种方法可以实现control_logic, 第一种是hard-wired control, 就是直接根据指令，拆分，组合得到每一个信号位，这个方法听起来有点哈人😇，我一开始就是这么认为的。第二种是使用一个ROM，直接预先存储所有指令对应的信号位，然后对于输入的指令，我们先拆分判断它的类型，然后直接在ROM中读取对应的所有信号。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;关于两种control_logic的方法，第一种hard-wired一般用于RISC指令集架构，因为它们的指令更加精简，线路设计更加简单。第二种ROM一般用于CISC架构比如intel&amp;rsquo;s x86-64, 它有一个好处就是通过修改ROM中的control word，很方便就能re-programmed. 我本来是想用ROM的，但是一想到它需要先分清指令类型，也就是说只要两个指令的control word稍稍不同，那么我们就得新建一行ROM，总感觉很冗余啊。你试想，单单对于一个I类指令，有很多操作种类，你要分很多ALUSel, 但是实际上由于它们都是I类，所以很多信号位都是一样的，这样区分就非常的浪费😡。 所以还是用第一种吧。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;具体操作就是，我们首先用一个splitter将inst拆分，然后针对每一种信号，如果它是1位的，那么根据opcode和func3，and/or 出一个结果(对于0/1，我们选择容易判断的一方即可)，如果是多位的，那么我们可以先按照1位的思路把每一种都搞出来，然后mux即可。总体思想就是先分大类，再分小类。宁可错杀一个，不可少杀一个。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;我们来分析一个信号(ALUSel)作为典型， 首先明确所有的指令中，除了RI指令外，别的指令就算有Alu，也是add。所以上来可以一个2路mux，默认是0，另一个是ALUSel_IR. 而对于ALUSel_IR, 你最好仔细研究一下ISA那张图，你会发现，I指令的操作几乎和R一样，比后者少几个，而且func3都是对应的，所以我们完全可以用func3来再次划分，有的func3只有一个操作，但是有的比如func3=0, 在R中它除了add，还有mul和sub。我们需要单独判断，根据func7来判断is_mul,is_sub. 把所有这些额外判断的操作和之前根据func3得到的一个mux输出再次mux，得到最后的ALUSel_IR.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;语言的描述是苍白的，所以我推荐你可以先看一眼flyingpig或者是我的仓库实现，然后就很清楚了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;至此，所有的单独模块全部完成，我们将在cpu.circ中将它们串联起来。无非是加一些tunnel，加一些mux。以下是一些需要mux的输入。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;CSR_din : read_1 , imm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;A : read_1, pc1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;B : read_2, imm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;pc: pc+4, result
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;writeback: READ_DATA1, result, PC4, imm
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;这里需要注意的是这个PC4由于是在stage2中计算，所以是pc1+4.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;这里的READ_DATA1是什么呢，我们在从内存中读取READ_DATA后，由于可能是lb,lh,lw, 
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;所以需要先写出三个的信号位，顺手写一下sb,sh,sw.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;然后用三个信号位对READ_DATA拆分再mux一些得到READ_DATA1.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对于WRITE_ENABLE，我们需要根据sb,sh,sw来判断是0，1，0011，1111.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;基本上完工，剩下一些小问题来讨论讨论。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;首先是一些模块的自由组合，比如我们在control_logic中的writeback有写到pc4, 但其实我们完全可以在BSel中添加一个4，这样就把pc4归纳到result一类中，二者都是可以的。&lt;/p&gt;
+&lt;p&gt;其次是有一个指令是lui, 它的B是imm没有疑问，问题是它的A，按照现有逻辑，默认是rs1的5位，但是显然对于lui来说这是不对的，应该是确定的0，如何解决的呢，我们在writeback中直接加了一个imm，而这个imm就是按照lui判断的。这从另一方面告诉我们在设计某一个信号的时候需要完全从上到下scan一遍ISA，确保包含所有情况。&lt;/p&gt;
+&lt;p&gt;再次就是关于branch/jump的问题，如果发现PCSel真的是1，那么发生跳转，但是此时下一条指令已经被fetch了，所以我们需要在IF_ID流水线寄存器的输入端加入一个mux，加入一个输入是00000013,这个指令是addi x0,x0,0, 也就是我们常说的nop，在ics课中我们也许经常用到nop，但是知道此时我才真正搞明白nop是如何加入的。&lt;/p&gt;
+&lt;p&gt;最后一个问题我们早就提过, 这个流水线真的是2stage吗，文档中说是，真的是吗？很明显regfile和mem的写入都是需要clk的，所以它是一个3stage的。其实一开始我错误的认为它是4stage的，因为我想对于ld类指令，它需要先从mem中读取，然后再写入reg，岂不是多了两个cycle，后来一拍脑袋，哎read是立即的，所以ld也是相当于3个cycle完成。那么3个stage会存在raw问题吗，不会的，因为前一条指令在写会寄存器文件时，后一条指令在读取对应的寄存器，由于half-to-half特性，在logisim中其实都不用这个特性了，cycle很长完全够用，一定能先写入再读取。DREM也是同理。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;至此，所有问题基本解决，我也写燃尽了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;task5-custom-tests&#34;&gt;Task5: Custom Tests
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;这个部分要求我们自己手搓一些测试样例，分别是unit test(针对每一条指令)、integration test(各种指令的组合)， edge case tests(故意的测试)。unit test你就随便找几个原来的inputs中没有的写写，integration test我是直接让ai写了一个2*2矩阵乘法的RISC-V汇编代码，然后把一些我们没实现的指令给删了，替换成已经实现的指令，然后test。edge test,我很难评价，因为我们先写汇编文件，然后用venus转化成circ，但是venus会自动检测一些危险操作，我试了几个venus都报错了，所以不了了之了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;啊啊啊啊啊啊-over&#34;&gt;啊啊啊啊啊啊， Over
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;写这一篇真的很consuming, 不过我相信你在搞完搞完这个project后应该对RISC-V精通了，加油😇&lt;/li&gt;
 &lt;/ul&gt;
 </description>
         </item>
