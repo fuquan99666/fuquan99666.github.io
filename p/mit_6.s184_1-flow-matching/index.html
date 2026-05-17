@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Lec2 一个值得思考的问题，在上一讲中我们通过$∇\\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。 我们将用训练神经网络的方式学习每一步的$U_t(x)$.\n">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Lec2 第二节课主要讲了Flow Matching的原理，具体包括了conditional path 和 marginal path，以及它们对应的loss，最终的Flow Matching训练算法。本节课对应的视频部分地方可能讲的不是很清楚，所以一些数学推导细节可能需要自己结合文档来进一步理解。 Conditional and Marginal Probability Path Conditional path的定义： $$p_0(\\cdot|z) = p_{\\text{init}},\\quad p_1(\\cdot|z) = \\delta_z \\quad \\text{for all } z\\in\\mathbb{R}^d$$ 这里的$\\delta_z$是一个Dirac delta distribution，表示只在z这个点上有概率，是一个确定性的分布。简单理解就是让一个随机初始化的分布经过一系列变化最终收缩到一个确定性的z上。当然这里的z你不要以为真的是一个点了，它是从一个$p_{data}$中sample得到的，如果$p_{data}$是一个点集，那么z就是一个点；如果$p_{data}$是一个图像集合，那么z就是一张图片。 Conditional path 就是从0-1过程中每一个t时，$p_{init}$和$p_{\\delta_z}$之间的一个插值分布，一种过渡状态。 One example: Gaussian Conditional Probability Path 我们希望得到一个从标准高斯分布到一个确定性的z的conditional path，即 $$p_t(\\cdot|z) = \\mathcal{N}(\\alpha_t z,\\; \\beta_t^2 I_d)$$或者写成 $$z \\sim p_{\\text{data}},\\; \\epsilon \\sim p_{\\text{init}} = \\mathcal{N}(0, I_d) \\;\\Rightarrow\\; x = \\alpha_t z + \\beta_t \\epsilon \\sim p_t$$ 其中t=0时，$\\alpha=0, \\beta=1$, t=1时，$\\alpha=1, \\beta=0$, 所以 t=0时， $p_0(\\cdot|z) = \\mathcal{N}(0, I_d)$, t=1时，$p_1(\\cdot|z) = \\mathcal{N}(z, 0) = \\delta_z$。 marginal probability path 在知道了conditional path大概是个什么东西后，我们可以定义marginal path了， $$z \\sim p_{\\text{data}},\\; x \\sim p_t(\\cdot|z) \\;\\Rightarrow\\; x \\sim p_t $$ 对于dataset中的每一个z，我们都能得到一个$p_t(\\cdot|z)$, marginal path就是按照z的概率对它们的conditional path进行积分加权。 $$ p_t(x) = \\int p_t(x|z) \\, p_{\\text{data}}(z) \\, dz $$ Conditional and Marginal Vector Fields ‼️ 对于conditional path, 我们按照定义有： ">
 <title>MIT_6.S184_1 — Flow Matching</title>
 
 <link rel='canonical' href='https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/'>
 
 <link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="MIT_6.S184_1 — Flow Matching">
-<meta property='og:description' content="Lec2 一个值得思考的问题，在上一讲中我们通过$∇\\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。 我们将用训练神经网络的方式学习每一步的$U_t(x)$.\n">
+<meta property='og:description' content="Lec2 第二节课主要讲了Flow Matching的原理，具体包括了conditional path 和 marginal path，以及它们对应的loss，最终的Flow Matching训练算法。本节课对应的视频部分地方可能讲的不是很清楚，所以一些数学推导细节可能需要自己结合文档来进一步理解。 Conditional and Marginal Probability Path Conditional path的定义： $$p_0(\\cdot|z) = p_{\\text{init}},\\quad p_1(\\cdot|z) = \\delta_z \\quad \\text{for all } z\\in\\mathbb{R}^d$$ 这里的$\\delta_z$是一个Dirac delta distribution，表示只在z这个点上有概率，是一个确定性的分布。简单理解就是让一个随机初始化的分布经过一系列变化最终收缩到一个确定性的z上。当然这里的z你不要以为真的是一个点了，它是从一个$p_{data}$中sample得到的，如果$p_{data}$是一个点集，那么z就是一个点；如果$p_{data}$是一个图像集合，那么z就是一张图片。 Conditional path 就是从0-1过程中每一个t时，$p_{init}$和$p_{\\delta_z}$之间的一个插值分布，一种过渡状态。 One example: Gaussian Conditional Probability Path 我们希望得到一个从标准高斯分布到一个确定性的z的conditional path，即 $$p_t(\\cdot|z) = \\mathcal{N}(\\alpha_t z,\\; \\beta_t^2 I_d)$$或者写成 $$z \\sim p_{\\text{data}},\\; \\epsilon \\sim p_{\\text{init}} = \\mathcal{N}(0, I_d) \\;\\Rightarrow\\; x = \\alpha_t z + \\beta_t \\epsilon \\sim p_t$$ 其中t=0时，$\\alpha=0, \\beta=1$, t=1时，$\\alpha=1, \\beta=0$, 所以 t=0时， $p_0(\\cdot|z) = \\mathcal{N}(0, I_d)$, t=1时，$p_1(\\cdot|z) = \\mathcal{N}(z, 0) = \\delta_z$。 marginal probability path 在知道了conditional path大概是个什么东西后，我们可以定义marginal path了， $$z \\sim p_{\\text{data}},\\; x \\sim p_t(\\cdot|z) \\;\\Rightarrow\\; x \\sim p_t $$ 对于dataset中的每一个z，我们都能得到一个$p_t(\\cdot|z)$, marginal path就是按照z的概率对它们的conditional path进行积分加权。 $$ p_t(x) = \\int p_t(x|z) \\, p_{\\text{data}}(z) \\, dz $$ Conditional and Marginal Vector Fields ‼️ 对于conditional path, 我们按照定义有： ">
 <meta property='og:url' content='https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/'>
 <meta property='og:site_name' content='My Site'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-05-04T10:42:29&#43;08:00'/><meta property='article:modified_time' content='2026-05-04T10:42:29&#43;08:00'/>
 <meta name="twitter:title" content="MIT_6.S184_1 — Flow Matching">
-<meta name="twitter:description" content="Lec2 一个值得思考的问题，在上一讲中我们通过$∇\\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。 我们将用训练神经网络的方式学习每一步的$U_t(x)$.\n">
+<meta name="twitter:description" content="Lec2 第二节课主要讲了Flow Matching的原理，具体包括了conditional path 和 marginal path，以及它们对应的loss，最终的Flow Matching训练算法。本节课对应的视频部分地方可能讲的不是很清楚，所以一些数学推导细节可能需要自己结合文档来进一步理解。 Conditional and Marginal Probability Path Conditional path的定义： $$p_0(\\cdot|z) = p_{\\text{init}},\\quad p_1(\\cdot|z) = \\delta_z \\quad \\text{for all } z\\in\\mathbb{R}^d$$ 这里的$\\delta_z$是一个Dirac delta distribution，表示只在z这个点上有概率，是一个确定性的分布。简单理解就是让一个随机初始化的分布经过一系列变化最终收缩到一个确定性的z上。当然这里的z你不要以为真的是一个点了，它是从一个$p_{data}$中sample得到的，如果$p_{data}$是一个点集，那么z就是一个点；如果$p_{data}$是一个图像集合，那么z就是一张图片。 Conditional path 就是从0-1过程中每一个t时，$p_{init}$和$p_{\\delta_z}$之间的一个插值分布，一种过渡状态。 One example: Gaussian Conditional Probability Path 我们希望得到一个从标准高斯分布到一个确定性的z的conditional path，即 $$p_t(\\cdot|z) = \\mathcal{N}(\\alpha_t z,\\; \\beta_t^2 I_d)$$或者写成 $$z \\sim p_{\\text{data}},\\; \\epsilon \\sim p_{\\text{init}} = \\mathcal{N}(0, I_d) \\;\\Rightarrow\\; x = \\alpha_t z + \\beta_t \\epsilon \\sim p_t$$ 其中t=0时，$\\alpha=0, \\beta=1$, t=1时，$\\alpha=1, \\beta=0$, 所以 t=0时， $p_0(\\cdot|z) = \\mathcal{N}(0, I_d)$, t=1时，$p_1(\\cdot|z) = \\mathcal{N}(z, 0) = \\delta_z$。 marginal probability path 在知道了conditional path大概是个什么东西后，我们可以定义marginal path了， $$z \\sim p_{\\text{data}},\\; x \\sim p_t(\\cdot|z) \\;\\Rightarrow\\; x \\sim p_t $$ 对于dataset中的每一个z，我们都能得到一个$p_t(\\cdot|z)$, marginal path就是按照z的概率对它们的conditional path进行积分加权。 $$ p_t(x) = \\int p_t(x|z) \\, p_{\\text{data}}(z) \\, dz $$ Conditional and Marginal Vector Fields ‼️ 对于conditional path, 我们按照定义有： ">
     <link rel="shortcut icon" href="/favicon.ico" />
 
     </head>
@@ -356,13 +356,7 @@
     
     <h3 id="lec2">Lec2
 </h3><ul>
-<li>
-<p>一个值得思考的问题，在上一讲中我们通过$∇\log𝑝(𝑋_𝑡)$可以直接优化概率分布，但是对于实际问题，比如图像生成，我们的target并不像target distribution一样有一个明确的概率分布公式，也就是第一节课中提到的不能score，只能sample，所以无法直接用对score求导的方式来做ODE或是SDE。
-我们将用训练神经网络的方式学习每一步的$U_t(x)$.</p>
-</li>
-<li>
-<p>第二节课主要讲了Flow Matching的原理，具体包括了conditional path 和 marginal path，以及它们对应的loss，最终的Flow Matching训练算法。本节课对应的视频部分地方可能讲的不是很清楚，所以一些数学推导细节可能需要自己结合文档来进一步理解。</p>
-</li>
+<li>第二节课主要讲了Flow Matching的原理，具体包括了conditional path 和 marginal path，以及它们对应的loss，最终的Flow Matching训练算法。本节课对应的视频部分地方可能讲的不是很清楚，所以一些数学推导细节可能需要自己结合文档来进一步理解。</li>
 </ul>
 <h3 id="conditional-and-marginal-probability-path">Conditional and Marginal Probability Path
 </h3><h4 id="conditional-path的定义">Conditional path的定义：
@@ -552,6 +546,19 @@ $$ \nabla_\theta \mathcal{L}_{\text{FM}}(\theta) = \nabla_\theta \mathcal{L}_{\t
     <h2 class="section-title">相关文章</h2>
     <div class="related-content">
         <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/mit_6.s184_2-score-functions-and-score-matching/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">MIT_6.S184_2 — Score Functions and Score Matching</h2>
+        </div>
+    </a>
+</article>
+
             
                 
 <article class="">

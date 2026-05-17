@@ -7,7 +7,31 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Mon, 11 May 2026 18:40:10 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 17 May 2026 14:49:20 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Diffusion</title>
+        <link>https://fuquan99666.github.io/categories/diffusion/</link>
+        <pubDate>Sun, 17 May 2026 14:49:20 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/categories/diffusion/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Flow Matching</title>
+        <link>https://fuquan99666.github.io/categories/flow-matching/</link>
+        <pubDate>Sun, 17 May 2026 14:49:20 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/categories/flow-matching/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Generative Model</title>
+        <link>https://fuquan99666.github.io/categories/generative-model/</link>
+        <pubDate>Sun, 17 May 2026 14:49:20 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/categories/generative-model/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>地理</title>
         <link>https://fuquan99666.github.io/categories/%E5%9C%B0%E7%90%86/</link>
         <pubDate>Mon, 11 May 2026 18:40:10 +0800</pubDate>
@@ -38,30 +62,6 @@
         
         <guid>https://fuquan99666.github.io/categories/risc-v/</guid>
         <description>&lt;img src="https://fuquan99666.github.io/categories/risc-v/1.png" alt="Featured image of post RISC V" /&gt;</description>
-        </item>
-        <item>
-        <title>Diffusion</title>
-        <link>https://fuquan99666.github.io/categories/diffusion/</link>
-        <pubDate>Mon, 04 May 2026 10:42:29 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/categories/diffusion/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Flow Matching</title>
-        <link>https://fuquan99666.github.io/categories/flow-matching/</link>
-        <pubDate>Mon, 04 May 2026 10:42:29 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/categories/flow-matching/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Generative Model</title>
-        <link>https://fuquan99666.github.io/categories/generative-model/</link>
-        <pubDate>Mon, 04 May 2026 10:42:29 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/categories/generative-model/</guid>
-        <description></description>
         </item>
         <item>
         <title>FPGA</title>
