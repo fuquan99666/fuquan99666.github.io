@@ -7,7 +7,20 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
         <copyright>zz486</copyright>
-        <lastBuildDate>Mon, 11 May 2026 10:17:20 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/cs61c/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 17 May 2026 21:07:07 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/cs61c/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS61c_13 — Vertual Memory I</title>
+        <link>https://fuquan99666.github.io/p/cs61c_13-vertual-memory-i/</link>
+        <pubDate>Sun, 17 May 2026 21:07:07 +0800</pubDate>
+        
+        <guid>https://fuquan99666.github.io/p/cs61c_13-vertual-memory-i/</guid>
+        <description>&lt;h3 id=&#34;lab07&#34;&gt;Lab07
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;在lab07中我们将和cache做一些有意思的事情，给我一种感觉就是简化版ICS的cache lab.&lt;/li&gt;
+&lt;li&gt;TBD&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
         <title>CS61c_12 — Project 3: 古法编程CPU</title>
         <link>https://fuquan99666.github.io/p/cs61c_12-project-3-%E5%8F%A4%E6%B3%95%E7%BC%96%E7%A8%8Bcpu/</link>
         <pubDate>Mon, 11 May 2026 10:17:20 +0800</pubDate>

@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
-<title>MIT_6.S184_0</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Lab07 在lab07中我们将和cache做一些有意思的事情，给我一种感觉就是简化版ICS的cache lab. TBD ">
+<title>CS61c_13 — Vertual Memory I</title>
 
-<link rel='canonical' href='https://fuquan99666.github.io/p/mit_6.s184_0/'>
+<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_13-vertual-memory-i/'>
 
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="MIT_6.S184_0">
-<meta property='og:description' content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/mit_6.s184_0/'>
+<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_13 — Vertual Memory I">
+<meta property='og:description' content="Lab07 在lab07中我们将和cache做一些有意思的事情，给我一种感觉就是简化版ICS的cache lab. TBD ">
+<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_13-vertual-memory-i/'>
 <meta property='og:site_name' content='My Site'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-05-01T08:29:30&#43;08:00'/><meta property='article:modified_time' content='2026-05-01T08:29:30&#43;08:00'/>
-<meta name="twitter:title" content="MIT_6.S184_0">
-<meta name="twitter:description" content="写在前面的 在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！ 宗门心法 All of these generative models generate objects by iteratively converting noise into data. 至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。 当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！ A Reminder on Probability Theory 文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：\n">
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-05-17T21:07:07&#43;08:00'/><meta property='article:modified_time' content='2026-05-17T21:07:07&#43;08:00'/>
+<meta name="twitter:title" content="CS61c_13 — Vertual Memory I">
+<meta name="twitter:description" content="Lab07 在lab07中我们将和cache做一些有意思的事情，给我一种感觉就是简化版ICS的cache lab. TBD ">
     <link rel="shortcut icon" href="/favicon.ico" />
 
     </head>
@@ -249,11 +249,7 @@
   <ol>
     <li>
       <ol>
-        <li><a href="#写在前面的">写在前面的</a></li>
-        <li><a href="#宗门心法">宗门心法</a></li>
-        <li><a href="#a-reminder-on-probability-theory">A Reminder on Probability Theory</a></li>
-        <li><a href="#lec1">Lec1</a></li>
-        <li><a href="#lab0">Lab0</a></li>
+        <li><a href="#lab07">Lab07</a></li>
       </ol>
     </li>
   </ol>
@@ -274,16 +270,12 @@
     
     <header class="article-category">
         
-            <a href="/categories/diffusion/" >
-                Diffusion
+            <a href="/categories/cs61c/" style="background-color: ; color: #fff;">
+                CS61c
             </a>
         
-            <a href="/categories/flow-matching/" >
-                Flow Matching
-            </a>
-        
-            <a href="/categories/generative-model/" >
-                Generative Model
+            <a href="/categories/risc-v/" style="background-color: ; color: #fff;">
+                RISC V
             </a>
         
     </header>
@@ -291,7 +283,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/mit_6.s184_0/">MIT_6.S184_0</a>
+            <a href="/p/cs61c_13-vertual-memory-i/">CS61c_13 — Vertual Memory I</a>
         </h2>
     
         
@@ -313,7 +305,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published" datetime='2026-05-01T08:29:30&#43;08:00'>2026-05-01</time>
+                <time class="article-time--published" datetime='2026-05-17T21:07:07&#43;08:00'>2026-05-17</time>
             </div>
         
 
@@ -328,7 +320,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 4 分钟
+                    阅读时长: 1 分钟
                 </time>
             </div>
         
@@ -343,75 +335,10 @@
     <section class="article-content">
     
     
-    <h3 id="写在前面的">写在前面的
+    <h3 id="lab07">Lab07
 </h3><ul>
-<li>在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！</li>
-</ul>
-<h3 id="宗门心法">宗门心法
-</h3><ul>
-<li>All of these generative models generate objects by iteratively converting noise into data.</li>
-<li>至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。</li>
-<li>当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！</li>
-</ul>
-<h3 id="a-reminder-on-probability-theory">A Reminder on Probability Theory
-</h3><ul>
-<li>
-<p>文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：</p>
-</li>
-<li>
-<p>均值的定义不仅仅是</p>
-$$\int x \, p(x) \, dx$$<p>
-可以证明它也是</p>
-$$
-\mathbb{E}[X] = \arg\min_{z \in \mathbb{R}^d} \int \|x - z\|^2 \, p_X(x) \, dx = \int x \, p_X(x) \, dx
-$$<p>
-二次误差期望的最小参数就是均值。</p>
-</li>
-<li>
-<p>对于两个随机变量X和Y，它们的联合概率对其中一个变量积分得到的是另一个变量的边缘概率。</p>
-</li>
-<li>
-<p>文档中花了不少篇幅讲述E(X|Y)的定义。本人之前的理解就是Y是条件，那么要先确定条件，外层对y积分，然后在y确定的条件下对X求期望。文档中通过一个二次误差的最优函数来定义：
-</p>
-$$
-g_* := \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \mathbb{E}\left[\|X - g(Y)\|^2\right]
-= \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \int \|x - g(y)\|^2 \, p_{X,Y}(x,y) \, dx dy
-= \arg\min_{g: \mathbb{R}^d \to \mathbb{R}^d} \int \left[ \int \|x - g(y)\|^2 \, p_{X \mid Y}(x \mid y) \, dx \right] p_Y(y) \, dy
-$$<p>
-对于这个我们可以理解为先遍历Y，对于每一个y，都可以对应唯一的一个值g(y)，可以由上面一阶期望的结论知道内层对x的积分误差如果想要取最小，那么一定有</p>
-$$
-\mathbb{E}[X \mid Y = y] := g_*(y) = \int x \, p_{X \mid Y}(x \mid y) \, dx
-$$<p>
-由于Y是一个随机变量，每一个y对应一个g(y)，那么g(Y)也是一个随机变量。</p>
-$$
-\mathbb{E}[X \mid Y] := g_*(Y)
-$$<p>
-请注意这里的E(X|Y)和E(X|Y=y)不是一个东西，后者是前者的一个特殊位置的值，前者则是关于Y的一个函数, 这个函数的意义是：对于每一个可能的 y，它给出一个数值，这个数值是在已知Y=y 的条件下，用二次距离来衡量最接近X的那个数。(唉唉，有点绕就对了😇)</p>
-</li>
-<li>
-<p>一个性质：</p>
-$$
-\mathbb{E}[\mathbb{E}[X \mid Y]] = \mathbb{E}[X]
-$$<p>
-证明如下：
-</p>
-$$
-\mathbb{E}[\mathbb{E}[X \mid Y]]
-= \int \left[ \int x \, p_{X \mid Y}(x \mid y) \, dx \right] p_Y(y) \, dy
-= \int \int x \, p_{X,Y}(x,y) \, dx \, dy
-= \int x \, p_X(x) \, dx
-= \mathbb{E}[X]
-$$</li>
-</ul>
-<h3 id="lec1">Lec1
-</h3><ul>
-<li>第一节课主要讲了生成模型的目标 ( p_init -&gt; p_data ), 以及如何使用ODE和SDE来实现simulate这个过程，简单的理解就是将ODE中的常数项参数表示为$∇\log𝑝(𝑋_𝑡)$此类的关于当前分布在目标分布上的概率(或者score)，从而将轨迹朝着增大data分布概率的方向前进。至于SED中的噪声项，暂时没看出有什么深远的意义，或许是增大选择路径，丰富最终的收敛结果？</li>
-</ul>
-<h3 id="lab0">Lab0
-</h3><ul>
-<li>友情提醒，lab中的一些函数没有具体实现，只有一个pass的不用写，它们的作用是函数示范。只有标注了raise NotImplementedError的函数才是需要我们自己实现的。</li>
-<li>这个lab个人感觉没有难度，基本上都是照着公式填就对了，但是官方的代码提供了非常牛逼的演示效果(包括过程图，视频)，以及几种函数分布供我们自由组合，可以说非常的亲民，做到了用最小的任务量，理解最核心的知识点，展示最生动的效果！</li>
-<li>核心是理解$∇\log𝑝(𝑋_𝑡)$作为$U_t(X)$的作用即可。</li>
+<li>在lab07中我们将和cache做一些有意思的事情，给我一种感觉就是简化版ICS的cache lab.</li>
+<li>TBD</li>
 </ul>
 
 </section>
@@ -481,12 +408,12 @@ $$</li>
             
                 
 <article class="">
-    <a href="/p/mit_6.s184_3-how-to-condition-on-a-prompt/">
+    <a href="/p/cs61c_12-project-3-%E5%8F%A4%E6%B3%95%E7%BC%96%E7%A8%8Bcpu/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">MIT_6.S184_3 — How To Condition on a Prompt</h2>
+            <h2 class="article-title">CS61c_12 — Project 3: 古法编程CPU</h2>
         </div>
     </a>
 </article>
@@ -494,12 +421,12 @@ $$</li>
             
                 
 <article class="">
-    <a href="/p/mit_6.s184_2-score-functions-and-score-matching/">
+    <a href="/p/cs61c_11-os-and-vm/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">MIT_6.S184_2 — Score Functions and Score Matching</h2>
+            <h2 class="article-title">CS61c_11 — OS and VM</h2>
         </div>
     </a>
 </article>
@@ -507,12 +434,38 @@ $$</li>
             
                 
 <article class="">
-    <a href="/p/mit_6.s184_1-flow-matching/">
+    <a href="/p/cs61c_10-cache/">
         
         
 
         <div class="article-details">
-            <h2 class="article-title">MIT_6.S184_1 — Flow Matching</h2>
+            <h2 class="article-title">CS61c_10 — Cache</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/cs61c_9-pipelining/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CS61c_9 — Pipelining</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/cs61c_8-control-logic-and-lab05/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">CS61c_8 — Control logic and lab05</h2>
         </div>
     </a>
 </article>
