@@ -334,9 +334,175 @@ $$\mathcal{L}_{\text{CFM}}^{\text{CFG}}(\theta) = \mathbb{E}_{(z,y) \sim p_{\tex
         <description>&lt;h3 id=&#34;lab07&#34;&gt;Lab07
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;在lab07中我们将和cache做一些有意思的事情，给我一种感觉就是简化版ICS的cache lab.&lt;/li&gt;
-&lt;li&gt;TBD&lt;/li&gt;
+&lt;li&gt;文档中有一句话我觉得说的很好 - Notice that in neither of the last two exercises did we actually know the cache parameters of our machine. We just made the code exhibit a higher degree of locality, and this magically made things go faster! This tells us that caches, regardless of their specific parameters, will always benefit from operating on code which exhibits a high degree of locality. 对于矩阵乘法的优化，我们其实并不知道具体的cache参数，因为cache本身及其的复杂，数据在内存中地址如何排布又是一个很复杂的问题，所以我们仅从更大的局部性来考虑。&lt;/li&gt;
 &lt;/ul&gt;
-</description>
+&lt;h3 id=&#34;virtual-memory-concepts&#34;&gt;Virtual Memory Concepts
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Virtual Memory - Next level in the memory hierarchy:
+&lt;ul&gt;
+&lt;li&gt;Provides program with illusion(错觉) of a very large main memory: Working set of &amp;ldquo;page&amp;rdquo; reside in main memory - others are on disk.&lt;/li&gt;
+&lt;li&gt;Demand paging: Provides the ability to run programs larger than the primary memory (DRAM)&lt;/li&gt;
+&lt;li&gt;Hides differences between machine configurations.我们可能会购买不同配置的电脑，比如8GB、16GB、32或是64GB内存的，虚拟内存给了我们统一的内存管理方式。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Also allows OS to share memory, protect programs from each other&lt;/li&gt;
+&lt;li&gt;Today, more important for protection than just another level of memory hierarchy.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;值的注意的是VM的概念出现的非常早，大概是上世纪60年代，在IBM 360处理器中引入的，甚至比cache早，因为那个时候处理器和访存速度的差距很小，还不需要cache，但是我们需要支持多个程序同时进行，为了不让它们的内存打架，VM应运而生。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;下图是添加了VM的memory hierarchy, 可以看到VM的位置处在DRAM和磁盘之间。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;1.png&#39; width=500&gt;
+&lt;/center&gt;
+&lt;h4 id=&#34;address-spaces&#34;&gt;Address Spaces
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Address space = set of addresses for all available memory locations.&lt;/li&gt;
+&lt;li&gt;Now, two kinds of memory addresses:
+&lt;ul&gt;
+&lt;li&gt;Virtual address space:
+&lt;ul&gt;
+&lt;li&gt;Set of addresses that the user program knows about.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Physical Address Space:
+&lt;ul&gt;
+&lt;li&gt;Set of addresses that map to actual physical locations in memory&lt;/li&gt;
+&lt;li&gt;Hidden from user applications. 这也是我们之前提到的有了VM之后，我们不需要在意不同机器的配置，因为VM会提供一个统一的内存空间管理。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;一个比喻&#34;&gt;一个比喻
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在一个图书管理系统中，每一本书的名字就是一个virtual address, 而它的实际图书编号则是一个physical address, 我们通过图书管理系统的目录来查找这个书名的编号，就相当于是VM中的地址转换过程，在得到了书籍编号后，你可能发现这本书在该图书馆，也有可能在别的图书馆，这就相当于是一个在DRAM，一个在硬盘中。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;physical-memory-and-storage&#34;&gt;Physical Memory and Storage
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;在我们开始具体了解虚拟内存如何工作前，很有必要先了解一下物理内存和存储设备的情况。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;memory&#34;&gt;Memory
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;DRAM (Dynamic Random Access Memory) - 主要的物理内存，需要注意的是DRAM比SRAM小很多，密度高很多，一般可以用来制造主内存，而后者一般用来制作一、二级缓存。不论是DRAM还是SRAM，都是易失性的，也就是说当电源断掉之后，里面的数据就会丢失了。&lt;/li&gt;
+&lt;li&gt;需要注意的是DRAM比SRAM的易失性更高，在通电情况喜爱，SRAM不会损失数据，但是DRAM会，因为DRAM的存储单元是一个电容，电容会漏电，所以需要不断的刷新(刷新就是微处理器会不断的读取并且写会DRAM)来保持数据的完整性，而SRAM则是由多个晶体管组成的，相对来说要稳定很多。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;值得注意的是，经常有人说什么什么DDR3、4、5的内存条，要明确内存条使用DRAM制造的，DDR3、4、5只是一种接口协议，其实HBM也是一种接口协议(高带宽传输，专用于服务器、AI训练)，所以不要把DDR4当成是内存条本身了。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;storage&#34;&gt;Storage
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;无论是SSD还是HDD，都是非易失性的存储设备，也就是说当电源断掉之后，里面的数据依然会保留。SSD的读写速度比HDD快很多，因为HDD是机械式的，需要通过磁头来读取数据，而SSD则是电子式(闪存)的，没有机械部件，所以速度更快。&lt;/li&gt;
+&lt;li&gt;这一块细节比较多，可以自行前往youtube上搜索相关工作原理。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;memory-manager&#34;&gt;Memory Manager
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;如下图, Memory Manager可以将虚拟地址转换成物理地址，每一个进程都认为自己拥有一个完整的虚拟地址空间。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;2.png&#39; width=500&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;下图展示了多进程的情况，每个进程都有自己完整的虚拟内存空间，但是它们被Memory Manager映射到同一个物理内存空间的不同区域了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;3.png&#39; width=500&gt;
+&lt;/center&gt;
+&lt;h4 id=&#34;responsibilities-of-memory-manager&#34;&gt;Responsibilities of Memory Manager
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;Map virtual to physical addresses&lt;/li&gt;
+&lt;li&gt;Protection:
+&lt;ul&gt;
+&lt;li&gt;Isolate memory between processes&lt;/li&gt;
+&lt;li&gt;each process gets dedicate &amp;ldquo;private&amp;rdquo; memory&lt;/li&gt;
+&lt;li&gt;Errors in one program won&amp;rsquo;t corrupt memory of other program&lt;/li&gt;
+&lt;li&gt;Prevent user programs from messing with OS&amp;rsquo;s memory&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Swap memory to disk
+&lt;ul&gt;
+&lt;li&gt;当我们启动很多进程时，内存放不下了怎么办呢？Memory Manager会将一些不常用的内存页交换到磁盘上，我们在linux的终端中使用free -h 就可以看到swap的使用情况。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;paged-memory&#34;&gt;Paged Memory
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;不知道这门课学到现在，大家有没有一种感觉就是，计算机体系设计一直都在追求一种简单化结构化的思想，我们不希望引入变量，这一点在之前的project3中亦有体会，上面我们提到swap，于是我们希望内存和磁盘之间的数据交换能以一个固定的单位进行，这个单位就是页(page).&lt;/li&gt;
+&lt;li&gt;ok, 所以我们很自然的可以将Physical Memory按照page来broken，通常一个page大小是4kib或者更大，而我们的RISC-V要求能够读取一个字节或是word，于是我们需要在页中进行偏移访址。对于一个32位的地址空间来说，低12位用来表示页内偏移，高20位用来表示页号，即我们拥有100万个页，每个页4kiB。&lt;/li&gt;
+&lt;li&gt;下图生动的展示了page的工作原理：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+    &lt;img src=&#39;4.png&#39; width=500&gt;
+&lt;/center&gt;
+OS会记录当前正在活跃的进程，选择对应的page table，然后memory manager会提取虚拟内存的高20位，在page table中查询对应的physical page number, 然后计算physical page number * page size + offset(这个和虚拟地址的低12位相同)， 就是最终的physical address了。
+&lt;h4 id=&#34;where-is-the-page-table&#34;&gt;Where is the Page table?
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;一个很自然的问题，page table存在哪里呢？很显然，每一个进程都需要自己的page table，一个single page table，如果是32位地址，每个页面是4kb的话，那么就是$2^{20} * 4B = 4MB$, 为什么这里的每一个entry是4个字节呢？按照之前的理解不是20位就行了吗，其实我们在entry中不仅需要存储对应的physical page number，还要存储一些特殊位，比如上图中的write enable bit等等，所以凑一个整数就是4字节了。如此一个4MB的页表对于4GB的内存来说其实还好，但是对于cache来说就太大了，不可能把完整的一个页表放入cache中，可以考虑放一些最常用的entry(TLB)，使用LRU策略.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Blocks vs Pages
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;In caches, we deal with individual blocks, usually 64B on modern systems.
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;In VM, we deal with individual pages, usually 4KB on modern systems.
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h4 id=&#34;page-fault&#34;&gt;Page Fault
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;在上面我们提到一个entry是4字节的，包含了20位的PPN和一些特殊位，其中有两个特殊位是valid bit和DRAM/disk bit, 如果valid bit是0，说明这个虚拟内存压根还没allocate到physical memory上，这个时候会触发一个page fault，OS会为其分配一个新的physical page, 并且更新entry中的PPN和valid bit，当然如果DRAM满了我们就需要用LRU策略将一些不常用的页交换到磁盘上了。如果valid bit是1，DRAM/disk bit是1，说明这个页就在内存里，我们直接查找PPN，然后该干啥干啥；如果是0，说明这个页被交换到磁盘上了，我们需要先将它从磁盘上交换会内存，然后更新entry中的PPN和DRAM/disk bit，最后再查找PPN进行访问。&lt;/li&gt;
+&lt;li&gt;这里当valid bit = 0 或者是 valid bit = 1 并且 DRAM/disk bit = 0 都会触发page fault，OS会接管当前的进程，然后会等待数据准备好。同时，如果OS发现page need to be swapped from disk to memory, 这个时间很长，OS会context switch到另一个准备好的程序执行，当page准备好后，再重新执行原先的程序。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;one-interesting-code&#34;&gt;One interesting code
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;这是课件中的一段代码，我在服务器和本地mac是都测试了一下，确实可以分配到130左右TB的空间，可能是由于没有真正去读写，所以只是停留在了虚拟内存的分配上，物理内存和磁盘都没有真正的被分配，所以才可以分配这么多的空间。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt;&lt;span class=&#34;cpf&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#include&lt;/span&gt;&lt;span class=&#34;cpf&#34;&gt;&amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;void&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;){&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;G&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1024&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1024&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1024&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;++&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;){&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		&lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;p&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;malloc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;G&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;sizeof&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;kt&#34;&gt;char&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;p&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;NULL&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;){&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;			&lt;span class=&#34;nf&#34;&gt;fprintf&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;stderr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#34;failed to allocate &amp;gt; %g TiBytes&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\n&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;n&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;mf&#34;&gt;1000.0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;			&lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;		&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description>
         </item>
         <item>
         <title>MIT_6.S184_2 — Score Functions and Score Matching</title>
