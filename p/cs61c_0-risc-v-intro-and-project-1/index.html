@@ -1,950 +1,141 @@
-<!DOCTYPE html>
-<html lang="en-us" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="我的CS61c学习笔记 感谢csdiy提供的课程资料 看的是20Fall的课程视频 由于前六节的内容是开学前看的，所以从第七节开始记录笔记。 课程资料可以fork这个仓库 特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。 RISC-V intro 指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。 主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。 优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃 70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。 RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide. 深入理解RISC-V🐶 basic concepts Registers，there is no variable in assembly language, to keep Hardware simple. It is near to the cpu and fast.And their number is limited, which is a main feature of ISA. RISC-V has 32 registers, in the RV32 one word is 32 bits. Referred by x0-x31, and x0 is special, always 0. Hash(#) comments, like python.🐍 In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands. Addition and Subtraction add x1,x2,x3 # x1 = x2 + x3 sub x4,x5,x6 # x4 = x5 - x6 example: 1 2 3 4 # f = (g + h) - (i + j) add x5,x20,x21 # x5 = x20 + x21 add x6,x22,x23 # x6 = x22 + x23 sub x19,x5,x6 # x19 = x5 - x6 Immediates Immediates are numerical constants. addi x3,x4,10 # x3 = x4 + 10 but don&rsquo;t support sub immediate why? because we can use addi with negative immediate to achieve the same effect. addi x3,x4,-10 # x3 = x4 - 10 how to move? add x1,x0,x2 # x1 = x2 add x0,x1,x2 # will not do anything, because x0 is hardwired to 0. Project 1: Life Game Preparation use PPM ASCII files (type P3) with maximum value 255, for example: 1 2 3 4 5 6 7 8 P3 4 5 255 0 0 0 0 0 0 0 0 0 0 0 0 255 255 255 255 255 255 255 255 255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 P3 means ASCII encoding,4 5 means width=4,height=5,255 means max color value. each pixel is represented by three integers(RGB), each ranging from 0 to 255. (255,255,255) is white,(0,0,0) is black. the command convert can be used to convert between png to ppm, for example: 1 2 convert -compress none glider.png glider.ppm convert glider.ppm glider.png structure of the Image and I/O functions 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 typedef struct Color { uint8_t R; uint8_t G; uint8_t B; } Color; typedef struct Image { Color **image; uint32_t rows; uint32_t cols; } Image; // an example of reading a text file in C FILE *fp = fopen(&#34;diary.txt&#34;, &#34;r&#34;); char buf[20]; int num; fscanf(fp, &#34;%s %d&#34;, buf, &amp;num); fclose(fp); Part A1: Reading,writing,and freeing images 说实话不难但是挺坑的🤣 使用malloc分配image二维数组，image要分配，然后每一行也要分配。 一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。 free的时候先free每一行，然后free image，最后free Image结构体本身。 Part A2: 使用刚写的A1藏信息 人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。 比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。 这里直接用最低一位，0和1来表示黑白。天才啊😆 需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。 写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣 Part B: Game of Life 1 2 3 4 5 6 7 8 9 10 11 12 13 基本规则： Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation. Any dead cell with three live neighbours becomes a live cell in the next generation. All other live cells die in the next generation. Similarly, all other dead cells stay dead. 整理成二进制格式： 对于活细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 1 0 0 -&gt; 2 or 3 neighbors survive 对于死细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 0 0 0 -&gt; 3 neighbors become alive 即0b000001100000001000 0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。 使用格式：./gameOfLife [file] [rule]\n">
-<title>CS61c_0 — RISC-V intro and Project 1</title>
-
-<link rel='canonical' href='https://fuquan99666.github.io/p/cs61c_0-risc-v-intro-and-project-1/'>
-
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="CS61c_0 — RISC-V intro and Project 1">
-<meta property='og:description' content="我的CS61c学习笔记 感谢csdiy提供的课程资料 看的是20Fall的课程视频 由于前六节的内容是开学前看的，所以从第七节开始记录笔记。 课程资料可以fork这个仓库 特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。 RISC-V intro 指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。 主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。 优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃 70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。 RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide. 深入理解RISC-V🐶 basic concepts Registers，there is no variable in assembly language, to keep Hardware simple. It is near to the cpu and fast.And their number is limited, which is a main feature of ISA. RISC-V has 32 registers, in the RV32 one word is 32 bits. Referred by x0-x31, and x0 is special, always 0. Hash(#) comments, like python.🐍 In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands. Addition and Subtraction add x1,x2,x3 # x1 = x2 + x3 sub x4,x5,x6 # x4 = x5 - x6 example: 1 2 3 4 # f = (g + h) - (i + j) add x5,x20,x21 # x5 = x20 + x21 add x6,x22,x23 # x6 = x22 + x23 sub x19,x5,x6 # x19 = x5 - x6 Immediates Immediates are numerical constants. addi x3,x4,10 # x3 = x4 + 10 but don&rsquo;t support sub immediate why? because we can use addi with negative immediate to achieve the same effect. addi x3,x4,-10 # x3 = x4 - 10 how to move? add x1,x0,x2 # x1 = x2 add x0,x1,x2 # will not do anything, because x0 is hardwired to 0. Project 1: Life Game Preparation use PPM ASCII files (type P3) with maximum value 255, for example: 1 2 3 4 5 6 7 8 P3 4 5 255 0 0 0 0 0 0 0 0 0 0 0 0 255 255 255 255 255 255 255 255 255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 P3 means ASCII encoding,4 5 means width=4,height=5,255 means max color value. each pixel is represented by three integers(RGB), each ranging from 0 to 255. (255,255,255) is white,(0,0,0) is black. the command convert can be used to convert between png to ppm, for example: 1 2 convert -compress none glider.png glider.ppm convert glider.ppm glider.png structure of the Image and I/O functions 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 typedef struct Color { uint8_t R; uint8_t G; uint8_t B; } Color; typedef struct Image { Color **image; uint32_t rows; uint32_t cols; } Image; // an example of reading a text file in C FILE *fp = fopen(&#34;diary.txt&#34;, &#34;r&#34;); char buf[20]; int num; fscanf(fp, &#34;%s %d&#34;, buf, &amp;num); fclose(fp); Part A1: Reading,writing,and freeing images 说实话不难但是挺坑的🤣 使用malloc分配image二维数组，image要分配，然后每一行也要分配。 一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。 free的时候先free每一行，然后free image，最后free Image结构体本身。 Part A2: 使用刚写的A1藏信息 人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。 比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。 这里直接用最低一位，0和1来表示黑白。天才啊😆 需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。 写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣 Part B: Game of Life 1 2 3 4 5 6 7 8 9 10 11 12 13 基本规则： Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation. Any dead cell with three live neighbours becomes a live cell in the next generation. All other live cells die in the next generation. Similarly, all other dead cells stay dead. 整理成二进制格式： 对于活细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 1 0 0 -&gt; 2 or 3 neighbors survive 对于死细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 0 0 0 -&gt; 3 neighbors become alive 即0b000001100000001000 0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。 使用格式：./gameOfLife [file] [rule]\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_0-risc-v-intro-and-project-1/'>
-<meta property='og:site_name' content='My Site'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-11T16:51:41&#43;08:00'/><meta property='article:modified_time' content='2026-01-11T16:51:41&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/st.jpg' />
-<meta name="twitter:title" content="CS61c_0 — RISC-V intro and Project 1">
-<meta name="twitter:description" content="我的CS61c学习笔记 感谢csdiy提供的课程资料 看的是20Fall的课程视频 由于前六节的内容是开学前看的，所以从第七节开始记录笔记。 课程资料可以fork这个仓库 特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。 RISC-V intro 指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。 主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。 优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃 70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。 RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide. 深入理解RISC-V🐶 basic concepts Registers，there is no variable in assembly language, to keep Hardware simple. It is near to the cpu and fast.And their number is limited, which is a main feature of ISA. RISC-V has 32 registers, in the RV32 one word is 32 bits. Referred by x0-x31, and x0 is special, always 0. Hash(#) comments, like python.🐍 In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands. Addition and Subtraction add x1,x2,x3 # x1 = x2 + x3 sub x4,x5,x6 # x4 = x5 - x6 example: 1 2 3 4 # f = (g + h) - (i + j) add x5,x20,x21 # x5 = x20 + x21 add x6,x22,x23 # x6 = x22 + x23 sub x19,x5,x6 # x19 = x5 - x6 Immediates Immediates are numerical constants. addi x3,x4,10 # x3 = x4 + 10 but don&rsquo;t support sub immediate why? because we can use addi with negative immediate to achieve the same effect. addi x3,x4,-10 # x3 = x4 - 10 how to move? add x1,x0,x2 # x1 = x2 add x0,x1,x2 # will not do anything, because x0 is hardwired to 0. Project 1: Life Game Preparation use PPM ASCII files (type P3) with maximum value 255, for example: 1 2 3 4 5 6 7 8 P3 4 5 255 0 0 0 0 0 0 0 0 0 0 0 0 255 255 255 255 255 255 255 255 255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 P3 means ASCII encoding,4 5 means width=4,height=5,255 means max color value. each pixel is represented by three integers(RGB), each ranging from 0 to 255. (255,255,255) is white,(0,0,0) is black. the command convert can be used to convert between png to ppm, for example: 1 2 convert -compress none glider.png glider.ppm convert glider.ppm glider.png structure of the Image and I/O functions 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 typedef struct Color { uint8_t R; uint8_t G; uint8_t B; } Color; typedef struct Image { Color **image; uint32_t rows; uint32_t cols; } Image; // an example of reading a text file in C FILE *fp = fopen(&#34;diary.txt&#34;, &#34;r&#34;); char buf[20]; int num; fscanf(fp, &#34;%s %d&#34;, buf, &amp;num); fclose(fp); Part A1: Reading,writing,and freeing images 说实话不难但是挺坑的🤣 使用malloc分配image二维数组，image要分配，然后每一行也要分配。 一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。 free的时候先free每一行，然后free image，最后free Image结构体本身。 Part A2: 使用刚写的A1藏信息 人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。 比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。 这里直接用最低一位，0和1来表示黑白。天才啊😆 需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。 写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣 Part B: Game of Life 1 2 3 4 5 6 7 8 9 10 11 12 13 基本规则： Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation. Any dead cell with three live neighbours becomes a live cell in the next generation. All other live cells die in the next generation. Similarly, all other dead cells stay dead. 整理成二进制格式： 对于活细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 1 0 0 -&gt; 2 or 3 neighbors survive 对于死细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 0 0 0 -&gt; 3 neighbors become alive 即0b000001100000001000 0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。 使用格式：./gameOfLife [file] [rule]\n"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://fuquan99666.github.io/st.jpg' />
-    <link rel="shortcut icon" href="/favicon.ico" />
-
-    </head>
-    <body class="
-    article-page
-    ">
-    <script>
-        (function() {
-            const colorSchemeKey = 'StackColorScheme';
-            if(!localStorage.getItem(colorSchemeKey)){
-                localStorage.setItem(colorSchemeKey, "auto");
-            }
-        })();
-    </script><script>
-    (function() {
-        const colorSchemeKey = 'StackColorScheme';
-        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
-        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-
-        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
-            
-
-            document.documentElement.dataset.scheme = 'dark';
-        } else {
-            document.documentElement.dataset.scheme = 'light';
-        }
-    })();
-</script>
-<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
-    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
-        <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-        </span>
-    </button>
-
-    <header>
-        
-            
-            <figure class="site-avatar">
-                <a href="/">
-                
-                    
-                    
-                    
-                        
-                        <img src="/img/avatar_hu_e94f98a3296399de.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
-                    
-                
-                </a>
-                
-                    <span class="emoji">🍥</span>
-                
-            </figure>
-            
-        
-        
-        <div class="site-meta">
-            <h1 class="site-name"><a href="/">My Site</a></h1>
-            <h2 class="site-description">欢迎来到我的网站！</h2>
-        </div>
-    </header><ol class="menu-social">
-            
-                <li>
-                    <a 
-                        href='https://github.com/fuquan99666'
-                        target="_blank"
-                        title="GitHub"
-                        rel="me"
-                    >
-                        
-                        
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
-</svg>
-
-
-
-                        
-                    </a>
-                </li>
-            
-        </ol><ol class="menu" id="main-menu">
-        
-        
-        
-        <li >
-            <a href='/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <polyline points="5 12 3 12 12 3 21 12 19 12" />
-  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-</svg>
-
-
-
-                
-                <span>主页</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/%E5%85%B3%E4%BA%8E/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="7" r="4" />
-  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-</svg>
-
-
-
-                
-                <span>关于</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/archives/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <rect x="3" y="4" width="18" height="4" rx="2" />
-  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
-  <line x1="10" y1="12" x2="14" y2="12" />
-</svg>
-
-
-
-                
-                <span>归档</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/search/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-                
-                <span>搜索</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/%E5%8F%8B%E9%93%BE/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
-  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
-</svg>
-
-
-
-                
-                <span>友链</span>
-            </a>
-        </li>
-        
-        <li class="menu-bottom-section">
-            <ol class="menu">
-
-                
-                    <li id="dark-mode-toggle">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="8" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="16" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <span>暗色模式</span>
-                    </li>
-                
-            </ol>
-        </li>
-    </ol>
-</aside>
-
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#我的cs61c学习笔记">我的CS61c学习笔记</a>
-      <ol>
-        <li><a href="#risc-v-intro">RISC-V intro</a></li>
-        <li><a href="#深入理解risc-v">深入理解RISC-V🐶</a>
-          <ol>
-            <li><a href="#basic-concepts">basic concepts</a></li>
-            <li><a href="#addition-and-subtraction">Addition and Subtraction</a></li>
-            <li><a href="#immediates">Immediates</a></li>
-          </ol>
-        </li>
-        <li><a href="#project-1-life-game">Project 1: Life Game</a>
-          <ol>
-            <li><a href="#preparation">Preparation</a></li>
-            <li><a href="#part-a1-readingwritingand-freeing-images">Part A1: Reading,writing,and freeing images</a></li>
-            <li><a href="#part-a2-使用刚写的a1藏信息">Part A2: 使用刚写的A1藏信息</a></li>
-            <li><a href="#part-b-game-of-life">Part B: Game of Life</a></li>
-            <li><a href="#part-c-其实官方没有">Part C: 其实官方没有😃</a></li>
-          </ol>
-        </li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
-            <main class="main full-width">
-    <article class="has-image main-article">
-    <header class="article-header">
-        <div class="article-image">
-            <a href="/p/cs61c_0-risc-v-intro-and-project-1/">
-                
-                    <img src="/st.jpg" loading="lazy" alt="Featured image of post CS61c_0 — RISC-V intro and Project 1" />
-                
-            </a>
-        </div>
-    
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/cs61c/" style="background-color: ; color: #fff;">
-                CS61c
-            </a>
-        
-            <a href="/categories/risc-v/" style="background-color: ; color: #fff;">
-                RISC V
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/p/cs61c_0-risc-v-intro-and-project-1/">CS61c_0 — RISC-V intro and Project 1</a>
-        </h2>
-    
-        
-    </div>
-
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published" datetime='2026-01-11T16:51:41&#43;08:00'>2026-01-11</time>
-            </div>
-        
-
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <polyline points="12 7 12 12 15 15" />
-</svg>
-
-
-
-                <time class="article-time--reading">
-                    阅读时长: 5 分钟
-                </time>
-            </div>
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-
-    <section class="article-content">
-    
-    
-    <h2 id="我的cs61c学习笔记">我的CS61c学习笔记
-</h2><ul>
-<li>感谢csdiy提供的<a class="link" href="https://csdiy.wiki/%e4%bd%93%e7%b3%bb%e7%bb%93%e6%9e%84/CS61C/"  target="_blank" rel="noopener"
-    >课程资料</a></li>
-<li>看的是20Fall的<a class="link" href="https://www.bilibili.com/video/BV17b42177VG/?share_source=copy_webvd_source=7c3823b46a52fbbef42b79e01d55c300"  target="_blank" rel="noopener"
-    >课程视频</a></li>
-<li>由于前六节的内容是开学前看的，所以从第七节开始记录笔记。</li>
-<li>课程资料可以fork这个<a class="link" href="https://github.com/InsideEmpire/CS61C-Assignment"  target="_blank" rel="noopener"
-    >仓库</a></li>
-<li>特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。</li>
-</ul>
-<h3 id="risc-v-intro">RISC-V intro
-</h3><ul>
-<li>指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。</li>
-<li>主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。</li>
-<li>优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃</li>
-<li>70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。</li>
-<li>RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide.</li>
-</ul>
-<h3 id="深入理解risc-v">深入理解RISC-V🐶
-</h3><h4 id="basic-concepts">basic concepts
-</h4><ol>
-<li>Registers，there is no variable in assembly language, to keep Hardware simple.
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='我的CS61c学习笔记 感谢csdiy提供的课程资料 看的是20Fall的课程视频 由于前六节的内容是开学前看的，所以从第七节开始记录笔记。 课程资料可以fork这个仓库 特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。 RISC-V intro 指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。 主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。 优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃 70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。 RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide. 深入理解RISC-V🐶 basic concepts Registers，there is no variable in assembly language, to keep Hardware simple. It is near to the cpu and fast.And their number is limited, which is a main feature of ISA. RISC-V has 32 registers, in the RV32 one word is 32 bits. Referred by x0-x31, and x0 is special, always 0. Hash(#) comments, like python.🐍 In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands. Addition and Subtraction add x1,x2,x3 # x1 = x2 + x3 sub x4,x5,x6 # x4 = x5 - x6 example: 1 2 3 4 # f = (g + h) - (i + j) add x5,x20,x21 # x5 = x20 + x21 add x6,x22,x23 # x6 = x22 + x23 sub x19,x5,x6 # x19 = x5 - x6 Immediates Immediates are numerical constants. addi x3,x4,10 # x3 = x4 + 10 but don&rsquo;t support sub immediate why? because we can use addi with negative immediate to achieve the same effect. addi x3,x4,-10 # x3 = x4 - 10 how to move? add x1,x0,x2 # x1 = x2 add x0,x1,x2 # will not do anything, because x0 is hardwired to 0. Project 1: Life Game Preparation use PPM ASCII files (type P3) with maximum value 255, for example: 1 2 3 4 5 6 7 8 P3 4 5 255 0 0 0 0 0 0 0 0 0 0 0 0 255 255 255 255 255 255 255 255 255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 P3 means ASCII encoding,4 5 means width=4,height=5,255 means max color value. each pixel is represented by three integers(RGB), each ranging from 0 to 255. (255,255,255) is white,(0,0,0) is black. the command convert can be used to convert between png to ppm, for example: 1 2 convert -compress none glider.png glider.ppm convert glider.ppm glider.png structure of the Image and I/O functions 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 typedef struct Color { uint8_t R; uint8_t G; uint8_t B; } Color; typedef struct Image { Color **image; uint32_t rows; uint32_t cols; } Image; // an example of reading a text file in C FILE *fp = fopen("diary.txt", "r"); char buf[20]; int num; fscanf(fp, "%s %d", buf, &amp;num); fclose(fp); Part A1: Reading,writing,and freeing images 说实话不难但是挺坑的🤣 使用malloc分配image二维数组，image要分配，然后每一行也要分配。 一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。 free的时候先free每一行，然后free image，最后free Image结构体本身。 Part A2: 使用刚写的A1藏信息 人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。 比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。 这里直接用最低一位，0和1来表示黑白。天才啊😆 需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。 写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣 Part B: Game of Life 1 2 3 4 5 6 7 8 9 10 11 12 13 基本规则： Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation. Any dead cell with three live neighbours becomes a live cell in the next generation. All other live cells die in the next generation. Similarly, all other dead cells stay dead. 整理成二进制格式： 对于活细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 1 0 0 -> 2 or 3 neighbors survive 对于死细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 0 0 0 -> 3 neighbors become alive 即0b000001100000001000 0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。 使用格式：./gameOfLife [file] [rule]\n'><title>CS61c_0 — RISC-V intro and Project 1</title><link rel=canonical href=https://fuquan99666.github.io/p/cs61c_0-risc-v-intro-and-project-1/><link rel=stylesheet href=/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css><meta property='og:title' content="CS61c_0 — RISC-V intro and Project 1"><meta property='og:description' content='我的CS61c学习笔记 感谢csdiy提供的课程资料 看的是20Fall的课程视频 由于前六节的内容是开学前看的，所以从第七节开始记录笔记。 课程资料可以fork这个仓库 特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。 RISC-V intro 指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。 主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。 优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃 70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。 RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide. 深入理解RISC-V🐶 basic concepts Registers，there is no variable in assembly language, to keep Hardware simple. It is near to the cpu and fast.And their number is limited, which is a main feature of ISA. RISC-V has 32 registers, in the RV32 one word is 32 bits. Referred by x0-x31, and x0 is special, always 0. Hash(#) comments, like python.🐍 In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands. Addition and Subtraction add x1,x2,x3 # x1 = x2 + x3 sub x4,x5,x6 # x4 = x5 - x6 example: 1 2 3 4 # f = (g + h) - (i + j) add x5,x20,x21 # x5 = x20 + x21 add x6,x22,x23 # x6 = x22 + x23 sub x19,x5,x6 # x19 = x5 - x6 Immediates Immediates are numerical constants. addi x3,x4,10 # x3 = x4 + 10 but don&rsquo;t support sub immediate why? because we can use addi with negative immediate to achieve the same effect. addi x3,x4,-10 # x3 = x4 - 10 how to move? add x1,x0,x2 # x1 = x2 add x0,x1,x2 # will not do anything, because x0 is hardwired to 0. Project 1: Life Game Preparation use PPM ASCII files (type P3) with maximum value 255, for example: 1 2 3 4 5 6 7 8 P3 4 5 255 0 0 0 0 0 0 0 0 0 0 0 0 255 255 255 255 255 255 255 255 255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 P3 means ASCII encoding,4 5 means width=4,height=5,255 means max color value. each pixel is represented by three integers(RGB), each ranging from 0 to 255. (255,255,255) is white,(0,0,0) is black. the command convert can be used to convert between png to ppm, for example: 1 2 convert -compress none glider.png glider.ppm convert glider.ppm glider.png structure of the Image and I/O functions 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 typedef struct Color { uint8_t R; uint8_t G; uint8_t B; } Color; typedef struct Image { Color **image; uint32_t rows; uint32_t cols; } Image; // an example of reading a text file in C FILE *fp = fopen("diary.txt", "r"); char buf[20]; int num; fscanf(fp, "%s %d", buf, &amp;num); fclose(fp); Part A1: Reading,writing,and freeing images 说实话不难但是挺坑的🤣 使用malloc分配image二维数组，image要分配，然后每一行也要分配。 一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。 free的时候先free每一行，然后free image，最后free Image结构体本身。 Part A2: 使用刚写的A1藏信息 人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。 比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。 这里直接用最低一位，0和1来表示黑白。天才啊😆 需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。 写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣 Part B: Game of Life 1 2 3 4 5 6 7 8 9 10 11 12 13 基本规则： Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation. Any dead cell with three live neighbours becomes a live cell in the next generation. All other live cells die in the next generation. Similarly, all other dead cells stay dead. 整理成二进制格式： 对于活细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 1 0 0 -> 2 or 3 neighbors survive 对于死细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 0 0 0 -> 3 neighbors become alive 即0b000001100000001000 0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。 使用格式：./gameOfLife [file] [rule]\n'><meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_0-risc-v-intro-and-project-1/'><meta property='og:site_name' content='My Site'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:published_time' content='2026-01-11T16:51:41+08:00'><meta property='article:modified_time' content='2026-01-11T16:51:41+08:00'><meta property='og:image' content='https://fuquan99666.github.io/st.jpg'><meta name=twitter:title content="CS61c_0 — RISC-V intro and Project 1"><meta name=twitter:description content='我的CS61c学习笔记 感谢csdiy提供的课程资料 看的是20Fall的课程视频 由于前六节的内容是开学前看的，所以从第七节开始记录笔记。 课程资料可以fork这个仓库 特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。 RISC-V intro 指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。 主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。 优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃 70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。 RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide. 深入理解RISC-V🐶 basic concepts Registers，there is no variable in assembly language, to keep Hardware simple. It is near to the cpu and fast.And their number is limited, which is a main feature of ISA. RISC-V has 32 registers, in the RV32 one word is 32 bits. Referred by x0-x31, and x0 is special, always 0. Hash(#) comments, like python.🐍 In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands. Addition and Subtraction add x1,x2,x3 # x1 = x2 + x3 sub x4,x5,x6 # x4 = x5 - x6 example: 1 2 3 4 # f = (g + h) - (i + j) add x5,x20,x21 # x5 = x20 + x21 add x6,x22,x23 # x6 = x22 + x23 sub x19,x5,x6 # x19 = x5 - x6 Immediates Immediates are numerical constants. addi x3,x4,10 # x3 = x4 + 10 but don&rsquo;t support sub immediate why? because we can use addi with negative immediate to achieve the same effect. addi x3,x4,-10 # x3 = x4 - 10 how to move? add x1,x0,x2 # x1 = x2 add x0,x1,x2 # will not do anything, because x0 is hardwired to 0. Project 1: Life Game Preparation use PPM ASCII files (type P3) with maximum value 255, for example: 1 2 3 4 5 6 7 8 P3 4 5 255 0 0 0 0 0 0 0 0 0 0 0 0 255 255 255 255 255 255 255 255 255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 P3 means ASCII encoding,4 5 means width=4,height=5,255 means max color value. each pixel is represented by three integers(RGB), each ranging from 0 to 255. (255,255,255) is white,(0,0,0) is black. the command convert can be used to convert between png to ppm, for example: 1 2 convert -compress none glider.png glider.ppm convert glider.ppm glider.png structure of the Image and I/O functions 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 typedef struct Color { uint8_t R; uint8_t G; uint8_t B; } Color; typedef struct Image { Color **image; uint32_t rows; uint32_t cols; } Image; // an example of reading a text file in C FILE *fp = fopen("diary.txt", "r"); char buf[20]; int num; fscanf(fp, "%s %d", buf, &amp;num); fclose(fp); Part A1: Reading,writing,and freeing images 说实话不难但是挺坑的🤣 使用malloc分配image二维数组，image要分配，然后每一行也要分配。 一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。 free的时候先free每一行，然后free image，最后free Image结构体本身。 Part A2: 使用刚写的A1藏信息 人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。 比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。 这里直接用最低一位，0和1来表示黑白。天才啊😆 需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。 写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣 Part B: Game of Life 1 2 3 4 5 6 7 8 9 10 11 12 13 基本规则： Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation. Any dead cell with three live neighbours becomes a live cell in the next generation. All other live cells die in the next generation. Similarly, all other dead cells stay dead. 整理成二进制格式： 对于活细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 1 0 0 -> 2 or 3 neighbors survive 对于死细胞： 8 7 6 5 4 3 2 1 0 0 0 0 0 0 1 0 0 0 -> 3 neighbors become alive 即0b000001100000001000 0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。 使用格式：./gameOfLife [file] [rule]\n'><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://fuquan99666.github.io/st.jpg'><link rel="shortcut icon" href=/favicon.ico></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu_e94f98a3296399de.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>My Site</a></h1><h2 class=site-description>欢迎来到我的网站！</h2></div></header><ol class=menu-social><li><a href=https://github.com/fuquan99666 target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>主页</span></a></li><li><a href=/%E5%85%B3%E4%BA%8E/><svg class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>关于</span></a></li><li><a href=/friends-circle/><svg class="icon icon-tabler icon-tabler-messages" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M21 14l-3-3h-7a1 1 0 01-1-1V4a1 1 0 011-1h9a1 1 0 011 1v10"/><path d="M14 15v2a1 1 0 01-1 1H6l-3 3V11a1 1 0 011-1h2"/></svg>
+<span>圈子</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/%E5%8F%8B%E9%93%BE/><svg class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>友链</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#我的cs61c学习笔记>我的CS61c学习笔记</a><ol><li><a href=#risc-v-intro>RISC-V intro</a></li><li><a href=#深入理解risc-v>深入理解RISC-V🐶</a><ol><li><a href=#basic-concepts>basic concepts</a></li><li><a href=#addition-and-subtraction>Addition and Subtraction</a></li><li><a href=#immediates>Immediates</a></li></ol></li><li><a href=#project-1-life-game>Project 1: Life Game</a><ol><li><a href=#preparation>Preparation</a></li><li><a href=#part-a1-readingwritingand-freeing-images>Part A1: Reading,writing,and freeing images</a></li><li><a href=#part-a2-使用刚写的a1藏信息>Part A2: 使用刚写的A1藏信息</a></li><li><a href=#part-b-game-of-life>Part B: Game of Life</a></li><li><a href=#part-c-其实官方没有>Part C: 其实官方没有😃</a></li></ol></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/p/cs61c_0-risc-v-intro-and-project-1/><img src=/st.jpg loading=lazy alt="Featured image of post CS61c_0 — RISC-V intro and Project 1"></a></div><div class=article-details><header class=article-category><a href=/categories/cs61c/ style=background-color:;color:#fff>CS61c
+</a><a href=/categories/risc-v/ style=background-color:;color:#fff>RISC V</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/cs61c_0-risc-v-intro-and-project-1/>CS61c_0 — RISC-V intro and Project 1</a></h2></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-01-11T16:51:41+08:00>2026-01-11</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><section class=article-content><h2 id=我的cs61c学习笔记>我的CS61c学习笔记</h2><ul><li>感谢csdiy提供的<a class=link href=https://csdiy.wiki/%e4%bd%93%e7%b3%bb%e7%bb%93%e6%9e%84/CS61C/ target=_blank rel=noopener>课程资料</a></li><li>看的是20Fall的<a class=link href="https://www.bilibili.com/video/BV17b42177VG/?share_source=copy_webvd_source=7c3823b46a52fbbef42b79e01d55c300" target=_blank rel=noopener>课程视频</a></li><li>由于前六节的内容是开学前看的，所以从第七节开始记录笔记。</li><li>课程资料可以fork这个<a class=link href=https://github.com/InsideEmpire/CS61C-Assignment target=_blank rel=noopener>仓库</a></li><li>特别说一嘴，这个课的老师（丹）相当有趣😃，甚至有出场动画。</li></ul><h3 id=risc-v-intro>RISC-V intro</h3><ul><li>指令集架构： 指令集架构（Instruction Set Architecture，ISA）是计算机系统的一个抽象层，定义了计算机可以执行的指令类型、数据类型、寄存器、内存地址模式等。它是硬件和软件之间的接口，使得软件能够与硬件进行交互。</li><li>主流指令集架构： x86（Intel和AMD的处理器使用）、ARM（广泛应用于移动设备）、MIPS（曾经在嵌入式系统中流行）、RISC-V（新兴的开源指令集架构？）。</li><li>优秀程序员和普通程序员的区别：前者往往更懂汇编语言和计算机体系结构。😃</li><li>70-80年代，计算机体系结构领域出现了RISC（精简指令集计算机）和CISC（复杂指令集计算机）两大阵营的争论。RISC强调简化指令集，以提高执行效率，而CISC则追求丰富的指令集以简化编程。</li><li>RISC-V started in Summer 2010 to support open research ad teaching at UC Berkeley. It is now supported by the RISC-V Foundation, which has over 300 members worldwide.</li></ul><h3 id=深入理解risc-v>深入理解RISC-V🐶</h3><h4 id=basic-concepts>basic concepts</h4><ol><li>Registers，there is no variable in assembly language, to keep Hardware simple.
 It is near to the cpu and fast.And their number is limited, which is a main feature of ISA.
 RISC-V has 32 registers, in the RV32 one word is 32 bits.
-Referred by x0-x31, and x0 is special, always 0.</li>
-<li>Hash(#) comments, like python.🐍</li>
-<li>In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands.</li>
-</ol>
-<h4 id="addition-and-subtraction">Addition and Subtraction
-</h4><ul>
-<li>add x1,x2,x3 # x1 = x2 + x3</li>
-<li>sub x4,x5,x6 # x4 = x5 - x6</li>
-<li>example:</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># f = (g + h) - (i + j)
-</span></span><span class="line"><span class="cl">add x5,x20,x21  # x5 = x20 + x21
-</span></span><span class="line"><span class="cl">add x6,x22,x23  # x6 = x22 + x23
-</span></span><span class="line"><span class="cl">sub x19,x5,x6   # x19 = x5 - x6
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="immediates">Immediates
-</h4><ul>
-<li>Immediates are numerical constants.</li>
-<li>addi x3,x4,10 # x3 = x4 + 10</li>
-<li>but don&rsquo;t support sub immediate</li>
-<li>why? because we can use addi with negative immediate to achieve the same effect.</li>
-<li>addi x3,x4,-10 # x3 = x4 - 10</li>
-<li>how to move?</li>
-<li>add x1,x0,x2 # x1 = x2</li>
-<li>add x0,x1,x2 # will not do anything, because x0 is hardwired to 0.</li>
-</ul>
-<h3 id="project-1-life-game">Project 1: Life Game
-</h3><h4 id="preparation">Preparation
-</h4><ul>
-<li>use PPM ASCII files (type P3) with maximum value 255, for example:</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">P3
-</span></span><span class="line"><span class="cl">4 5
-</span></span><span class="line"><span class="cl">255
-</span></span><span class="line"><span class="cl">  0   0   0     0   0   0     0   0   0     0   0   0
-</span></span><span class="line"><span class="cl">255 255 255   255 255 255   255 255 255     0   0   0
-</span></span><span class="line"><span class="cl">  0   0   0     0   0   0     0   0   0     0   0   0
-</span></span><span class="line"><span class="cl">  0   0   0     0   0   0     0   0   0     0   0   0
-</span></span><span class="line"><span class="cl">  0   0   0     0   0   0     0   0   0     0   0   0
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>P3 means ASCII encoding,4 5 means width=4,height=5,255
-means max color value.</li>
-<li>each pixel is represented by three integers(RGB), each
-ranging from 0 to 255.</li>
-<li>(255,255,255) is white,(0,0,0) is black.</li>
-<li>the command convert can be used to convert between png
-to ppm, for example:</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">convert -compress none glider.png glider.ppm
-</span></span><span class="line"><span class="cl">convert glider.ppm glider.png
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>structure of the Image and I/O functions</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">typedef struct Color 
-</span></span><span class="line"><span class="cl">{
-</span></span><span class="line"><span class="cl">    uint8_t R;
-</span></span><span class="line"><span class="cl">    uint8_t G;
-</span></span><span class="line"><span class="cl">    uint8_t B;
-</span></span><span class="line"><span class="cl">} Color;
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">typedef struct Image
-</span></span><span class="line"><span class="cl">{
-</span></span><span class="line"><span class="cl">    Color **image;
-</span></span><span class="line"><span class="cl">    uint32_t rows;
-</span></span><span class="line"><span class="cl">    uint32_t cols;
-</span></span><span class="line"><span class="cl">} Image;
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">// an example of reading a text file in C
-</span></span><span class="line"><span class="cl">FILE *fp = fopen(&#34;diary.txt&#34;, &#34;r&#34;);
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">char buf[20];
-</span></span><span class="line"><span class="cl">int num;
-</span></span><span class="line"><span class="cl">fscanf(fp, &#34;%s %d&#34;, buf, &amp;num);
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">fclose(fp);
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h4 id="part-a1-readingwritingand-freeing-images">Part A1: Reading,writing,and freeing images
-</h4><ul>
-<li>说实话不难但是挺坑的🤣</li>
-<li>使用malloc分配image二维数组，image要分配，然后每一行也要分配。</li>
-<li>一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。</li>
-<li>free的时候先free每一行，然后free image，最后free Image结构体本身。</li>
-</ul>
-<h4 id="part-a2-使用刚写的a1藏信息">Part A2: 使用刚写的A1藏信息
-</h4><ul>
-<li>人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。</li>
-<li>比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。</li>
-<li>这里直接用最低一位，0和1来表示黑白。天才啊😆</li>
-<li>需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。</li>
-<li>写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣</li>
-</ul>
-<h4 id="part-b-game-of-life">Part B: Game of Life
-</h4><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">基本规则：
-</span></span><span class="line"><span class="cl">Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation.
-</span></span><span class="line"><span class="cl">Any dead cell with three live neighbours becomes a live cell in the next generation.
-</span></span><span class="line"><span class="cl">All other live cells die in the next generation. Similarly, all other dead cells stay dead.
-</span></span><span class="line"><span class="cl">整理成二进制格式：
-</span></span><span class="line"><span class="cl">对于活细胞：
-</span></span><span class="line"><span class="cl">8 7 6 5 4 3 2 1 0 
-</span></span><span class="line"><span class="cl">0 0 0 0 0 1 1 0 0  -&gt; 2 or 3 neighbors survive
-</span></span><span class="line"><span class="cl">对于死细胞：
-</span></span><span class="line"><span class="cl">8 7 6 5 4 3 2 1 0
-</span></span><span class="line"><span class="cl">0 0 0 0 0 1 0 0 0  -&gt; 3 neighbors become alive
-</span></span><span class="line"><span class="cl">即0b000001100000001000
-</span></span><span class="line"><span class="cl">0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>
-<p>使用格式：./gameOfLife [file] [rule]</p>
-</li>
-<li>
-<p>或者直接使用./frames.csh [file] [rule] [num_frames]来生成多帧图片和gif。</p>
-</li>
-<li>
-<p>该<a class="link" href="https://en.wikipedia.org/wiki/Life-like_cellular_automaton"  target="_blank" rel="noopener"
-    >wiki</a>提供了很多有趣的规则，可以尝试不同的规则看看效果。</p>
-</li>
-<li>
-<p>可以将24位颜色分成24个独立的游戏，状态完全独立但是颜色可以叠加，增加了趣味性？</p>
-</li>
-<li>
-<p>挺简单的？，主要是边界条件要注意（warp around），0和rows-1,0和cols-1要连接起来。（可以考虑直接使用模运算处理）。</p>
-</li>
-<li>
-<p>善于使用valgrind检查内存泄漏，凡是用malloc分配的最后都不要忘记了free。</p>
-</li>
-<li>
-<p>分成24个颜色通道后的遍历逻辑写起来挺繁琐的，我是直接循环24次，处理时需要判断8，16的大小关系，感觉不如直接分成3中颜色情况处理来的清晰。</p>
-</li>
-<li>
-<p>效果展示(run ./frames.csh GliderGuns 0x1808 100 and ./frames.csh glider 0x1808 10 and convert ppm to gif):</p>
-</li>
-</ul>
-<center>
-    <div>
-        <img src="glider.gif" alt="glider" width="30" />
-        <img src="GliderGuns.gif" alt="GliderGuns" width="200" />
-    </div>
-    <img src="JohnConway.gif" alt="JohnConway" width="200" />
-</center>
-<h4 id="part-c-其实官方没有">Part C: 其实官方没有😃
-</h4><p>我自己写了一个将信息图片藏入已知图片的小函数，在我的仓库叫hide.c，需要先手动使用上文提到过的convert命令将png转换成ppm格式，然后运行</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">convert -compress none hide.png hide.ppm
-</span></span><span class="line"><span class="cl">convert -compress none input.png input.ppm
-</span></span><span class="line"><span class="cl">./hide input.ppm hide.ppm &gt; output.ppm
-</span></span><span class="line"><span class="cl">convert output.ppm output.png
-</span></span><span class="line"><span class="cl">// 如果需要验证可以使用之前part A2的steganography程序
-</span></span><span class="line"><span class="cl">./steganography output.ppm &gt; real_info.ppm
-</span></span><span class="line"><span class="cl">convert real_info.ppm  real_info.png
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>这里我提供一个例子,you can try to solve this little puzzle🧩.</p>
-<div style="display: flex; justify-content: space-around; align-items: center;">
-    <div>
-        <img src="hide.png" alt="hide" width="200" />
-    </div>
-    <div>
-        <details>
-        <summary>click for the answer!</summary>
-        <img src="output.png" alt="output" width="200" />
-        </details>
-    </div>
-</div>
-<ul>
-<li>对了，这个黑白的隐藏信息图片是利用我的词云程序raster.py生成的，请看另一篇文章<a class="link" href="https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/"  target="_blank" rel="noopener"
-    >wordcloud with python</a>,可以在demo.py中修改word1的内容(比如改成&quot;hello world&quot;)，然后重新运行生成隐藏信息图片(temp.png)。</li>
-</ul>
-
-</section>
-
-
-    <footer class="article-footer">
-    
-
-    
-    <section class="article-copyright">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
-</svg>
-
-
-
-        <span>Licensed under CC BY-NC-SA 4.0</span>
-    </section>
-    </footer>
-
-
-    
-        <link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
-            ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
-                defer
-                >
-            </script><script>
-    window.addEventListener("DOMContentLoaded", () => {
-        const elementsToRender = [".main-article", ".widget--toc"];
-
-        elementsToRender.forEach(selector => {
-            const element = document.querySelector(selector);
-            if (element) {
-                renderMathInElement(element, {
-                    delimiters: [
-                        { left: "$$", right: "$$", display: true },
-                        { left: "$", right: "$", display: false },
-                        { left: "\\(", right: "\\)", display: false },
-                        { left: "\\[", right: "\\]", display: true }
-                    ],
-                    ignoredClasses: ["gist"]
-                });
-            }
-        });
-    });
-</script>
-    
-</article>
-
-    
-
-    
-
-<aside class="related-content--wrapper">
-    <h2 class="section-title">相关文章</h2>
-    <div class="related-content">
-        <div class="flex article-list--tile">
-            
-                
-<article class="">
-    <a href="/p/cs61c_13-vertual-memory-i/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">CS61c_13 — Vertual Memory I</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/cs61c_12-project-3-%E5%8F%A4%E6%B3%95%E7%BC%96%E7%A8%8Bcpu/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">CS61c_12 — Project 3: 古法编程CPU</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/cs61c_11-os-and-vm/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">CS61c_11 — OS and VM</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/cs61c_10-cache/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">CS61c_10 — Cache</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/cs61c_9-pipelining/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">CS61c_9 — Pipelining</h2>
-        </div>
-    </a>
-</article>
-
-            
-        </div>
-    </div>
-</aside>
-
-     
-    
-        
-    <script
-    src="https://giscus.app/client.js"
-    data-repo="fuquan99666/fuquan99666.github.io"
-    data-repo-id="R_kgDOQuvzsw"
-    data-category="Announcements"
-    data-category-id="DIC_kwDOQuvzs84C0tAQ"
-    data-mapping="pathname"
-    data-strict="0"
-    data-reactions-enabled="1"
-    data-emit-metadata="0"
-    data-input-position="top"
-    data-theme="light"
-    data-lang="en"
-    data-loading=""
-    crossorigin="anonymous"
-    async
-></script>
-<script>
-    function setGiscusTheme(theme) {
-        let giscus = document.querySelector("iframe.giscus-frame");
-        if (giscus) {
-            giscus.contentWindow.postMessage(
-                {
-                    giscus: {
-                        setConfig: {
-                            theme: theme,
-                        },
-                    },
-                },
-                "https://giscus.app"
-            );
-        }
-    }
-
-    (function () {
-        addEventListener("message", (e) => {
-            if (event.origin !== "https://giscus.app") return;
-            handler();
-        });
-        window.addEventListener("onColorSchemeChange", handler);
-
-        function handler() {
-            if (document.documentElement.dataset.scheme === "light") {
-                setGiscusTheme('light');
-            } else {
-                setGiscusTheme('dark');
-            }
-        }
-    })();
-</script>
-
-    
-
-    <footer class="site-footer">
-    <section class="copyright">
-        &copy; 
-        
-            2025 - 
-        
-        2026 zz486
-    </section>
-    
-    <section class="powerby">
-        
-            啊啊啊啊啊啊啊 <br/>
-        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.33.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
-    </section>
-</footer>
-
-
-    
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-    
-    <div class="pswp__bg"></div>
-
-    
-    <div class="pswp__scroll-wrap">
-
-        
-        <div class="pswp__container">
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-        </div>
-
-        
-        <div class="pswp__ui pswp__ui--hidden">
-
-            <div class="pswp__top-bar">
-
-                
-
-                <div class="pswp__counter"></div>
-
-                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
-                <button class="pswp__button pswp__button--share" title="Share"></button>
-
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
-                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-                
-                
-                <div class="pswp__preloader">
-                    <div class="pswp__preloader__icn">
-                        <div class="pswp__preloader__cut">
-                            <div class="pswp__preloader__donut"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                <div class="pswp__share-tooltip"></div>
-            </div>
-
-            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-            </button>
-
-            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-            </button>
-
-            <div class="pswp__caption">
-                <div class="pswp__caption__center"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
-                defer
-                >
-            </script><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
-            ><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
-            >
-    
-
-            </main>
-        </div>
-        <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
-                
-                >
-            </script><script type="text/javascript" src="/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js" defer></script>
-<script>
-    (function () {
-        const customFont = document.createElement('link');
-        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
-
-        customFont.type = "text/css";
-        customFont.rel = "stylesheet";
-
-        document.head.appendChild(customFont);
-    }());
-</script>
-
-    </body>
-</html>
+Referred by x0-x31, and x0 is special, always 0.</li><li>Hash(#) comments, like python.🐍</li><li>In assembly language, each statement(called an instruction) executes exactly one of a short list of simple commands.</li></ol><h4 id=addition-and-subtraction>Addition and Subtraction</h4><ul><li>add x1,x2,x3 # x1 = x2 + x3</li><li>sub x4,x5,x6 # x4 = x5 - x6</li><li>example:</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl># f = (g + h) - (i + j)
+</span></span><span class=line><span class=cl>add x5,x20,x21  # x5 = x20 + x21
+</span></span><span class=line><span class=cl>add x6,x22,x23  # x6 = x22 + x23
+</span></span><span class=line><span class=cl>sub x19,x5,x6   # x19 = x5 - x6
+</span></span></code></pre></td></tr></table></div></div><h4 id=immediates>Immediates</h4><ul><li>Immediates are numerical constants.</li><li>addi x3,x4,10 # x3 = x4 + 10</li><li>but don&rsquo;t support sub immediate</li><li>why? because we can use addi with negative immediate to achieve the same effect.</li><li>addi x3,x4,-10 # x3 = x4 - 10</li><li>how to move?</li><li>add x1,x0,x2 # x1 = x2</li><li>add x0,x1,x2 # will not do anything, because x0 is hardwired to 0.</li></ul><h3 id=project-1-life-game>Project 1: Life Game</h3><h4 id=preparation>Preparation</h4><ul><li>use PPM ASCII files (type P3) with maximum value 255, for example:</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>P3
+</span></span><span class=line><span class=cl>4 5
+</span></span><span class=line><span class=cl>255
+</span></span><span class=line><span class=cl>  0   0   0     0   0   0     0   0   0     0   0   0
+</span></span><span class=line><span class=cl>255 255 255   255 255 255   255 255 255     0   0   0
+</span></span><span class=line><span class=cl>  0   0   0     0   0   0     0   0   0     0   0   0
+</span></span><span class=line><span class=cl>  0   0   0     0   0   0     0   0   0     0   0   0
+</span></span><span class=line><span class=cl>  0   0   0     0   0   0     0   0   0     0   0   0
+</span></span></code></pre></td></tr></table></div></div><ul><li>P3 means ASCII encoding,4 5 means width=4,height=5,255
+means max color value.</li><li>each pixel is represented by three integers(RGB), each
+ranging from 0 to 255.</li><li>(255,255,255) is white,(0,0,0) is black.</li><li>the command convert can be used to convert between png
+to ppm, for example:</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>convert -compress none glider.png glider.ppm
+</span></span><span class=line><span class=cl>convert glider.ppm glider.png
+</span></span></code></pre></td></tr></table></div></div><ul><li>structure of the Image and I/O functions</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>typedef struct Color 
+</span></span><span class=line><span class=cl>{
+</span></span><span class=line><span class=cl>    uint8_t R;
+</span></span><span class=line><span class=cl>    uint8_t G;
+</span></span><span class=line><span class=cl>    uint8_t B;
+</span></span><span class=line><span class=cl>} Color;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>typedef struct Image
+</span></span><span class=line><span class=cl>{
+</span></span><span class=line><span class=cl>    Color **image;
+</span></span><span class=line><span class=cl>    uint32_t rows;
+</span></span><span class=line><span class=cl>    uint32_t cols;
+</span></span><span class=line><span class=cl>} Image;
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>// an example of reading a text file in C
+</span></span><span class=line><span class=cl>FILE *fp = fopen(&#34;diary.txt&#34;, &#34;r&#34;);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>char buf[20];
+</span></span><span class=line><span class=cl>int num;
+</span></span><span class=line><span class=cl>fscanf(fp, &#34;%s %d&#34;, buf, &amp;num);
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>fclose(fp);
+</span></span></code></pre></td></tr></table></div></div><h4 id=part-a1-readingwritingand-freeing-images>Part A1: Reading,writing,and freeing images</h4><ul><li>说实话不难但是挺坑的🤣</li><li>使用malloc分配image二维数组，image要分配，然后每一行也要分配。</li><li>一个踩坑点是write时要注意格式，%3d，一定是3位！！！,中间有空格，然后col之间三个空格。</li><li>free的时候先free每一行，然后free image，最后free Image结构体本身。</li></ul><h4 id=part-a2-使用刚写的a1藏信息>Part A2: 使用刚写的A1藏信息</h4><ul><li>人眼无法分辨颜色的微小变化，可以利用这一点来隐藏信息。</li><li>比如说rgb一般是8位表示，但是人眼对于低4位的变化不敏感，所以我们可以把信息藏在低4位中。</li><li>这里直接用最低一位，0和1来表示黑白。天才啊😆</li><li>需要完成两个辅助函数：一个用来设置某个位置像素的新值（根据B的最低位），另一个函数将整个Image使用第一个函数进行挨个像素处理返回一个新Image。</li><li>写一个的简单的主函数后可以得到隐藏信息是:secrect message,是的就是两个单词，就是长得歪歪扭扭的🤣</li></ul><h4 id=part-b-game-of-life>Part B: Game of Life</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>基本规则：
+</span></span><span class=line><span class=cl>Any live cell with two or three live neighbours (in the surrounding 8 cells) survives to the next generation.
+</span></span><span class=line><span class=cl>Any dead cell with three live neighbours becomes a live cell in the next generation.
+</span></span><span class=line><span class=cl>All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+</span></span><span class=line><span class=cl>整理成二进制格式：
+</span></span><span class=line><span class=cl>对于活细胞：
+</span></span><span class=line><span class=cl>8 7 6 5 4 3 2 1 0 
+</span></span><span class=line><span class=cl>0 0 0 0 0 1 1 0 0  -&gt; 2 or 3 neighbors survive
+</span></span><span class=line><span class=cl>对于死细胞：
+</span></span><span class=line><span class=cl>8 7 6 5 4 3 2 1 0
+</span></span><span class=line><span class=cl>0 0 0 0 0 1 0 0 0  -&gt; 3 neighbors become alive
+</span></span><span class=line><span class=cl>即0b000001100000001000
+</span></span><span class=line><span class=cl>0x1808,其实从0x0-0x3ffff都是合理的规则，你完全可以创建自己的变种。
+</span></span></code></pre></td></tr></table></div></div><ul><li><p>使用格式：./gameOfLife [file] [rule]</p></li><li><p>或者直接使用./frames.csh [file] [rule] [num_frames]来生成多帧图片和gif。</p></li><li><p>该<a class=link href=https://en.wikipedia.org/wiki/Life-like_cellular_automaton target=_blank rel=noopener>wiki</a>提供了很多有趣的规则，可以尝试不同的规则看看效果。</p></li><li><p>可以将24位颜色分成24个独立的游戏，状态完全独立但是颜色可以叠加，增加了趣味性？</p></li><li><p>挺简单的？，主要是边界条件要注意（warp around），0和rows-1,0和cols-1要连接起来。（可以考虑直接使用模运算处理）。</p></li><li><p>善于使用valgrind检查内存泄漏，凡是用malloc分配的最后都不要忘记了free。</p></li><li><p>分成24个颜色通道后的遍历逻辑写起来挺繁琐的，我是直接循环24次，处理时需要判断8，16的大小关系，感觉不如直接分成3中颜色情况处理来的清晰。</p></li><li><p>效果展示(run ./frames.csh GliderGuns 0x1808 100 and ./frames.csh glider 0x1808 10 and convert ppm to gif):</p></li></ul><center><div><img src=glider.gif alt=glider width=30>
+<img src=GliderGuns.gif alt=GliderGuns width=200></div><img src=JohnConway.gif alt=JohnConway width=200></center><h4 id=part-c-其实官方没有>Part C: 其实官方没有😃</h4><p>我自己写了一个将信息图片藏入已知图片的小函数，在我的仓库叫hide.c，需要先手动使用上文提到过的convert命令将png转换成ppm格式，然后运行</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>convert -compress none hide.png hide.ppm
+</span></span><span class=line><span class=cl>convert -compress none input.png input.ppm
+</span></span><span class=line><span class=cl>./hide input.ppm hide.ppm &gt; output.ppm
+</span></span><span class=line><span class=cl>convert output.ppm output.png
+</span></span><span class=line><span class=cl>// 如果需要验证可以使用之前part A2的steganography程序
+</span></span><span class=line><span class=cl>./steganography output.ppm &gt; real_info.ppm
+</span></span><span class=line><span class=cl>convert real_info.ppm  real_info.png
+</span></span></code></pre></td></tr></table></div></div><p>这里我提供一个例子,you can try to solve this little puzzle🧩.</p><div style=display:flex;justify-content:space-around;align-items:center><div><img src=hide.png alt=hide width=200></div><div><details><summary>click for the answer!</summary><img src=output.png alt=output width=200></details></div></div><ul><li>对了，这个黑白的隐藏信息图片是利用我的词云程序raster.py生成的，请看另一篇文章<a class=link href=https://fuquan99666.github.io/p/a-simple-wordcloud-with-python/ target=_blank rel=noopener>wordcloud with python</a>,可以在demo.py中修改word1的内容(比如改成"hello world")，然后重新运行生成隐藏信息图片(temp.png)。</li></ul></section><footer class=article-footer><section class=article-copyright><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{const e=[".main-article",".widget--toc"];e.forEach(e=>{const t=document.querySelector(e);t&&renderMathInElement(t,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})})</script></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/cs61c_13-vertual-memory-i/><div class=article-details><h2 class=article-title>CS61c_13 — Vertual Memory I</h2></div></a></article><article><a href=/p/cs61c_12-project-3-%E5%8F%A4%E6%B3%95%E7%BC%96%E7%A8%8Bcpu/><div class=article-details><h2 class=article-title>CS61c_12 — Project 3: 古法编程CPU</h2></div></a></article><article><a href=/p/cs61c_11-os-and-vm/><div class=article-details><h2 class=article-title>CS61c_11 — OS and VM</h2></div></a></article><article><a href=/p/cs61c_10-cache/><div class=article-details><h2 class=article-title>CS61c_10 — Cache</h2></div></a></article><article><a href=/p/cs61c_9-pipelining/><div class=article-details><h2 class=article-title>CS61c_9 — Pipelining</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=fuquan99666/fuquan99666.github.io data-repo-id=R_kgDOQuvzsw data-category=Announcements data-category-id=DIC_kwDOQuvzs84C0tAQ data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=light data-lang=en data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"light":"dark")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 zz486</section><section class=powerby>啊啊啊啊啊啊啊<br>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.33.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

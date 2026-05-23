@@ -1,23 +1,8 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-    <channel>
-        <title>Diffusion on My Site</title>
-        <link>https://fuquan99666.github.io/categories/diffusion/</link>
-        <description>Recent content in Diffusion on My Site</description>
-        <generator>Hugo -- gohugo.io</generator>
-        <language>en-us</language>
-        <copyright>zz486</copyright>
-        <lastBuildDate>Mon, 18 May 2026 09:31:42 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/diffusion/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>MIT_6.S184_3 — How To Condition on a Prompt</title>
-        <link>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</link>
-        <pubDate>Mon, 18 May 2026 09:31:42 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</guid>
-        <description>&lt;h3 id=&#34;引&#34;&gt;引
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Diffusion on My Site</title><link>https://fuquan99666.github.io/categories/diffusion/</link><description>Recent content in Diffusion on My Site</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>zz486</copyright><lastBuildDate>Mon, 18 May 2026 09:31:42 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/diffusion/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT_6.S184_3 — How To Condition on a Prompt</title><link>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</link><pubDate>Mon, 18 May 2026 09:31:42 +0800</pubDate><guid>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</guid><description>&lt;h3 id="引"&gt;引
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;在上一讲中我们已经介绍了difussion model是如何定义，如何进行训练的，现在我们可以用flow matching 或者 score matching来训练一个generative model，并且用ODE或者SDE进行采样。但是在真正使用时，我们肯定是希望能够给定一个prompt来进行条件生成的，而我们上述的模型都是直接在$z \in data$上进行训练的，至于最终的采样结果完全是z中一个随机点，所以我们需要一些方法来让我们的模型能够根据一个prompt来进行条件生成。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;vanilla-guidance&#34;&gt;Vanilla Guidance
+&lt;h3 id="vanilla-guidance"&gt;Vanilla Guidance
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;我们首先来介绍一下最简单的vanilla guidance方法，定义如下：
@@ -45,14 +30,13 @@ $$\mathcal{L}_{\text{CFM}}^{\text{guided}}(\theta) = \mathbb{E}_{(z,y) \sim p_{\
 &lt;p&gt;这个方法理论上是可行的，但是实际训练结果证明效果并不好（相关但是不够准确），可能是模型没有学习到正确的marginal vector field, 或者是网络上的(image, text)数据本身有问题。为了强化生成结果和prompt的相关性，我们介绍一种当前SOTA(state-of-the-art)的训练方法。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;/blockquote&gt;
-&lt;h3 id=&#34;classifer-free-guidance&#34;&gt;Classifer-Free Guidance
-&lt;/h3&gt;&lt;h4 id=&#34;classifier-guidance&#34;&gt;Classifier Guidance
+&lt;h3 id="classifer-free-guidance"&gt;Classifer-Free Guidance
+&lt;/h3&gt;&lt;h4 id="classifier-guidance"&gt;Classifier Guidance
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;我们首先介绍Classifier Guidance，在gaussian probability path的例子中，我们有vector field和score function之间的一个线性关系，用(x|y)替换后有：
-
 $$u_t^{\text{target}}(x|y) = a_t \nabla \log p_t(x|y) + b_t x \tag{1}$$&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div style=&#34;border: 2px solid #ccc; padding: 10px; border-radius: 15px; margin: 10px 0;&#34;&gt;
+&lt;div style="border: 2px solid #ccc; padding: 10px; border-radius: 15px; margin: 10px 0;"&gt;
 &lt;p&gt;这里的看似显然的替换值得思考，实际上$p_t(x|y)$和$p_t(x)$是一个东西，后者理解为对所有的$z \in data$进行一个加权，前者也可以看成是对所有的$z \in data(y)$进行一个加权，只不过前者是后者数据范围的一个子集罢了。于是乎，利用加权积分的线性性质在$z \in data(y)$上展开一次就得证了。&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;对于prompt下的概率路径$p_t(x|y)$, 我们有：
@@ -83,14 +67,12 @@ where w &amp;gt; 1 is known as the guidance scale.&lt;/p&gt;
 &lt;p&gt;其实，只有当w=1的时候，classifier guidance才是真正的guided vector field, 当w不等于1时，虽然它的采样结果更符合prompt，但是 it is not the “true” guided vector field. （偏离真实vector field,但结果更fit，这就是reinforce）&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;/blockquote&gt;
-&lt;h4 id=&#34;classifier-free-guidance&#34;&gt;Classifier-Free Guidance
+&lt;h4 id="classifier-free-guidance"&gt;Classifier-Free Guidance
 &lt;/h4&gt;&lt;ul&gt;
-&lt;li&gt;由于上述提到的两个困难，我们需要一个classifier-free guidance的方法。    Classifier-free guidance results in the theoretically equivalent effect as classifier guidance but without having to train a separate classifier.&lt;/li&gt;
+&lt;li&gt;由于上述提到的两个困难，我们需要一个classifier-free guidance的方法。 Classifier-free guidance results in the theoretically equivalent effect as classifier guidance but without having to train a separate classifier.&lt;/li&gt;
 &lt;li&gt;我们利用这个等式：
-
 $$\nabla \log p_t(x|y) = \nabla \log p_t(x) + \nabla \log p_t(y|x)$$
 代入之前的$\tilde{u}_t(x|y)$的结果中，有：
-
 $$\begin{aligned}
 \tilde{u}_t(x|y) &amp;= u_t^{\text{target}}(x) + w a_t \nabla \log p_t(y|x) \\
 &amp;= u_t^{\text{target}}(x) + w a_t \left( \nabla \log p_t(x|y) - \nabla \log p_t(x) \right) \\
@@ -102,13 +84,13 @@ denotes the absence of conditioning. We can then treat $u^{target}_t (x) = u^{ta
 train a separate model to reinforce the effect of a hypothetical classifier. This approach of training a conditional and
 unconditional model in one (and subsequently reinforcing the conditioning) is known as classifier-free guidance (CFG)!&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div style=&#34;border: 2px solid #ccc; padding: 10px; border-radius: 15px; margin: 10px 0;&#34;&gt;
+&lt;div style="border: 2px solid #ccc; padding: 10px; border-radius: 15px; margin: 10px 0;"&gt;
 &lt;p&gt;Note that the construction
 $\tilde{u}_t(x|y) = (1−w)u^{target}_t (x) + wu^{target}_t (x|y)$,
 is equally valid for any choice probability path‼️, not just a Gaussian one. When w = 1, it is straightforward to verify that
 $\tilde{u}_t(x|y) = u^{target}_t (x|y)$. Our derivation using Gaussian paths was simply to illustrate the intuition behind the construction, and in particular of amplifying the contribution of a hypothetical “classifier” $\nabla \log p_t(y|x)$.&lt;/p&gt;
 &lt;/div&gt;
-&lt;h4 id=&#34;training-with-classifier-free-guidance&#34;&gt;Training with Classifier-Free Guidance
+&lt;h4 id="training-with-classifier-free-guidance"&gt;Training with Classifier-Free Guidance
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;由上面的推导，我们现在只需要训练一个神经网络来预测$u^{target}_t(x|y)$即可，但是这里有一个问题：我们从data中取得(z,y)时，y不可能是$\emptyset$, 所以需要人工制造空标签。
@@ -125,29 +107,19 @@ $$\mathcal{L}_{\text{CFM}}^{\text{CFG}}(\theta) = \mathbb{E}_{(z,y) \sim p_{\tex
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;center&gt;
-    &lt;img src=&#39;1.png&#39; width=500&gt;
-&lt;/center&gt;
-</description>
-        </item>
-        <item>
-        <title>MIT_6.S184_2 — Score Functions and Score Matching</title>
-        <link>https://fuquan99666.github.io/p/mit_6.s184_2-score-functions-and-score-matching/</link>
-        <pubDate>Sun, 17 May 2026 14:49:20 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/p/mit_6.s184_2-score-functions-and-score-matching/</guid>
-        <description>&lt;h3 id=&#34;引&#34;&gt;引
+&lt;img src='1.png' width=500&gt;
+&lt;/center&gt;</description></item><item><title>MIT_6.S184_2 — Score Functions and Score Matching</title><link>https://fuquan99666.github.io/p/mit_6.s184_2-score-functions-and-score-matching/</link><pubDate>Sun, 17 May 2026 14:49:20 +0800</pubDate><guid>https://fuquan99666.github.io/p/mit_6.s184_2-score-functions-and-score-matching/</guid><description>&lt;h3 id="引"&gt;引
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;还记得我们曾经在lab1中用过一个$∇\log𝑝(𝑋_𝑡)$来进行ODE吗，本文将详细介绍与之有关的知识。&lt;/li&gt;
 &lt;li&gt;在上一讲中我们已经推导出了vector field的公式，并且给出了flow matching的训练算法，现在我们将学习如何处理diffusion model 并且如何使用score matching来训练它。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;conditional-and-marginal-score-functions&#34;&gt;Conditional and Marginal Score Functions
+&lt;h3 id="conditional-and-marginal-score-functions"&gt;Conditional and Marginal Score Functions
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;什么是score function? 对于一个概率分布p(x)，它的score function定义为：
-
 $$s(x) = \nabla \log p(x)$$&lt;/li&gt;
 &lt;li&gt;这个函数的意义在于它告诉我们在x这个点上，对于x的log-likelihood的最快增长方向，也就是它的梯度。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;conditional-score-function&#34;&gt;Conditional Score Function
+&lt;h4 id="conditional-score-function"&gt;Conditional Score Function
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;于是，我们定义Conditional Score Function为：
@@ -179,7 +151,7 @@ $$s_t(x|z) = \nabla_x \log p_t(x|z)$$&lt;/li&gt;
 \[b_t = \frac{\dot{\alpha_t}}{\alpha_t}\]&lt;p&gt;
 则有：
 &lt;/p&gt;
-\[u_t^{\text{target}}(x|z) = a_t s_t(x|z) + b_t x\]&lt;h4 id=&#34;marginal-score-function&#34;&gt;Marginal Score Function
+\[u_t^{\text{target}}(x|z) = a_t s_t(x|z) + b_t x\]&lt;h4 id="marginal-score-function"&gt;Marginal Score Function
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;同理定义一个 &lt;/p&gt;
@@ -195,7 +167,7 @@ $$s_t(x) = \nabla_x \log p_t(x)$$&lt;/li&gt;
 &lt;/p&gt;
 $$
 \begin{align*}
-\nabla \log p_t(x) 
+\nabla \log p_t(x)
 &amp;= \frac{\nabla p_t(x)}{p_t(x)} \\
 &amp;= \frac{\nabla \int p_t(x|z) p_{\text{data}}(z) \, dz}{p_t(x)} \\
 &amp;= \int \frac{\nabla p_t(x|z) p_{\text{data}}(z)}{p_t(x)} \, dz \\
@@ -209,7 +181,7 @@ $$&lt;p&gt;
 &lt;/p&gt;
 \[u_t^{\text{target}}(x) = a_t s_t(x) + b_t x\]&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;conditional-and-marginal-denoiser&#34;&gt;conditional and marginal denoiser
+&lt;h4 id="conditional-and-marginal-denoiser"&gt;conditional and marginal denoiser
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;本段视频中老师没讲，纯纯个人理解，如果有错误欢迎指正。&lt;/li&gt;
 &lt;li&gt;在gaussian probility path的例子中，我们的$u_t^{\text{target}}(x|z)$和$s_t(x|z)$都是x和z的线性组合，而它们的marginal version则是在它们的基础上进行一个对z的后验概率加权积分。&lt;/li&gt;
@@ -226,17 +198,16 @@ $$&lt;p&gt;
 这里note中提到了一个很有意思的点，will the denoiser always output a “clean” data point? Why or why not, and what might this depend on? 这个让我想起了EAI课程中wh老师举过一个例子，在无人驾驶中，如果路中间有一个障碍物，那么我们记录左转和右转都是有效，写出一个loss函数是 (x-1)^2 + (x+1)^2, 但问题是这个loss函数最优解是x=0，完全撞上了障碍物，大错特错了。这里的道理是一样的，如果我们的data distribution有多个峰值，那么对于一个噪声数据点x来说，它的后验概率可能在多个峰值上都有比较大的值，那么它的denoiser输出的就是这些峰值的一个加权平均，可能并不是一个“clean”的数据点了。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;/blockquote&gt;
-&lt;h3 id=&#34;sampling-with-sdes&#34;&gt;Sampling with SDEs
+&lt;h3 id="sampling-with-sdes"&gt;Sampling with SDEs
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;我们之前展示过如何利用vector field来进行ODE sampling了，那么对于diffusion model来说，我们就需要用到SDE了。&lt;/li&gt;
 &lt;li&gt;SDE Extension Trick, 仿照flow matching的ODE版本，我们定义：
-
 $$
 \begin{aligned}
 X_0 &amp;\sim p_{\text{init}}, \\
 dX_t &amp;= \left( u_t^{\text{target}}(X_t) + \frac{\sigma_t^2}{2} \nabla \log p_t(X_t) \right) dt + \sigma_t \, dW_t, \\
 \Rightarrow \quad X_t &amp;\sim p_t \quad (0 \le t \le 1).
-\end{aligned} 
+\end{aligned}
 $$
 你可能觉得很奇怪，我们原本的SDE想法是一个确定的vector field加上一个noise项，为什么这里要加上一个score function呢？这一点其实很好理解，我们一般是先确定了一个probability path, 然后计算vector field来进行ODE sampling的，但是对于SDE来说，加上了一个noise，会导致中间的$p_t$发生变化，所以我们需要加上这个score function来修正noise带来的影响。&lt;/li&gt;
 &lt;/ul&gt;
@@ -249,7 +220,7 @@ $$
 &lt;li&gt;
 &lt;p&gt;更进一步的，可以代入marginal score function：（Only for gaussian probability path‼️）
 &lt;/p&gt;
-$$X_0 \sim p_{\text{init}}, \quad 
+$$X_0 \sim p_{\text{init}}, \quad
 dX_t = \left( (a_t + \frac{\sigma_t^2}{2}) \nabla \log p_t(X_t) + b_t X_t \right) dt + \sigma_t \, dW_t$$&lt;p&gt;
 &lt;/p&gt;
 $$\Rightarrow \quad X_t \sim p_t \quad (0 \le t \le 1)$$&lt;/li&gt;
@@ -258,7 +229,7 @@ $$\Rightarrow \quad X_t \sim p_t \quad (0 \le t \le 1)$$&lt;/li&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;center&gt;
-    &lt;img src=&#39;1.png&#39; width=700&gt;
+&lt;img src='1.png' width=700&gt;
 &lt;/center&gt;
 至于为什么满足这个定理就可以做到消除噪音的影响，请自行参考note中的附录Section B.
 下面我们来计算在满足Fokker-Planck equation的条件下，新的$u_t$是什么。
@@ -273,7 +244,7 @@ for scalar field $w_t: \mathbb{R}^d \to \mathbb{R}$
 &lt;/p&gt;
 $$
 \begin{align}
-\partial_t p_t(x) 
+\partial_t p_t(x)
 &amp;\stackrel{(i)}{=} -\operatorname{div}\left(p_t u_t^{\text{target}}\right)(x) \\
 &amp;\stackrel{(ii)}{=} -\operatorname{div}\left(p_t u_t^{\text{target}}\right)(x) - \frac{\sigma_t^2}{2} \Delta p_t(x) + \frac{\sigma_t^2}{2} \Delta p_t(x) \\
 &amp;\stackrel{(iii)}{=} -\operatorname{div}\left(p_t u_t^{\text{target}}\right)(x) - \operatorname{div}\left(\frac{\sigma_t^2}{2} \nabla p_t\right)(x) + \frac{\sigma_t^2}{2} \Delta p_t(x) \\
@@ -282,15 +253,14 @@ $$
 \end{align}
 $$&lt;p&gt;
 符合Fokker-Planck equation的格式，于是新的$u_t$就是 $u_t^{\text{target}} + \frac{\sigma_t^2}{2} \nabla \log p_t$。&lt;/p&gt;
-&lt;h4 id=&#34;langevin-dynamics&#34;&gt;Langevin Dynamics
+&lt;h4 id="langevin-dynamics"&gt;Langevin Dynamics
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;小表格中提到了Langevin Dynamics, 其实就是一个$p_t = p$的特殊情况，也就是说我们在采样过程中保持$p_t$不变，此时我们令$u_t^{\text{target}} = 0$ (带入Fokker-Planck equation你会发现是成立的)，于是得到了Langevin Dynamics的SDE：
-
 $$ dX_t = \frac{\sigma^2}{2} \nabla \log p(X_t) dt + \sigma dW_t $$&lt;/li&gt;
 &lt;li&gt;这个SDE的意义在于它可以让我们采样到一个固定的分布p，而且它具有收敛性，即便$p_{init}$离p十万八千里，只要有足够的时间，最后一定会趋向于p.&lt;/li&gt;
 &lt;li&gt;开头提到的我们曾经在lab1中就使用了这个公式从一个随机噪声分布收敛到一个高斯分布！用的就是这个公式了。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;optional-glass-flows-stochastic-evolution-with-odes&#34;&gt;Optional: GLASS Flows, Stochastic evolution with ODEs
+&lt;h4 id="optional-glass-flows-stochastic-evolution-with-odes"&gt;Optional: GLASS Flows, Stochastic evolution with ODEs
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;The remarkable property of SDE sampling (compared to ODEs) is that the evolution becomes stochastic, i.e.
 the initial point X0 does not fully determine Xt for t &amp;gt; 0. Perhaps surprisingly, it is also possible to get the
@@ -298,10 +268,9 @@ same stochastic transitions purely via ODEs via a simple sampling trick called G
 to exploit the stochastic nature of SDEs (e.g. via search algorithms) while keeping the efficiency of ODEs.&lt;/li&gt;
 &lt;li&gt;SDE能够让采样更多样性，可以在采样中跳过一些训练误差带来的不良影响，但是效率更低；GLASS Flows则是一个采样技巧，可以让我们在保持ODE效率的同时，也能得到SDE的采样多样性。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;score-matching&#34;&gt;Score Matching
+&lt;h3 id="score-matching"&gt;Score Matching
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;首先定义loss函数：
-
 $$\begin{align}
 \mathcal{L}_{\text{SM}}(\theta) &amp;= \mathbb{E}_{t \sim \text{Unif}, \, z \sim p_{\text{data}}, \, x \sim p_t(\cdot|z)} \left\| s_t^\theta(x) - \nabla \log p_t(x) \right\|^2 \\
 \mathcal{L}_{\text{CSM}}(\theta) &amp;= \mathbb{E}_{t \sim \text{Unif}, \, z \sim p_{\text{data}}, \, x \sim p_t(\cdot|z)} \left\| s_t^\theta(x) - \nabla \log p_t(x|z) \right\|^2
@@ -321,52 +290,40 @@ In particular, for the minimizer $\theta^&lt;em&gt;$, it will hold that $s_t^{\t
 &lt;li&gt;
 &lt;p&gt;note中又以gaussian为例子详细描述了Denoising Diffusion Models 以及最后的训练算法，这里最重要的insight就是为什么要叫denoising, 通过带入公式我们可以发现，如果$\beta_t$比较小，那么很容易数值爆炸(也就是要想训练出来的话必须加很多的噪声)。我们可以先提取出$\beta_t$, 舍掉它，然后你会发现优化项里是$\beta_t s_t^\theta(x) + \epsilon$, 于是可以令
 &lt;/p&gt;
-$$-\beta_t s_t^\theta(x) = \epsilon_t^\theta(x) \quad \Rightarrow \quad 
-\mathcal{L}_{\text{DDPM}}(\theta) = \mathbb{E}_{t \sim \text{Unif}, \, z \sim p_{\text{data}}, \, \epsilon \sim \mathcal{N}(0, I_d)} 
+$$-\beta_t s_t^\theta(x) = \epsilon_t^\theta(x) \quad \Rightarrow \quad
+\mathcal{L}_{\text{DDPM}}(\theta) = \mathbb{E}_{t \sim \text{Unif}, \, z \sim p_{\text{data}}, \, \epsilon \sim \mathcal{N}(0, I_d)}
 \left\| \epsilon_t^\theta(\alpha_t z + \beta_t \epsilon) - \epsilon \right\|^2$$&lt;p&gt;
 这实际上就是用$\theta$ 来在固定z，固定t，固定x的情况下去预测原始噪声$\epsilon$，所以叫denoising了。&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;note的最后也是给出了训练的伪代码，当然loss函数我们既可以用score版本也可以用noise版本。其实，在使用gaussian probability path的情况下，这些量之间都是线性关系，都可以相互转化，我们完全可以只搞一个最简单的训练器，比如(noise或者D(z|x)),然后转化得到vector field和score function, 最后应用SDE采样就好了。&lt;/p&gt;
 &lt;/li&gt;
-&lt;/ul&gt;
-</description>
-        </item>
-        <item>
-        <title>MIT_6.S184_1 — Flow Matching</title>
-        <link>https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/</link>
-        <pubDate>Mon, 04 May 2026 10:42:29 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/</guid>
-        <description>&lt;h3 id=&#34;lec2&#34;&gt;Lec2
+&lt;/ul&gt;</description></item><item><title>MIT_6.S184_1 — Flow Matching</title><link>https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/</link><pubDate>Mon, 04 May 2026 10:42:29 +0800</pubDate><guid>https://fuquan99666.github.io/p/mit_6.s184_1-flow-matching/</guid><description>&lt;h3 id="lec2"&gt;Lec2
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;第二节课主要讲了Flow Matching的原理，具体包括了conditional path 和 marginal path，以及它们对应的loss，最终的Flow Matching训练算法。本节课对应的视频部分地方可能讲的不是很清楚，所以一些数学推导细节可能需要自己结合文档来进一步理解。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;conditional-and-marginal-probability-path&#34;&gt;Conditional and Marginal Probability Path
-&lt;/h3&gt;&lt;h4 id=&#34;conditional-path的定义&#34;&gt;Conditional path的定义：
+&lt;h3 id="conditional-and-marginal-probability-path"&gt;Conditional and Marginal Probability Path
+&lt;/h3&gt;&lt;h4 id="conditional-path的定义"&gt;Conditional path的定义：
 &lt;/h4&gt;$$p_0(\cdot|z) = p_{\text{init}},\quad p_1(\cdot|z) = \delta_z \quad \text{for all } z\in\mathbb{R}^d$$&lt;ul&gt;
 &lt;li&gt;这里的$\delta_z$是一个Dirac delta distribution，表示只在z这个点上有概率，是一个确定性的分布。简单理解就是让一个随机初始化的分布经过一系列变化最终收缩到一个确定性的z上。当然这里的z你不要以为真的是一个点了，它是从一个$p_{data}$中sample得到的，如果$p_{data}$是一个点集，那么z就是一个点；如果$p_{data}$是一个图像集合，那么z就是一张图片。&lt;/li&gt;
 &lt;li&gt;Conditional path 就是从0-1过程中每一个t时，$p_{init}$和$p_{\delta_z}$之间的一个插值分布，一种过渡状态。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;one-example-gaussian-conditional-probability-path&#34;&gt;One example: Gaussian Conditional Probability Path
+&lt;h4 id="one-example-gaussian-conditional-probability-path"&gt;One example: Gaussian Conditional Probability Path
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;我们希望得到一个从标准高斯分布到一个确定性的z的conditional path，即&lt;/li&gt;
 &lt;li&gt;
 $$p_t(\cdot|z) = \mathcal{N}(\alpha_t z,\; \beta_t^2 I_d)$$或者写成
-
 $$z \sim p_{\text{data}},\; \epsilon \sim p_{\text{init}} = \mathcal{N}(0, I_d) \;\Rightarrow\; x = \alpha_t z + \beta_t \epsilon \sim p_t$$&lt;/li&gt;
 &lt;li&gt;其中t=0时，$\alpha=0, \beta=1$, t=1时，$\alpha=1, \beta=0$, 所以 t=0时， $p_0(\cdot|z) = \mathcal{N}(0, I_d)$, t=1时，$p_1(\cdot|z) = \mathcal{N}(z, 0) = \delta_z$。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;marginal-probability-path&#34;&gt;marginal probability path
+&lt;h4 id="marginal-probability-path"&gt;marginal probability path
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;在知道了conditional path大概是个什么东西后，我们可以定义marginal path了，
-
 $$z \sim p_{\text{data}},\; x \sim p_t(\cdot|z) \;\Rightarrow\; x \sim p_t $$
 对于dataset中的每一个z，我们都能得到一个$p_t(\cdot|z)$, marginal path就是按照z的概率对它们的conditional path进行积分加权。
-
 $$ p_t(x) = \int p_t(x|z) \, p_{\text{data}}(z) \, dz $$&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;conditional-and-marginal-vector-fields-&#34;&gt;Conditional and Marginal Vector Fields ‼️
+&lt;h3 id="conditional-and-marginal-vector-fields-"&gt;Conditional and Marginal Vector Fields ‼️
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;对于conditional path, 我们按照定义有：
@@ -419,14 +376,14 @@ $$ p_t(x) = \int p_t(x|z) \, p_{\text{data}}(z) \, dz $$&lt;p&gt;
 &lt;/p&gt;
 $$ \partial_t p_t(x) = -\operatorname{div}\left(p_t \, u_t^{\text{target}}\right)(x), \quad \forall x \in \mathbb{R}^d,\; 0 \le t \le 1 $$&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div style=&#34;border: 2px solid #ccc; padding: 10px; border-radius: 5px; margin: 10px 0;&#34;&gt;
+&lt;div style="border: 2px solid #ccc; padding: 10px; border-radius: 5px; margin: 10px 0;"&gt;
 &lt;p&gt;The left-hand side $\partial_t p_t(x)$ describes how much the probability $p_t(x)$ at $x$ changes over time. Intuitively, the change should correspond to the net inflow of probability mass. For a flow model, a particle $X_t$ follows along the vector field $u^{\text{target}}_t$. As you might recall from physics, the divergence measures a sort of net outflow from the vector field. Therefore, the negative divergence measures the net inflow. Scaling this by the total probability mass currently residing at $x$, we get that the net $-\operatorname{div}(p_t \cdot u_t)$ measures the total inflow of probability mass. Since probability mass is conserved (always integrates to 1), the left-hand and right-hand side of the equation should be the same!&lt;/p&gt;
 &lt;/div&gt;
 上面的note原文解释了这个式子的原理，就是概率质量守恒，只要我们的u能让概率质量守恒，那么说明它作为vector field就是正确的。
 证明如下：
 $$
 \begin{aligned}
-\partial_t p_t(x) 
+\partial_t p_t(x)
 &amp;= \partial_t \int p_t(x|z) \, p_{\text{data}}(z) \, dz \quad &amp;\text{(i)} \\
 &amp;= \int \partial_t p_t(x|z) \, p_{\text{data}}(z) \, dz \quad &amp;\text{(ii)} \\
 &amp;= -\int \operatorname{div}\left( p_t(\cdot|z) \, u_t^{\text{target}}(\cdot|z) \right)(x) \, p_{\text{data}}(z) \, dz \quad &amp;\text{(iii)} \\
@@ -435,55 +392,43 @@ $$
 &amp;= -\operatorname{div} \left( p_t \, u_t^{\text{target}} \right)(x) \quad &amp;\text{(vi)}
 \end{aligned} $$&lt;p&gt;
 这里面由于对x，z，t的微分和积分变量都是独立的，所以可以交换顺序，同时前后各引入了$p_t(x)$来凑出我们定义的u的形式，最终得到了我们想要的结果。&lt;/p&gt;
-&lt;h3 id=&#34;learning-the-marginal-vector-field&#34;&gt;Learning the Marginal Vector Field
+&lt;h3 id="learning-the-marginal-vector-field"&gt;Learning the Marginal Vector Field
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;上一部分的理解我认为是本次课程最硬核的部分，现在我们在定义了vector field之后，接下来我们就可以用神经网络来学习这个vector field了，想要训练神经网络，首先要定义损失函数。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;flow-matching-loss&#34;&gt;flow matching loss
+&lt;h4 id="flow-matching-loss"&gt;flow matching loss
 &lt;/h4&gt;$$
 \mathcal{L}_{\text{FM}}(\theta) = \mathbb{E}_{t \sim \text{Unif}, \, x \sim p_t} \left[ \left\| u^\theta_t(x) - u^{\text{target}}_t(x) \right\|^2 \right]
 $$&lt;p&gt;
 这个看似很合理，但是有一个巨大的问题：我们需要计算$u^{\text{target}}_t(x)$，而这个是一个关于z的积分，而z所在的dataset有可能非常大，甚至是无穷的，无法计算！&lt;/p&gt;
-&lt;h4 id=&#34;conditional-flow-matching-loss&#34;&gt;conditional flow matching loss
+&lt;h4 id="conditional-flow-matching-loss"&gt;conditional flow matching loss
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;由于上面的loss无法计算，所以我们引入了一个conditional flow matching loss，来代替上面的loss：
-
 $$
 \mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t \sim \text{Unif}, \, z \sim p_{\text{data}}, \, x \sim p_t(\cdot|z)} \left[ \left\| u^\theta_t(x) - u^{\text{target}}_t(x|z) \right\|^2 \right]
 $$&lt;/li&gt;
 &lt;li&gt;唉哎，不对啊，我们不是要让$u^\theta_t(x)$去逼近那个marginal vector field吗，用这conditional vector field来训练，难道没有问题吗？可以证明：
-
 $$
 \mathcal{L}_{\text{FM}}(\theta) = \mathcal{L}_{\text{CFM}}(\theta) + C $$其中C是一个和$\theta$无关的常数，即
-
 $$ \nabla_\theta \mathcal{L}_{\text{FM}}(\theta) = \nabla_\theta \mathcal{L}_{\text{CFM}}(\theta) $$
-这里的证明思路主要是先用$|a - b|^2 = |a|^2 - 2a^T b + |b|^2$将loss展开，然后第三项明显是与$\theta$无关的C1，第二项要经过一系列神奇的妙妙变换直接和CFM的第二项相等了🤣，配凑一下得证。具体证明见&lt;a class=&#34;link&#34; href=&#34;https://diffusion.csail.mit.edu/2026/docs/lecture_notes.pdf&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;Note&lt;/a&gt;(实在肝不动了，还是看note轻松)。&lt;/li&gt;
+这里的证明思路主要是先用$|a - b|^2 = |a|^2 - 2a^T b + |b|^2$将loss展开，然后第三项明显是与$\theta$无关的C1，第二项要经过一系列神奇的妙妙变换直接和CFM的第二项相等了🤣，配凑一下得证。具体证明见&lt;a class="link" href="https://diffusion.csail.mit.edu/2026/docs/lecture_notes.pdf" target="_blank" rel="noopener"
+&gt;Note&lt;/a&gt;(实在肝不动了，还是看note轻松)。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id=&#34;训练算法&#34;&gt;训练算法
+&lt;h4 id="训练算法"&gt;训练算法
 &lt;/h4&gt;&lt;ul&gt;
 &lt;li&gt;这部分比较简单，不写了。&lt;/li&gt;
 &lt;li&gt;结合note中gaussian conditional path的例子理解即可。&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-        </item>
-        <item>
-        <title>MIT_6.S184_0</title>
-        <link>https://fuquan99666.github.io/p/mit_6.s184_0/</link>
-        <pubDate>Fri, 01 May 2026 08:29:30 +0800</pubDate>
-        
-        <guid>https://fuquan99666.github.io/p/mit_6.s184_0/</guid>
-        <description>&lt;h3 id=&#34;写在前面的&#34;&gt;写在前面的
+&lt;/ul&gt;</description></item><item><title>MIT_6.S184_0</title><link>https://fuquan99666.github.io/p/mit_6.s184_0/</link><pubDate>Fri, 01 May 2026 08:29:30 +0800</pubDate><guid>https://fuquan99666.github.io/p/mit_6.s184_0/</guid><description>&lt;h3 id="写在前面的"&gt;写在前面的
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;在上完cs336的5个模块，并且完成了其中的3个半作业后(hw1，hw2，hw4均已基本完成，hw3由于不想苦苦调参数只做了一半的样子，hw5需要训练一个RL，由于社团的h100集群网络问题非常搞宣告放弃，但是就算能连上，考虑到RL训练的困难，想要收敛也不是一个容易的事情，不过也让我意识到了基础设施建设的重要性)。给我最大的感受是当今人们对于LLM的学习和认识都大都浮于表面的，只是知其名，甚至能把原理说的头头是道，但是真的落到实处，如何从小小的数据结构开始构建一个完整的Transformer, data processing, DDP, benchmark, RL, scaling, 不亲自体验一遍是无法认识到其中的困难的，而其中的细节我认为恰恰是最重要的(如果你不想只会调调包，调调参数，试试各种agent，或者只是和网页版玩的不亦乐乎的话) （不过话又说回来了，和llm相关的硬课基本上都需要不少的财力算力支持，也需要运维管理，听可信机器学习的老师说贵校曾经开过类似的课程，不过开了一段时间宣告失败，我觉得应该就是上述原因）。这就和cs336第一节课里的一句话对上了，llm在显著降低程序员的思考和动手能力，非常有必要深入研究LLM的底层细节，当今各种agent、harness、牛鬼蛇神一天一个，我个人觉得这种应用级别的东西在出现一个最强者完成大一统之前，把时间用在尝试这些东西完全是浪费的，它们的实现细节、数学原理才是大浪底下的黄金。为此开始学习MIT Class 6.S184: Generative AI With Stochastic Differential Equations, 2026，深入理解生成模型！&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;宗门心法&#34;&gt;宗门心法
+&lt;h3 id="宗门心法"&gt;宗门心法
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;All of these generative models generate objects by iteratively converting noise into data.&lt;/li&gt;
 &lt;li&gt;至于如何将噪声变成有意义的数据，需要研究一些微分方程(常微分，随机微分)。我们的Diffusion model, Flow Matching, 就是将这些微分方程的思想和神经网络结合起来的结果。&lt;/li&gt;
 &lt;li&gt;当我看到一份70多页的在线文档，上面是非常硬的课程note，我对mit的教学工作者唯有敬意！太牛逼了，很多人不理解一份完整且优质的教学文档是多么耗时耗力！&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;a-reminder-on-probability-theory&#34;&gt;A Reminder on Probability Theory
+&lt;h3 id="a-reminder-on-probability-theory"&gt;A Reminder on Probability Theory
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;文档中提到有一些前置的数学知识可能会用到(Section A)，下面是一些重点：&lt;/p&gt;
@@ -533,18 +478,13 @@ $$
 = \mathbb{E}[X]
 $$&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;lec1&#34;&gt;Lec1
+&lt;h3 id="lec1"&gt;Lec1
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;第一节课主要讲了生成模型的目标 ( p_init -&amp;gt; p_data ), 以及如何使用ODE和SDE来实现simulate这个过程，简单的理解就是将ODE中的常数项参数表示为$∇\log𝑝(𝑋_𝑡)$此类的关于当前分布在目标分布上的概率(或者score)，从而将轨迹朝着增大data分布概率的方向前进。至于SED中的噪声项，暂时没看出有什么深远的意义，或许是增大选择路径，丰富最终的收敛结果？&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;lab0&#34;&gt;Lab0
+&lt;h3 id="lab0"&gt;Lab0
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;友情提醒，lab中的一些函数没有具体实现，只有一个pass的不用写，它们的作用是函数示范。只有标注了raise NotImplementedError的函数才是需要我们自己实现的。&lt;/li&gt;
 &lt;li&gt;这个lab个人感觉没有难度，基本上都是照着公式填就对了，但是官方的代码提供了非常牛逼的演示效果(包括过程图，视频)，以及几种函数分布供我们自由组合，可以说非常的亲民，做到了用最小的任务量，理解最核心的知识点，展示最生动的效果！&lt;/li&gt;
 &lt;li&gt;核心是理解$∇\log𝑝(𝑋_𝑡)$作为$U_t(X)$的作用即可。&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-        </item>
-        
-    </channel>
-</rss>
+&lt;/ul&gt;</description></item></channel></rss>

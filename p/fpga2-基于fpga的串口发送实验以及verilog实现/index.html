@@ -1,974 +1,255 @@
-<!DOCTYPE html>
-<html lang="en-us" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="原理部分 UART (Universal Asynchronous Receiver/Transmitter)是一种串行通信协议，广泛应用于计算机和外围设备之间的数据传输。它通过将数据分成一系列的位(bit)进行传输，从而实现设备间的通信。 在发送数据的时候将并行数据转换成串行数据来传输，在数据接受的时候将接受到的串行数据转换成并行数据，可以实现全双工传输和接收。 包括了RS232,RS449,RS423,RS422和RS485等标准。 我们使用的是最常见的RS232标准，包括9个引脚,如图所以： 数据位： 发送的数据位数，通常为5到8位。 波特率： 数据传输的速度，单位为比特每秒（bps）。常见的波特率有9600、19200、115200等。 奇偶校验： 用于检测数据传输中的错误，可以是奇校验、偶校验或无校验。 停止位： 用于标识数据包的结束，通常为1或2位。 uart 发送数据格式： 1个起始位 + 5-8个数据位 + 可选的奇偶校验位 + 1或2个停止位 起始位为低电平，停止位为高电平。\n">
-<title>FPGA2 — 基于FPGA的串口发送实验以及verilog实现</title>
-
-<link rel='canonical' href='https://fuquan99666.github.io/p/fpga2-%E5%9F%BA%E4%BA%8Efpga%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E5%AE%9E%E9%AA%8C%E4%BB%A5%E5%8F%8Averilog%E5%AE%9E%E7%8E%B0/'>
-
-<link rel="stylesheet" href="/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css"><meta property='og:title' content="FPGA2 — 基于FPGA的串口发送实验以及verilog实现">
-<meta property='og:description' content="原理部分 UART (Universal Asynchronous Receiver/Transmitter)是一种串行通信协议，广泛应用于计算机和外围设备之间的数据传输。它通过将数据分成一系列的位(bit)进行传输，从而实现设备间的通信。 在发送数据的时候将并行数据转换成串行数据来传输，在数据接受的时候将接受到的串行数据转换成并行数据，可以实现全双工传输和接收。 包括了RS232,RS449,RS423,RS422和RS485等标准。 我们使用的是最常见的RS232标准，包括9个引脚,如图所以： 数据位： 发送的数据位数，通常为5到8位。 波特率： 数据传输的速度，单位为比特每秒（bps）。常见的波特率有9600、19200、115200等。 奇偶校验： 用于检测数据传输中的错误，可以是奇校验、偶校验或无校验。 停止位： 用于标识数据包的结束，通常为1或2位。 uart 发送数据格式： 1个起始位 + 5-8个数据位 + 可选的奇偶校验位 + 1或2个停止位 起始位为低电平，停止位为高电平。\n">
-<meta property='og:url' content='https://fuquan99666.github.io/p/fpga2-%E5%9F%BA%E4%BA%8Efpga%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E5%AE%9E%E9%AA%8C%E4%BB%A5%E5%8F%8Averilog%E5%AE%9E%E7%8E%B0/'>
-<meta property='og:site_name' content='My Site'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2026-01-17T22:59:12&#43;08:00'/><meta property='article:modified_time' content='2026-01-17T22:59:12&#43;08:00'/><meta property='og:image' content='https://fuquan99666.github.io/%E7%9F%B3%E5%8E%9F%E9%87%8C%E7%BE%8E.jpg' />
-<meta name="twitter:title" content="FPGA2 — 基于FPGA的串口发送实验以及verilog实现">
-<meta name="twitter:description" content="原理部分 UART (Universal Asynchronous Receiver/Transmitter)是一种串行通信协议，广泛应用于计算机和外围设备之间的数据传输。它通过将数据分成一系列的位(bit)进行传输，从而实现设备间的通信。 在发送数据的时候将并行数据转换成串行数据来传输，在数据接受的时候将接受到的串行数据转换成并行数据，可以实现全双工传输和接收。 包括了RS232,RS449,RS423,RS422和RS485等标准。 我们使用的是最常见的RS232标准，包括9个引脚,如图所以： 数据位： 发送的数据位数，通常为5到8位。 波特率： 数据传输的速度，单位为比特每秒（bps）。常见的波特率有9600、19200、115200等。 奇偶校验： 用于检测数据传输中的错误，可以是奇校验、偶校验或无校验。 停止位： 用于标识数据包的结束，通常为1或2位。 uart 发送数据格式： 1个起始位 + 5-8个数据位 + 可选的奇偶校验位 + 1或2个停止位 起始位为低电平，停止位为高电平。\n"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://fuquan99666.github.io/%E7%9F%B3%E5%8E%9F%E9%87%8C%E7%BE%8E.jpg' />
-    <link rel="shortcut icon" href="/favicon.ico" />
-
-    </head>
-    <body class="
-    article-page
-    ">
-    <script>
-        (function() {
-            const colorSchemeKey = 'StackColorScheme';
-            if(!localStorage.getItem(colorSchemeKey)){
-                localStorage.setItem(colorSchemeKey, "auto");
-            }
-        })();
-    </script><script>
-    (function() {
-        const colorSchemeKey = 'StackColorScheme';
-        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
-        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-
-        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
-            
-
-            document.documentElement.dataset.scheme = 'dark';
-        } else {
-            document.documentElement.dataset.scheme = 'light';
-        }
-    })();
-</script>
-<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
-    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
-        <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-        </span>
-    </button>
-
-    <header>
-        
-            
-            <figure class="site-avatar">
-                <a href="/">
-                
-                    
-                    
-                    
-                        
-                        <img src="/img/avatar_hu_e94f98a3296399de.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
-                    
-                
-                </a>
-                
-                    <span class="emoji">🍥</span>
-                
-            </figure>
-            
-        
-        
-        <div class="site-meta">
-            <h1 class="site-name"><a href="/">My Site</a></h1>
-            <h2 class="site-description">欢迎来到我的网站！</h2>
-        </div>
-    </header><ol class="menu-social">
-            
-                <li>
-                    <a 
-                        href='https://github.com/fuquan99666'
-                        target="_blank"
-                        title="GitHub"
-                        rel="me"
-                    >
-                        
-                        
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
-</svg>
-
-
-
-                        
-                    </a>
-                </li>
-            
-        </ol><ol class="menu" id="main-menu">
-        
-        
-        
-        <li >
-            <a href='/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <polyline points="5 12 3 12 12 3 21 12 19 12" />
-  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-</svg>
-
-
-
-                
-                <span>主页</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/%E5%85%B3%E4%BA%8E/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="7" r="4" />
-  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-</svg>
-
-
-
-                
-                <span>关于</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/archives/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <rect x="3" y="4" width="18" height="4" rx="2" />
-  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
-  <line x1="10" y1="12" x2="14" y2="12" />
-</svg>
-
-
-
-                
-                <span>归档</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/search/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-                
-                <span>搜索</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/%E5%8F%8B%E9%93%BE/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
-  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
-</svg>
-
-
-
-                
-                <span>友链</span>
-            </a>
-        </li>
-        
-        <li class="menu-bottom-section">
-            <ol class="menu">
-
-                
-                    <li id="dark-mode-toggle">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="8" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="16" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <span>暗色模式</span>
-                    </li>
-                
-            </ol>
-        </li>
-    </ol>
-</aside>
-
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li>
-      <ol>
-        <li><a href="#原理部分">原理部分</a></li>
-        <li><a href="#实验部分">实验部分</a></li>
-        <li><a href="#verilog代码实现切记这里坑比较多推荐自己写一遍">Verilog代码实现,切记这里坑比较多，推荐自己写一遍</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
-            <main class="main full-width">
-    <article class="has-image main-article">
-    <header class="article-header">
-        <div class="article-image">
-            <a href="/p/fpga2-%E5%9F%BA%E4%BA%8Efpga%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E5%AE%9E%E9%AA%8C%E4%BB%A5%E5%8F%8Averilog%E5%AE%9E%E7%8E%B0/">
-                
-                    <img src="/%e7%9f%b3%e5%8e%9f%e9%87%8c%e7%be%8e.jpg" loading="lazy" alt="Featured image of post FPGA2 — 基于FPGA的串口发送实验以及verilog实现" />
-                
-            </a>
-        </div>
-    
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/fpga/" style="background-color: ; color: #fff;">
-                FPGA
-            </a>
-        
-            <a href="/categories/verilog/" style="background-color: ; color: #fff;">
-                Verilog
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/p/fpga2-%E5%9F%BA%E4%BA%8Efpga%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E5%AE%9E%E9%AA%8C%E4%BB%A5%E5%8F%8Averilog%E5%AE%9E%E7%8E%B0/">FPGA2 — 基于FPGA的串口发送实验以及verilog实现</a>
-        </h2>
-    
-        
-    </div>
-
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published" datetime='2026-01-17T22:59:12&#43;08:00'>2026-01-17</time>
-            </div>
-        
-
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <polyline points="12 7 12 12 15 15" />
-</svg>
-
-
-
-                <time class="article-time--reading">
-                    阅读时长: 5 分钟
-                </time>
-            </div>
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-
-    <section class="article-content">
-    
-    
-    <h3 id="原理部分">原理部分
-</h3><ul>
-<li>UART (Universal Asynchronous Receiver/Transmitter)是一种串行通信协议，广泛应用于计算机和外围设备之间的数据传输。它通过将数据分成一系列的位(bit)进行传输，从而实现设备间的通信。</li>
-<li>在发送数据的时候将并行数据转换成串行数据来传输，在数据接受的时候将接受到的串行数据转换成并行数据，可以实现全双工传输和接收。</li>
-<li>包括了RS232,RS449,RS423,RS422和RS485等标准。</li>
-<li>我们使用的是最常见的RS232标准，包括9个引脚,如图所以：</li>
-<li></li>
-</ul>
-<center>
-    <img src='1.jpg' alt='RS232引脚图' width='400'/>
-</center>
-<ul>
-<li>数据位： 发送的数据位数，通常为5到8位。</li>
-<li>波特率： 数据传输的速度，单位为比特每秒（bps）。常见的波特率有9600、19200、115200等。</li>
-<li>奇偶校验： 用于检测数据传输中的错误，可以是奇校验、偶校验或无校验。</li>
-<li>停止位： 用于标识数据包的结束，通常为1或2位。</li>
-</ul>
-<blockquote>
-<p>uart 发送数据格式：
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="原理部分 UART (Universal Asynchronous Receiver/Transmitter)是一种串行通信协议，广泛应用于计算机和外围设备之间的数据传输。它通过将数据分成一系列的位(bit)进行传输，从而实现设备间的通信。 在发送数据的时候将并行数据转换成串行数据来传输，在数据接受的时候将接受到的串行数据转换成并行数据，可以实现全双工传输和接收。 包括了RS232,RS449,RS423,RS422和RS485等标准。 我们使用的是最常见的RS232标准，包括9个引脚,如图所以： 数据位： 发送的数据位数，通常为5到8位。 波特率： 数据传输的速度，单位为比特每秒（bps）。常见的波特率有9600、19200、115200等。 奇偶校验： 用于检测数据传输中的错误，可以是奇校验、偶校验或无校验。 停止位： 用于标识数据包的结束，通常为1或2位。 uart 发送数据格式： 1个起始位 + 5-8个数据位 + 可选的奇偶校验位 + 1或2个停止位 起始位为低电平，停止位为高电平。\n"><title>FPGA2 — 基于FPGA的串口发送实验以及verilog实现</title><link rel=canonical href=https://fuquan99666.github.io/p/fpga2-%E5%9F%BA%E4%BA%8Efpga%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E5%AE%9E%E9%AA%8C%E4%BB%A5%E5%8F%8Averilog%E5%AE%9E%E7%8E%B0/><link rel=stylesheet href=/scss/style.min.833d6eed45de56f48306bf57268d5b8cdfc8a60e8e7bdc99810464fcd033f7c6.css><meta property='og:title' content="FPGA2 — 基于FPGA的串口发送实验以及verilog实现"><meta property='og:description' content="原理部分 UART (Universal Asynchronous Receiver/Transmitter)是一种串行通信协议，广泛应用于计算机和外围设备之间的数据传输。它通过将数据分成一系列的位(bit)进行传输，从而实现设备间的通信。 在发送数据的时候将并行数据转换成串行数据来传输，在数据接受的时候将接受到的串行数据转换成并行数据，可以实现全双工传输和接收。 包括了RS232,RS449,RS423,RS422和RS485等标准。 我们使用的是最常见的RS232标准，包括9个引脚,如图所以： 数据位： 发送的数据位数，通常为5到8位。 波特率： 数据传输的速度，单位为比特每秒（bps）。常见的波特率有9600、19200、115200等。 奇偶校验： 用于检测数据传输中的错误，可以是奇校验、偶校验或无校验。 停止位： 用于标识数据包的结束，通常为1或2位。 uart 发送数据格式： 1个起始位 + 5-8个数据位 + 可选的奇偶校验位 + 1或2个停止位 起始位为低电平，停止位为高电平。\n"><meta property='og:url' content='https://fuquan99666.github.io/p/fpga2-%E5%9F%BA%E4%BA%8Efpga%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E5%AE%9E%E9%AA%8C%E4%BB%A5%E5%8F%8Averilog%E5%AE%9E%E7%8E%B0/'><meta property='og:site_name' content='My Site'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:published_time' content='2026-01-17T22:59:12+08:00'><meta property='article:modified_time' content='2026-01-17T22:59:12+08:00'><meta property='og:image' content='https://fuquan99666.github.io/%E7%9F%B3%E5%8E%9F%E9%87%8C%E7%BE%8E.jpg'><meta name=twitter:title content="FPGA2 — 基于FPGA的串口发送实验以及verilog实现"><meta name=twitter:description content="原理部分 UART (Universal Asynchronous Receiver/Transmitter)是一种串行通信协议，广泛应用于计算机和外围设备之间的数据传输。它通过将数据分成一系列的位(bit)进行传输，从而实现设备间的通信。 在发送数据的时候将并行数据转换成串行数据来传输，在数据接受的时候将接受到的串行数据转换成并行数据，可以实现全双工传输和接收。 包括了RS232,RS449,RS423,RS422和RS485等标准。 我们使用的是最常见的RS232标准，包括9个引脚,如图所以： 数据位： 发送的数据位数，通常为5到8位。 波特率： 数据传输的速度，单位为比特每秒（bps）。常见的波特率有9600、19200、115200等。 奇偶校验： 用于检测数据传输中的错误，可以是奇校验、偶校验或无校验。 停止位： 用于标识数据包的结束，通常为1或2位。 uart 发送数据格式： 1个起始位 + 5-8个数据位 + 可选的奇偶校验位 + 1或2个停止位 起始位为低电平，停止位为高电平。\n"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://fuquan99666.github.io/%E7%9F%B3%E5%8E%9F%E9%87%8C%E7%BE%8E.jpg'><link rel="shortcut icon" href=/favicon.ico></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu_e94f98a3296399de.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>My Site</a></h1><h2 class=site-description>欢迎来到我的网站！</h2></div></header><ol class=menu-social><li><a href=https://github.com/fuquan99666 target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>主页</span></a></li><li><a href=/%E5%85%B3%E4%BA%8E/><svg class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>关于</span></a></li><li><a href=/friends-circle/><svg class="icon icon-tabler icon-tabler-messages" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M21 14l-3-3h-7a1 1 0 01-1-1V4a1 1 0 011-1h9a1 1 0 011 1v10"/><path d="M14 15v2a1 1 0 01-1 1H6l-3 3V11a1 1 0 011-1h2"/></svg>
+<span>圈子</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/%E5%8F%8B%E9%93%BE/><svg class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>友链</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><ol><li><a href=#原理部分>原理部分</a></li><li><a href=#实验部分>实验部分</a></li><li><a href=#verilog代码实现切记这里坑比较多推荐自己写一遍>Verilog代码实现,切记这里坑比较多，推荐自己写一遍</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/p/fpga2-%E5%9F%BA%E4%BA%8Efpga%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E5%AE%9E%E9%AA%8C%E4%BB%A5%E5%8F%8Averilog%E5%AE%9E%E7%8E%B0/><img src=/%e7%9f%b3%e5%8e%9f%e9%87%8c%e7%be%8e.jpg loading=lazy alt="Featured image of post FPGA2 — 基于FPGA的串口发送实验以及verilog实现"></a></div><div class=article-details><header class=article-category><a href=/categories/fpga/ style=background-color:;color:#fff>FPGA
+</a><a href=/categories/verilog/ style=background-color:;color:#fff>Verilog</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/fpga2-%E5%9F%BA%E4%BA%8Efpga%E7%9A%84%E4%B8%B2%E5%8F%A3%E5%8F%91%E9%80%81%E5%AE%9E%E9%AA%8C%E4%BB%A5%E5%8F%8Averilog%E5%AE%9E%E7%8E%B0/>FPGA2 — 基于FPGA的串口发送实验以及verilog实现</a></h2></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-01-17T22:59:12+08:00>2026-01-17</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 5 分钟</time></div></footer></div></header><section class=article-content><h3 id=原理部分>原理部分</h3><ul><li>UART (Universal Asynchronous Receiver/Transmitter)是一种串行通信协议，广泛应用于计算机和外围设备之间的数据传输。它通过将数据分成一系列的位(bit)进行传输，从而实现设备间的通信。</li><li>在发送数据的时候将并行数据转换成串行数据来传输，在数据接受的时候将接受到的串行数据转换成并行数据，可以实现全双工传输和接收。</li><li>包括了RS232,RS449,RS423,RS422和RS485等标准。</li><li>我们使用的是最常见的RS232标准，包括9个引脚,如图所以：</li><li></li></ul><center><img src=1.jpg alt=RS232引脚图 width=400></center><ul><li>数据位： 发送的数据位数，通常为5到8位。</li><li>波特率： 数据传输的速度，单位为比特每秒（bps）。常见的波特率有9600、19200、115200等。</li><li>奇偶校验： 用于检测数据传输中的错误，可以是奇校验、偶校验或无校验。</li><li>停止位： 用于标识数据包的结束，通常为1或2位。</li></ul><blockquote><p>uart 发送数据格式：
 1个起始位 + 5-8个数据位 + 可选的奇偶校验位 + 1或2个停止位
-起始位为低电平，停止位为高电平。</p>
-</blockquote>
-<center>
-    <img src='2.png' alt='UART发送一个字节时序图' width='700'/>
-</center>
-<ul>
-<li>可以想到之前的FPGA点灯实验中8个LED灯的基础时间单元和波特率其实是一个东西，只不过点灯实验中是直接控制LED的亮灭时长，而UART通信中则是通过这个时间单元来控制数据的发送和接收速度。而用户自定义8种亮暗恰好对应8个数据位。</li>
-</ul>
-<h3 id="实验部分">实验部分
-</h3><ol>
-<li>串口通信模块设计的目的是用来发送数据的，因此需要有一个数据输入端口</li>
-<li>串口通信，支持不同的波特率，所以需要一个波特率设置端口。</li>
-<li>串口通信的本质就是将8位的并行数据通过一根信号线，在不同的时刻传输并行数据的不同位，通过多个时刻，最终将8位并行数据全部传出。</li>
-<li>以1位低电平的起始位开始，接着是8位数据位，最后是1位高电平的停止位，总共10位数据。</li>
-<li>控制信号，需要一个信号来告诉模块可以发送数据了(when to send)，还需要一个信号来告诉模块当前的一批数据已经成功发送了。</li>
-</ol>
-<center>
-    <img src='3.png' alt='UART发送模块设计图' width='600'/>
-</center>
-<h3 id="verilog代码实现切记这里坑比较多推荐自己写一遍">Verilog代码实现,切记这里坑比较多，推荐自己写一遍
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="no">`timescale</span> <span class="mh">1</span><span class="n">ns</span> <span class="o">/</span> <span class="mh">1</span><span class="n">ns</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">module</span> <span class="n">uart_byte_tx</span><span class="p">(</span>
-</span></span><span class="line"><span class="cl">    <span class="k">input</span> <span class="n">Clk</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="k">input</span> <span class="n">Reset_n</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="k">input</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">Data</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="k">input</span> <span class="p">[</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">Baud_set</span><span class="p">,</span> <span class="c1">// 波特率设置,8种波特率
-</span></span></span><span class="line"><span class="cl">    <span class="k">input</span> <span class="n">Send_en</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="k">output</span> <span class="n">uart_tx</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">    <span class="k">output</span> <span class="n">Tx_done</span>
-</span></span><span class="line"><span class="cl"><span class="p">)</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>首先计算一下计数器的最大值，已知我们的FPGA时钟频率是125MHz，假设我们选择的波特率是115200bps,那么每一位对应的时钟周期数就是125000000/115200=1085.069，遵从宁可多花时间也不丢数据的原则，向上取整为1086个时钟周期（实际波特率会略低于115200bps）,需要11位的计数器来存储。
-假设我们选择的波特率是300bps,那么每一位对应的时钟周期数就是125000000/300=416666.67，向上取整为416667个时钟周期，需要19位的计数器来存储。</p>
-<ul>
-<li>使用一个19位的bps_DR寄存器来存储当前波特率对应的时钟周期数，[18:0]bps_DR</li>
-<li>可以使用一个译码器将3位的波特率设置转换成对应的时钟周期数</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="kt">reg</span> <span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">bps_DR</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="o">*</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="k">case</span><span class="p">(</span><span class="n">Baud_set</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">0</span><span class="o">:</span> <span class="n">bps_DR</span> <span class="o">=</span> <span class="mh">125000000</span><span class="o">/</span> <span class="mh">9600</span><span class="err">；</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">1</span><span class="o">:</span> <span class="n">bps_DR</span> <span class="o">=</span> <span class="mh">125000000</span><span class="o">/</span> <span class="mh">19200</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">2</span><span class="o">:</span> <span class="n">bps_DR</span> <span class="o">=</span> <span class="mh">125000000</span><span class="o">/</span> <span class="mh">38400</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">3</span><span class="o">:</span> <span class="n">bps_DR</span> <span class="o">=</span> <span class="mh">125000000</span><span class="o">/</span> <span class="mh">57600</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">4</span><span class="o">:</span> <span class="n">bps_DR</span> <span class="o">=</span> <span class="mh">125000000</span><span class="o">/</span> <span class="mh">115200</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="k">default</span><span class="o">:</span> <span class="n">bps_DR</span> <span class="o">=</span> <span class="mh">125000000</span><span class="o">/</span> <span class="mh">9600</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">endcase</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>由于最大的bps_DR是19位，所以可以使用一个19位的计数器来进行计数[18:0] div_cnt,需要考虑到只有在Send_en状态时才进行计数。</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="kt">reg</span> <span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">div_cnt</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="k">posedge</span> <span class="n">Clk</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">div_cnt</span> <span class="o">&lt;=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">Send_en</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">div_cnt</span> <span class="o">==</span> <span class="n">bps_DR</span> <span class="o">-</span><span class="mh">1</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">            <span class="n">div_cnt</span> <span class="o">&lt;=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="k">else</span> 
-</span></span><span class="line"><span class="cl">            <span class="n">div_cnt</span> <span class="o">&lt;=</span> <span class="n">div_cnt</span> <span class="o">+</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">end</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> 
-</span></span><span class="line"><span class="cl">    <span class="n">div_cnt</span> <span class="o">&lt;=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>由于一共有10位数据需要发送，所以可以使用一个4位的计数器来记录当前发送的数据是第几位[3:0] bps_cnt</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="kt">reg</span> <span class="p">[</span><span class="mh">3</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">bps_cnt</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="k">posedge</span> <span class="n">Clk</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bps_cnt</span> <span class="o">&lt;=</span> <span class="mh">10</span><span class="p">;</span> <span class="c1">// 初始状态设置为10而不是0，后面解释🙋‍♂️
-</span></span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">div_cnt</span> <span class="o">==</span> <span class="n">bps_DR</span> <span class="o">-</span><span class="mh">1</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="n">bps_cnt</span> <span class="o">&lt;=</span> <span class="n">bps_cnt</span> <span class="o">+</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">bps_cnt</span> <span class="o">==</span> <span class="mh">10</span> <span class="o">&amp;&amp;</span> <span class="n">div_cnt</span> <span class="o">==</span> <span class="mh">2</span><span class="p">)</span> <span class="c1">// 如果写成Send_en呢，如果写成div_cnt == 1呢，后面再说🙋‍♂️
-</span></span></span><span class="line"><span class="cl">    <span class="n">bps_cnt</span> <span class="o">&lt;=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>设置uart_tx和Tx_done信号</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="k">always</span><span class="p">@(</span><span class="k">posedge</span> <span class="n">Clk</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">Reset_n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">    <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">        <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="mh">1</span><span class="p">;</span> <span class="c1">// 空闲状态为高电平
-</span></span></span><span class="line"><span class="cl">        <span class="n">Tx_done</span> <span class="o">&lt;=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">end</span>
-</span></span><span class="line"><span class="cl"><span class="k">else</span> <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="k">case</span><span class="p">(</span><span class="n">bps_cnt</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">0</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">1</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="n">Data</span><span class="p">[</span><span class="mh">0</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">2</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="n">Data</span><span class="p">[</span><span class="mh">1</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">3</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="n">Data</span><span class="p">[</span><span class="mh">2</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">4</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="n">Data</span><span class="p">[</span><span class="mh">3</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">5</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="n">Data</span><span class="p">[</span><span class="mh">4</span><span class="p">];</span>  
-</span></span><span class="line"><span class="cl">        <span class="mh">6</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="n">Data</span><span class="p">[</span><span class="mh">5</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">7</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="n">Data</span><span class="p">[</span><span class="mh">6</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">8</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="n">Data</span><span class="p">[</span><span class="mh">7</span><span class="p">];</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">9</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="mh">10</span><span class="o">:</span> <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">            <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">            <span class="n">Tx_done</span> <span class="o">&lt;=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">        <span class="k">end</span>
-</span></span><span class="line"><span class="cl">        <span class="k">default</span><span class="o">:</span> <span class="n">uart_tx</span> <span class="o">&lt;=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="k">endcase</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>testbench代码</li>
-</ul>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-verilog" data-lang="verilog"><span class="line"><span class="cl"><span class="no">`timescale</span> <span class="mh">1</span><span class="n">ns</span> <span class="o">/</span> <span class="mh">1</span><span class="n">ns</span>
-</span></span><span class="line"><span class="cl"><span class="k">module</span> <span class="n">uart_byte_tx_tb</span><span class="p">();</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">reg</span> <span class="n">Clk</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">reg</span> <span class="n">Reset_n</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">reg</span> <span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">Data</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">reg</span> <span class="n">Send_en</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">reg</span> <span class="p">[</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">Baud_set</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">wire</span> <span class="n">uart_tx</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="kt">wire</span> <span class="n">Tx_done</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">uart_byte_tx</span> <span class="n">uart_byte_tx</span><span class="p">(</span>
-</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">Clk</span><span class="p">(</span><span class="n">Clk</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">Reset_n</span><span class="p">(</span><span class="n">Reset_n</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">Data</span><span class="p">(</span><span class="n">Data</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">Baud_set</span><span class="p">(</span><span class="n">Baud_set</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">Send_en</span><span class="p">(</span><span class="n">Send_en</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">uart_tx</span><span class="p">(</span><span class="n">uart_tx</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">Tx_done</span><span class="p">(</span><span class="n">Tx_done</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">initial</span> <span class="n">Clk</span> <span class="o">=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">always</span> <span class="p">#</span><span class="mh">4</span> <span class="n">Clk</span> <span class="o">=</span> <span class="o">!</span><span class="n">Clk</span><span class="p">;</span> <span class="c1">// notice that we use 125MHz clock
-</span></span></span><span class="line"><span class="cl"><span class="k">initial</span> <span class="k">begin</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Reset_n</span> <span class="o">=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Data</span> <span class="o">=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Send_en</span> <span class="o">=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Baud_set</span> <span class="o">=</span> <span class="mh">4</span><span class="p">;</span> <span class="c1">// 115200bps
-</span></span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="p">#</span> <span class="mh">201</span><span class="p">;</span> <span class="c1">// 我的理解是比周期正好多一点，防止不稳定
-</span></span></span><span class="line"><span class="cl">    <span class="n">Reset_n</span> <span class="o">=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">#</span> <span class="mh">100</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Data</span> <span class="o">=</span> <span class="mh">8&#39;h57</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Send_en</span> <span class="o">=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="p">#</span> <span class="mh">20</span><span class="p">;</span> <span class="c1">// 我的理解是保证Tx_done有充分的时间可以变成0，方便上升沿检测
-</span></span></span><span class="line"><span class="cl">    <span class="p">@(</span><span class="k">posedge</span> <span class="n">Tx_done</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Send_en</span> <span class="o">=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="p">#</span> <span class="mh">20000</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Data</span> <span class="o">=</span> <span class="mh">8&#39;h75</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Send_en</span> <span class="o">=</span> <span class="mh">1</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">#</span> <span class="mh">20</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">@(</span><span class="k">posedge</span> <span class="n">Tx_done</span><span class="p">);</span>
-</span></span><span class="line"><span class="cl">    <span class="n">Send_en</span> <span class="o">=</span> <span class="mh">0</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="p">#</span> <span class="mh">20000</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl">    <span class="nb">$stop</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="k">end</span>
-</span></span><span class="line"><span class="cl"><span class="k">endmodule</span> 
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>经过仿真可以测得一个小字节的间隔是8.68us,接近理论值1000000/115200=8.68us,符合预期。</li>
-<li>上述两个疑问的回答：</li>
-</ul>
-<blockquote>
-<p>1.bps_cnt初始值设置为10是为了在reset的时候让uart_tx和Tx_done都处于空闲状态（高电平），即此时并没有数据发送。</p>
-</blockquote>
-<blockquote>
-<ol start="2">
-<li>为什么不可以使用Send_en来控制bps_cnt变成0，因为在实际仿真的过程中，在Tx_done上升时，看似Send_en=0，实际使用的Send_en信号并不是0而是1，导致bps_cnt变成0,进入了发送状态，然而我们要求bsp_cnt保持10的状态直到下一次Send_en变成1才开始发送数据。</li>
-</ol>
-</blockquote>
-<blockquote>
-<ol start="3">
-<li>为什么不可以写成div_cnt == 1,看似使用计数保证了有一个稳定的时间间隔，但是在实际仿真过程中，在Tx_done上升瞬间，和2一样，Send_en并不是0而是1，导致div_cnt并没有归零，而是继续计数，div_cnt=1，而在下一个时钟周期上升时，div_cnt恰好是1导致bps_cnt变成0，进入了发送状态，就和2一样了。</li>
-</ol>
-</blockquote>
-<ul>
-<li>总结：深入分析仿真中实际的信号变化情况，考虑到信号的竞争与冒险问题，设计出合理的代码是关键。还有就是善用仿真。</li>
-</ul>
-
-</section>
-
-
-    <footer class="article-footer">
-    
-
-    
-    <section class="article-copyright">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
-</svg>
-
-
-
-        <span>Licensed under CC BY-NC-SA 4.0</span>
-    </section>
-    </footer>
-
-
-    
-        <link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
-            ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
-                defer
-                >
-            </script><script>
-    window.addEventListener("DOMContentLoaded", () => {
-        const elementsToRender = [".main-article", ".widget--toc"];
-
-        elementsToRender.forEach(selector => {
-            const element = document.querySelector(selector);
-            if (element) {
-                renderMathInElement(element, {
-                    delimiters: [
-                        { left: "$$", right: "$$", display: true },
-                        { left: "$", right: "$", display: false },
-                        { left: "\\(", right: "\\)", display: false },
-                        { left: "\\[", right: "\\]", display: true }
-                    ],
-                    ignoredClasses: ["gist"]
-                });
-            }
-        });
-    });
-</script>
-    
-</article>
-
-    
-
-    
-
-<aside class="related-content--wrapper">
-    <h2 class="section-title">相关文章</h2>
-    <div class="related-content">
-        <div class="flex article-list--tile">
-            
-                
-<article class="has-image">
-    <a href="/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/">
-        
-        
-            <div class="article-image">
-                
-                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c6.jpg" loading="lazy" data-key="" data-hash="/伊蕾娜6.jpg"/>
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">FPGA1 — 阻塞赋值与非阻塞赋值</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="has-image">
-    <a href="/p/fpga0-%E5%8F%AF%E6%8E%A7%E7%BA%BF%E6%80%A7%E5%BA%8F%E5%88%97%E6%9C%BA/">
-        
-        
-            <div class="article-image">
-                
-                    <img src="/%e4%bc%8a%e8%95%be%e5%a8%9c5.jpg" loading="lazy" data-key="" data-hash="/伊蕾娜5.jpg"/>
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">FPGA0 — 可控线性序列机</h2>
-        </div>
-    </a>
-</article>
-
-            
-        </div>
-    </div>
-</aside>
-
-     
-    
-        
-    <script
-    src="https://giscus.app/client.js"
-    data-repo="fuquan99666/fuquan99666.github.io"
-    data-repo-id="R_kgDOQuvzsw"
-    data-category="Announcements"
-    data-category-id="DIC_kwDOQuvzs84C0tAQ"
-    data-mapping="pathname"
-    data-strict="0"
-    data-reactions-enabled="1"
-    data-emit-metadata="0"
-    data-input-position="top"
-    data-theme="light"
-    data-lang="en"
-    data-loading=""
-    crossorigin="anonymous"
-    async
-></script>
-<script>
-    function setGiscusTheme(theme) {
-        let giscus = document.querySelector("iframe.giscus-frame");
-        if (giscus) {
-            giscus.contentWindow.postMessage(
-                {
-                    giscus: {
-                        setConfig: {
-                            theme: theme,
-                        },
-                    },
-                },
-                "https://giscus.app"
-            );
-        }
-    }
-
-    (function () {
-        addEventListener("message", (e) => {
-            if (event.origin !== "https://giscus.app") return;
-            handler();
-        });
-        window.addEventListener("onColorSchemeChange", handler);
-
-        function handler() {
-            if (document.documentElement.dataset.scheme === "light") {
-                setGiscusTheme('light');
-            } else {
-                setGiscusTheme('dark');
-            }
-        }
-    })();
-</script>
-
-    
-
-    <footer class="site-footer">
-    <section class="copyright">
-        &copy; 
-        
-            2025 - 
-        
-        2026 zz486
-    </section>
-    
-    <section class="powerby">
-        
-            啊啊啊啊啊啊啊 <br/>
-        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
-        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.33.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
-    </section>
-</footer>
-
-
-    
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-    
-    <div class="pswp__bg"></div>
-
-    
-    <div class="pswp__scroll-wrap">
-
-        
-        <div class="pswp__container">
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-        </div>
-
-        
-        <div class="pswp__ui pswp__ui--hidden">
-
-            <div class="pswp__top-bar">
-
-                
-
-                <div class="pswp__counter"></div>
-
-                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
-                <button class="pswp__button pswp__button--share" title="Share"></button>
-
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
-                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-                
-                
-                <div class="pswp__preloader">
-                    <div class="pswp__preloader__icn">
-                        <div class="pswp__preloader__cut">
-                            <div class="pswp__preloader__donut"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                <div class="pswp__share-tooltip"></div>
-            </div>
-
-            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-            </button>
-
-            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-            </button>
-
-            <div class="pswp__caption">
-                <div class="pswp__caption__center"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
-                defer
-                >
-            </script><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
-            ><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
-            >
-    
-
-            </main>
-        </div>
-        <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
-                
-                >
-            </script><script type="text/javascript" src="/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js" defer></script>
-<script>
-    (function () {
-        const customFont = document.createElement('link');
-        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
-
-        customFont.type = "text/css";
-        customFont.rel = "stylesheet";
-
-        document.head.appendChild(customFont);
-    }());
-</script>
-
-    </body>
-</html>
+起始位为低电平，停止位为高电平。</p></blockquote><center><img src=2.png alt=UART发送一个字节时序图 width=700></center><ul><li>可以想到之前的FPGA点灯实验中8个LED灯的基础时间单元和波特率其实是一个东西，只不过点灯实验中是直接控制LED的亮灭时长，而UART通信中则是通过这个时间单元来控制数据的发送和接收速度。而用户自定义8种亮暗恰好对应8个数据位。</li></ul><h3 id=实验部分>实验部分</h3><ol><li>串口通信模块设计的目的是用来发送数据的，因此需要有一个数据输入端口</li><li>串口通信，支持不同的波特率，所以需要一个波特率设置端口。</li><li>串口通信的本质就是将8位的并行数据通过一根信号线，在不同的时刻传输并行数据的不同位，通过多个时刻，最终将8位并行数据全部传出。</li><li>以1位低电平的起始位开始，接着是8位数据位，最后是1位高电平的停止位，总共10位数据。</li><li>控制信号，需要一个信号来告诉模块可以发送数据了(when to send)，还需要一个信号来告诉模块当前的一批数据已经成功发送了。</li></ol><center><img src=3.png alt=UART发送模块设计图 width=600></center><h3 id=verilog代码实现切记这里坑比较多推荐自己写一遍>Verilog代码实现,切记这里坑比较多，推荐自己写一遍</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=no>`timescale</span> <span class=mh>1</span><span class=n>ns</span> <span class=o>/</span> <span class=mh>1</span><span class=n>ns</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>module</span> <span class=n>uart_byte_tx</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>Clk</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>Reset_n</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>Data</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=p>[</span><span class=mh>2</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>Baud_set</span><span class=p>,</span> <span class=c1>// 波特率设置,8种波特率
+</span></span></span><span class=line><span class=cl>    <span class=k>input</span> <span class=n>Send_en</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=n>uart_tx</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=k>output</span> <span class=n>Tx_done</span>
+</span></span><span class=line><span class=cl><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>首先计算一下计数器的最大值，已知我们的FPGA时钟频率是125MHz，假设我们选择的波特率是115200bps,那么每一位对应的时钟周期数就是125000000/115200=1085.069，遵从宁可多花时间也不丢数据的原则，向上取整为1086个时钟周期（实际波特率会略低于115200bps）,需要11位的计数器来存储。
+假设我们选择的波特率是300bps,那么每一位对应的时钟周期数就是125000000/300=416666.67，向上取整为416667个时钟周期，需要19位的计数器来存储。</p><ul><li>使用一个19位的bps_DR寄存器来存储当前波特率对应的时钟周期数，[18:0]bps_DR</li><li>可以使用一个译码器将3位的波特率设置转换成对应的时钟周期数</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=kt>reg</span> <span class=p>[</span><span class=mh>18</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>bps_DR</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>always</span><span class=p>@(</span><span class=o>*</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>case</span><span class=p>(</span><span class=n>Baud_set</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=mh>0</span><span class=o>:</span> <span class=n>bps_DR</span> <span class=o>=</span> <span class=mh>125000000</span><span class=o>/</span> <span class=mh>9600</span><span class=err>；</span>
+</span></span><span class=line><span class=cl>        <span class=mh>1</span><span class=o>:</span> <span class=n>bps_DR</span> <span class=o>=</span> <span class=mh>125000000</span><span class=o>/</span> <span class=mh>19200</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=mh>2</span><span class=o>:</span> <span class=n>bps_DR</span> <span class=o>=</span> <span class=mh>125000000</span><span class=o>/</span> <span class=mh>38400</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=mh>3</span><span class=o>:</span> <span class=n>bps_DR</span> <span class=o>=</span> <span class=mh>125000000</span><span class=o>/</span> <span class=mh>57600</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=mh>4</span><span class=o>:</span> <span class=n>bps_DR</span> <span class=o>=</span> <span class=mh>125000000</span><span class=o>/</span> <span class=mh>115200</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>default</span><span class=o>:</span> <span class=n>bps_DR</span> <span class=o>=</span> <span class=mh>125000000</span><span class=o>/</span> <span class=mh>9600</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>endcase</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>由于最大的bps_DR是19位，所以可以使用一个19位的计数器来进行计数[18:0] div_cnt,需要考虑到只有在Send_en状态时才进行计数。</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=kt>reg</span> <span class=p>[</span><span class=mh>18</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>div_cnt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>always</span><span class=p>@(</span><span class=k>posedge</span> <span class=n>Clk</span> <span class=k>or</span> <span class=k>negedge</span> <span class=n>Reset_n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span><span class=o>!</span><span class=n>Reset_n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>div_cnt</span> <span class=o>&lt;=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>else</span> <span class=k>if</span><span class=p>(</span><span class=n>Send_en</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span><span class=p>(</span><span class=n>div_cnt</span> <span class=o>==</span> <span class=n>bps_DR</span> <span class=o>-</span><span class=mh>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>div_cnt</span> <span class=o>&lt;=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span> 
+</span></span><span class=line><span class=cl>            <span class=n>div_cnt</span> <span class=o>&lt;=</span> <span class=n>div_cnt</span> <span class=o>+</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl><span class=k>else</span> 
+</span></span><span class=line><span class=cl>    <span class=n>div_cnt</span> <span class=o>&lt;=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>由于一共有10位数据需要发送，所以可以使用一个4位的计数器来记录当前发送的数据是第几位[3:0] bps_cnt</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=kt>reg</span> <span class=p>[</span><span class=mh>3</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>bps_cnt</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>always</span><span class=p>@(</span><span class=k>posedge</span> <span class=n>Clk</span> <span class=k>or</span> <span class=k>negedge</span> <span class=n>Reset_n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span><span class=o>!</span><span class=n>Reset_n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>bps_cnt</span> <span class=o>&lt;=</span> <span class=mh>10</span><span class=p>;</span> <span class=c1>// 初始状态设置为10而不是0，后面解释🙋‍♂️
+</span></span></span><span class=line><span class=cl><span class=k>else</span> <span class=k>if</span><span class=p>(</span><span class=n>div_cnt</span> <span class=o>==</span> <span class=n>bps_DR</span> <span class=o>-</span><span class=mh>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>bps_cnt</span> <span class=o>&lt;=</span> <span class=n>bps_cnt</span> <span class=o>+</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>else</span> <span class=k>if</span><span class=p>(</span><span class=n>bps_cnt</span> <span class=o>==</span> <span class=mh>10</span> <span class=o>&amp;&amp;</span> <span class=n>div_cnt</span> <span class=o>==</span> <span class=mh>2</span><span class=p>)</span> <span class=c1>// 如果写成Send_en呢，如果写成div_cnt == 1呢，后面再说🙋‍♂️
+</span></span></span><span class=line><span class=cl>    <span class=n>bps_cnt</span> <span class=o>&lt;=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>设置uart_tx和Tx_done信号</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=k>always</span><span class=p>@(</span><span class=k>posedge</span> <span class=n>Clk</span> <span class=k>or</span> <span class=k>negedge</span> <span class=n>Reset_n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>if</span><span class=p>(</span><span class=o>!</span><span class=n>Reset_n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>begin</span>
+</span></span><span class=line><span class=cl>        <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=mh>1</span><span class=p>;</span> <span class=c1>// 空闲状态为高电平
+</span></span></span><span class=line><span class=cl>        <span class=n>Tx_done</span> <span class=o>&lt;=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>end</span>
+</span></span><span class=line><span class=cl><span class=k>else</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=k>case</span><span class=p>(</span><span class=n>bps_cnt</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=mh>0</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=mh>1</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=n>Data</span><span class=p>[</span><span class=mh>0</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=mh>2</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=n>Data</span><span class=p>[</span><span class=mh>1</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=mh>3</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=n>Data</span><span class=p>[</span><span class=mh>2</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=mh>4</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=n>Data</span><span class=p>[</span><span class=mh>3</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=mh>5</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=n>Data</span><span class=p>[</span><span class=mh>4</span><span class=p>];</span>  
+</span></span><span class=line><span class=cl>        <span class=mh>6</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=n>Data</span><span class=p>[</span><span class=mh>5</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=mh>7</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=n>Data</span><span class=p>[</span><span class=mh>6</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=mh>8</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=n>Data</span><span class=p>[</span><span class=mh>7</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=mh>9</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=mh>10</span><span class=o>:</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>            <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=n>Tx_done</span> <span class=o>&lt;=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>end</span>
+</span></span><span class=line><span class=cl>        <span class=k>default</span><span class=o>:</span> <span class=n>uart_tx</span> <span class=o>&lt;=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=k>endcase</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>testbench代码</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-verilog data-lang=verilog><span class=line><span class=cl><span class=no>`timescale</span> <span class=mh>1</span><span class=n>ns</span> <span class=o>/</span> <span class=mh>1</span><span class=n>ns</span>
+</span></span><span class=line><span class=cl><span class=k>module</span> <span class=n>uart_byte_tx_tb</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=kt>reg</span> <span class=n>Clk</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>reg</span> <span class=n>Reset_n</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>reg</span> <span class=p>[</span><span class=mh>7</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>Data</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>reg</span> <span class=n>Send_en</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>reg</span> <span class=p>[</span><span class=mh>2</span><span class=o>:</span><span class=mh>0</span><span class=p>]</span> <span class=n>Baud_set</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>wire</span> <span class=n>uart_tx</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kt>wire</span> <span class=n>Tx_done</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>uart_byte_tx</span> <span class=n>uart_byte_tx</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>Clk</span><span class=p>(</span><span class=n>Clk</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>Reset_n</span><span class=p>(</span><span class=n>Reset_n</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>Data</span><span class=p>(</span><span class=n>Data</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>Baud_set</span><span class=p>(</span><span class=n>Baud_set</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>Send_en</span><span class=p>(</span><span class=n>Send_en</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>uart_tx</span><span class=p>(</span><span class=n>uart_tx</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>    <span class=p>.</span><span class=n>Tx_done</span><span class=p>(</span><span class=n>Tx_done</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>initial</span> <span class=n>Clk</span> <span class=o>=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>always</span> <span class=p>#</span><span class=mh>4</span> <span class=n>Clk</span> <span class=o>=</span> <span class=o>!</span><span class=n>Clk</span><span class=p>;</span> <span class=c1>// notice that we use 125MHz clock
+</span></span></span><span class=line><span class=cl><span class=k>initial</span> <span class=k>begin</span>
+</span></span><span class=line><span class=cl>    <span class=n>Reset_n</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Data</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Send_en</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Baud_set</span> <span class=o>=</span> <span class=mh>4</span><span class=p>;</span> <span class=c1>// 115200bps
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=p>#</span> <span class=mh>201</span><span class=p>;</span> <span class=c1>// 我的理解是比周期正好多一点，防止不稳定
+</span></span></span><span class=line><span class=cl>    <span class=n>Reset_n</span> <span class=o>=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>#</span> <span class=mh>100</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Data</span> <span class=o>=</span> <span class=mh>8&#39;h57</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Send_en</span> <span class=o>=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=p>#</span> <span class=mh>20</span><span class=p>;</span> <span class=c1>// 我的理解是保证Tx_done有充分的时间可以变成0，方便上升沿检测
+</span></span></span><span class=line><span class=cl>    <span class=p>@(</span><span class=k>posedge</span> <span class=n>Tx_done</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>Send_en</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=p>#</span> <span class=mh>20000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Data</span> <span class=o>=</span> <span class=mh>8&#39;h75</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>Send_en</span> <span class=o>=</span> <span class=mh>1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>#</span> <span class=mh>20</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>@(</span><span class=k>posedge</span> <span class=n>Tx_done</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=n>Send_en</span> <span class=o>=</span> <span class=mh>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>#</span> <span class=mh>20000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=nb>$stop</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>end</span>
+</span></span><span class=line><span class=cl><span class=k>endmodule</span> 
+</span></span></code></pre></td></tr></table></div></div><ul><li>经过仿真可以测得一个小字节的间隔是8.68us,接近理论值1000000/115200=8.68us,符合预期。</li><li>上述两个疑问的回答：</li></ul><blockquote><p>1.bps_cnt初始值设置为10是为了在reset的时候让uart_tx和Tx_done都处于空闲状态（高电平），即此时并没有数据发送。</p></blockquote><blockquote><ol start=2><li>为什么不可以使用Send_en来控制bps_cnt变成0，因为在实际仿真的过程中，在Tx_done上升时，看似Send_en=0，实际使用的Send_en信号并不是0而是1，导致bps_cnt变成0,进入了发送状态，然而我们要求bsp_cnt保持10的状态直到下一次Send_en变成1才开始发送数据。</li></ol></blockquote><blockquote><ol start=3><li>为什么不可以写成div_cnt == 1,看似使用计数保证了有一个稳定的时间间隔，但是在实际仿真过程中，在Tx_done上升瞬间，和2一样，Send_en并不是0而是1，导致div_cnt并没有归零，而是继续计数，div_cnt=1，而在下一个时钟周期上升时，div_cnt恰好是1导致bps_cnt变成0，进入了发送状态，就和2一样了。</li></ol></blockquote><ul><li>总结：深入分析仿真中实际的信号变化情况，考虑到信号的竞争与冒险问题，设计出合理的代码是关键。还有就是善用仿真。</li></ul></section><footer class=article-footer><section class=article-copyright><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{const e=[".main-article",".widget--toc"];e.forEach(e=>{const t=document.querySelector(e);t&&renderMathInElement(t,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})})</script></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article class=has-image><a href=/p/fpga1-%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E%E8%B5%8B%E5%80%BC/><div class=article-image><img src=/%e4%bc%8a%e8%95%be%e5%a8%9c6.jpg loading=lazy data-key data-hash=/伊蕾娜6.jpg></div><div class=article-details><h2 class=article-title>FPGA1 — 阻塞赋值与非阻塞赋值</h2></div></a></article><article class=has-image><a href=/p/fpga0-%E5%8F%AF%E6%8E%A7%E7%BA%BF%E6%80%A7%E5%BA%8F%E5%88%97%E6%9C%BA/><div class=article-image><img src=/%e4%bc%8a%e8%95%be%e5%a8%9c5.jpg loading=lazy data-key data-hash=/伊蕾娜5.jpg></div><div class=article-details><h2 class=article-title>FPGA0 — 可控线性序列机</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=fuquan99666/fuquan99666.github.io data-repo-id=R_kgDOQuvzsw data-category=Announcements data-category-id=DIC_kwDOQuvzs84C0tAQ data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=light data-lang=en data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"light":"dark")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 zz486</section><section class=powerby>啊啊啊啊啊啊啊<br>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.33.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
