@@ -1,4 +1,204 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Diffusion on My Site</title><link>https://fuquan99666.github.io/categories/diffusion/</link><description>Recent content in Diffusion on My Site</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>zz486</copyright><lastBuildDate>Mon, 18 May 2026 09:31:42 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/diffusion/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT_6.S184_3 — How To Condition on a Prompt</title><link>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</link><pubDate>Mon, 18 May 2026 09:31:42 +0800</pubDate><guid>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</guid><description>&lt;h3 id="引"&gt;引
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Diffusion on My Site</title><link>https://fuquan99666.github.io/categories/diffusion/</link><description>Recent content in Diffusion on My Site</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>zz486</copyright><lastBuildDate>Thu, 21 May 2026 15:23:00 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/categories/diffusion/index.xml" rel="self" type="application/rss+xml"/><item><title>MIT_6.S184_4 — Building Large-Scale Image or Video Generators</title><link>https://fuquan99666.github.io/p/mit_6.s184_4-building-large-scale-image-or-video-generators/</link><pubDate>Thu, 21 May 2026 15:23:00 +0800</pubDate><guid>https://fuquan99666.github.io/p/mit_6.s184_4-building-large-scale-image-or-video-generators/</guid><description>&lt;h3 id="引"&gt;引
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;通过前面几节课的学习，我们已经基本掌握了flow matching和score matching的原理和算法，并且学会了如何根据prompt来训练一个conditional flow matching model, 接下来我们将学习如何如何使用具体的神经网络实现这些模型。&lt;/li&gt;
+&lt;li&gt;本篇内容主要分为3个部分：首先介绍具体的神经网络架构；其次介绍一下隐空间以及如何使用VAE来学习一个好的latent space; 最后介绍两个当前SOTA的生成模型。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="neural-network-architectures"&gt;Neural Network Architectures
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;我们现在需要训练的是一个guided vector field, 也就是$u^{\theta}_t(x|y)$, 这个神经网络接受3个输入，t、x和y，所以我们首先需要将这三个输入转化成向量，至于我们具体使用什么神经网络，在之前的lab2中我们使用了MLP，成功学习到了一个格子图的生成。但是对于更高维度的复杂图像，比如蛋白质或者视频，我们需要用到更加复杂的网络结构，在这里我们将介绍U-Net和difussion transformer两种网络结构。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="embedding-the-conditioning-variables"&gt;Embedding the Conditioning Variables
+&lt;/h4&gt;&lt;h5 id="embedding-time"&gt;Embedding Time
+&lt;/h5&gt;&lt;ul&gt;
+&lt;li&gt;对于t，之前的toy model中我们可以简单的将t和x进行拼接，然后传入神经网络即可。In practice, the scalar time is often embedded in a higher dimensional space using Fourier features, allowing the model to more faithfully capture high-frequency time dependence（呃呃，看似很有道理）。具体的构造如下图所示：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+&lt;img src='1.png' width=500&gt;
+&lt;/center&gt;
+&lt;h6 id="embedding-class-labels"&gt;Embedding Class Labels
+&lt;/h6&gt;&lt;ul&gt;
+&lt;li&gt;对于y，如果它只是一个离散的类别标签，那么我们可以仿照LLM中，为每一个标签设计一个类似词向量的标签向量，note提到我们可以把这个embedding向量作为参数的一部分，然后在训练过程中同步更新，以便得到一个更好反应标签之间关系的embedding向量。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h6 id="embedding-textual-input"&gt;Embedding Textual Input
+&lt;/h6&gt;&lt;ul&gt;
+&lt;li&gt;如果y是一段文本输入，那么情况会比较复杂，我们可以使用一个预训练的text embedding model来将文本转化为一个vector，推荐使用CLIP模型，CLIP模型在训练的时候会同时将图像和文本进行embedding，并且将它们进行对齐(using a training loss designed to encourage image embeddings to be close to their corresponding prompts, while being farther from the embeddings of other images and prompts), 于是有$y = \text{CLIP}(y_{\text{raw}}) \in \mathbb{R}^{d_{\text{CLIP}}}$.&lt;/li&gt;
+&lt;li&gt;当然如果y是一个非常非常长的文本输入，我们显然不可能用一个单vector去表示它，我们可以考虑使用一个transformer对整个text进行逐个embedding，note中也提到我们可以结合多种模型的embedding结果来得到一个更好的文本embedding，最后得到$\text{PromptEmbed}(y_{\text{raw}}) \in \mathbb{R}^{S \times k}$, 其中S是文本长度，k是embedding维度。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="diffusion-transformer"&gt;Diffusion Transformer
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;这个部分没啥好说的，直接看note，我建议是把note中的DiT Block看一遍，能get到它由3个子模块组成即可。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;we note that class-conditioned DiT’s, such as the one implemented in the lab, are typically simpler and eschew the cross attention layer in favor of a time and class-based AdaNorm conditioning. 对于比较简单的条件输入y(比如类别标签)，我们没必要整一个单独的cross attention layer来将图片信息和prompt信息进行融合，简单的用t，y做一个MLP得到几个参数和x乘一乘就够了，这样就大大简化了模型的复杂度和计算量。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="u-net"&gt;U-Net
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;直接看note吧，这种网络架构的设计没啥意思（&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="working-in-latent-space-variational-autoencoders"&gt;Working in Latent Space: (Variational) Autoencoders
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;现在我们有了一个完整的深度学习结构用于训练，问题是当前的embedding都是d维度的，假如我们有一张1024*1024的RGB图像，那么它的embedding结果就是$NC^{\prime}$维度的，其中$C^{\prime} = 3 * patch^2$, $N = \frac{1024^2}{patch^2}$, 故总维度就是$1024^2 * 3$, 这是一个非常非常大的向量，在image classification中，我们还可以通过卷积、pooling等操作最后得到一个维度更小的结果，但是在difussion中，我们最后的输出就是guided vector field，和输入是一样的，所以直接炸了。这仅仅是image生成啊，如果是视频生成话，我们将增加一条时间维度，那么维度再次翻倍，😇。How can we model high-dimensional images within a reasonable memory and computation budget😭&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="standard-autoencoders"&gt;Standard Autoencoders
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;A natural answer to this question lies in compression: perhaps the actual space of images, for example, lies near a much lower-dimensional manifold of the high dimensional image space. More concretely, we might consider an encoder $µ_ϕ$ : $R_d \rightarrow R_k$, together with some decoder $µ_θ$ : $R_k \rightarrow R_d$, which together map raw images $x \in R_d$ to and from latents $z \in R_k$, respectively. The dimension k is typically chosen to be much smaller than d. 其中$\mu_{\phi},\mu_{\theta}$被称为autoencoder, 它们的训练目标是让$\mu_{\theta}(\mu_{\phi}(x))$尽可能的接近x, 也就是让重构误差最小化：
+&lt;/p&gt;
+$$\mathcal{L}_{\text{Recon}}(\phi, \theta) = \mathbb{E}_{x \sim p_{\text{data}}} \left\|\mu_{\theta}(\mu_{\phi}(x)) - x \right\|^2$$&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;这个方法吧，理论上是没啥大毛病的，可以通过不断训练来让重构误差变的很小，但是但是但是我们似乎没有添加任何对$\mu_{\phi}(x)$的限制，如下图所示，这种神经网络的映射可能导致$\mu_{\phi}(x)$的分布十分混乱(可能聚成很多小簇，彼此之间不连续、有空洞, 如果我们随机输入一个x，得到的z可能根本没有落到这些小簇上，decoder由于没有遇到过这种z，可能得到奇怪的输出)，&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+&lt;img src='2.png' width=500&gt;
+&lt;/center&gt;
+&lt;h4 id="variational-autoencoders"&gt;Variational Autoencoders
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;于是，VAE应运而生，它和standard autoencoder的区别在于不再使用deterministic function, 而是得到一个概率分布：
+$$q_\phi(z|x) = \mathcal{N}(z; \mu_\phi(x), \text{diag}(\sigma_\phi^2(x))), \quad
+p_\theta(x|z) = \mathcal{N}(x; \mu_\theta(z), \sigma_\theta^2(z) I_d)$$
+如果我们想要采样：
+$$z \sim q_\phi(\cdot \mid x) \quad \text{(encode)}, \qquad
+x \sim p_\theta(\cdot \mid z) \quad \text{(decode)}$$
+当$\sigma_\phi^2(x) \rightarrow 0$ and $\sigma_\theta^2(z) \rightarrow 0$, VAE就退化成了standard autoencoder了。
+它的损失函数可以定义为：
+$$\mathcal{L}_{\text{VAE-Recon}}(\phi, \theta) = -\mathbb{E}_{x \sim p_{\text{data}}(x), \, z \sim q_\phi(\cdot|x)} \left[ \log p_\theta(x|z) \right]$$
+这个 loss反应了 how likely would our original data point x
+be if we encoded and decoded it - and we take all possible decodings/encodings into account as things have become random now. 在高斯分布的情况下，这个公式可以写为：
+$$\mathcal{L}_{\text{VAE-Recon}}(\phi, \theta) = \mathbb{E}_{x \sim p_{\text{data}}(x), \, z \sim q_\phi(z|x)} \left[ \frac{1}{2\sigma_\theta^2(z)} \| x - \mu_\theta(z) \|^2 + \frac{d}{2} \log \sigma_\theta^2(z) \right] + \text{const}$$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div style="border: 2px solid #ccc; padding: 10px; border-radius: 15px; margin: 10px 0;"&gt;
+&lt;p&gt;这里需要介绍一下我们在生成模型中常用的一个PDF(probability density function) : d-dimensional isotropic Gaussian.
+公式如下：
+&lt;/p&gt;
+$$\mathcal{N}(x; \mu, \sigma^2 I) = (2\pi\sigma^2)^{-\frac{d}{2}} \exp\left( -\frac{\|x - \mu\|^2}{2\sigma^2} \right)$$&lt;p&gt;
+由于这个分布的协方差矩阵是$\sigma^2 I$, 所以它在各个维度都是独立的，并且方差都一样，所以我们称它为isotropic Gaussian. 它的PDF就是将根据独立性将每个维度的PDF相乘得到的结果，即上面的公式。对它取负对数后将常量分离,再用网络预测的均值和方差带入即为$\mathcal{L}_{\text{VAE-Recon}}(\phi, \theta)$.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div style="border: 2px solid #1a8bed; padding: 10px; border-radius: 15px; margin: 10px 0;"&gt;
+&lt;p&gt;下面是note中的一段：
+The second term depending on the decoder variance controls the tradeoff between reconstruction accuracy and predictive uncertainty. Many implementations, including that in the lab, fix $\sigma_{\phi}(x)$ and $\sigma_{\theta}(z)$ to learned scalar constants (that is, independent of x and z, respectively), thereby avoiding pathological behavior and numerical stability when learning variances. Therefore, the VAE reconstruction loss in this case then becomes basically the standard autoencoder reconstruction loss up to stochasticity in the encoding and constants. 这段话提到了两个方差的影响，我们注意到$\sigma_{\theta}^2(z)$同时出现在了损失函数中第一项的分母和第二项的分子，这是一种tradeoff，如果$\sigma_{\theta}^2(z)$很大，那么第一项重建误差就会很小，精度损失大；如果$\sigma_{\theta}^2(z)$很小，那么第一项重建误差就会很大，精度控制好，但是最终采样的方差小，生成的样本会回到了之前standard autoencoder的问题，碎片化、不连续。因此，我们通常会将$\sigma_{\phi}(x)$和$\sigma_{\theta}(z)$设置为一个常数，这样就避免了学习方差时可能出现的不稳定问题，同时也让VAE的重建损失基本上退化成了standard autoencoder的重建损失。&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;即 ：
+&lt;/p&gt;
+$$\mathcal{L}_{\text{VAE-Recon}}(\phi, \theta) = \mathbb{E}_{x \sim p_{\text{data}}(x), \, z \sim q_\phi(z|x)} \left[ \frac{1}{2\sigma_\theta^2} \| x - \mu_\theta(z) \|^2 \right] + \text{const}$$&lt;ul&gt;
+&lt;li&gt;重新回到VAE诞生的初衷，我们希望得到一个连续，容易学习和推广的隐空间分布，我们已经通过引入高斯分布让隐空间变得连续一些了，但是可能仍然会有空白部分，于是我们引入一个prior distribution - $p_{prior}(z)$，这里使用$p_{\text{prior}} = \mathcal{N}(0, I_k)$ (a isotropic Gaussian),然后我们希望所有x在编码后的分布都往这个prior分布靠近，这样就能保证不同x的编码结果更加连续，没有空洞。利用KL散度来定义loss有：
+$$
+L_{\text{VAE-Prior}}(\phi) = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x})} \left[ D_{\text{KL}}(q_{\phi}(\cdot \mid \mathbf{x}) \parallel p_{\text{prior}}) \right]$$
+下图是对KL散度的补充：&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+&lt;img src='3.png' width=500&gt;
+&lt;/center&gt;
+&lt;div style="border: 2px solid #1a8bed; padding: 10px; border-radius: 15px; margin: 10px 0;"&gt;
+&lt;p&gt;让我们证明一下KL散度的非负性以及等号成立的条件：
+设 $P$ 和 $Q$ 为定义在离散概率空间 $\mathcal{X}$ 上的两个概率分布，且 $P(x) &amp;gt; 0$，$Q(x) &amp;gt; 0$ 对所有 $x \in \mathcal{X}$ 成立。&lt;/p&gt;
+&lt;p&gt;KL 散度的定义为：
+&lt;/p&gt;
+$$
+D_{\text{KL}}(P \parallel Q) = \sum_{x \in \mathcal{X}} P(x) \ln \frac{P(x)}{Q(x)}
+$$&lt;p&gt;考虑随机变量 $Y = \frac{Q(X)}{P(X)}$，其中 $X \sim P$。由于 $\ln$ 是凹函数，根据 Jensen 不等式有：
+&lt;/p&gt;
+$$
+\mathbb{E}_{P}[\ln Y] \le \ln \mathbb{E}_{P}[Y]
+$$&lt;p&gt;具体写出：
+&lt;/p&gt;
+$$
+\sum_{x} P(x) \ln \frac{Q(x)}{P(x)} \le \ln \left( \sum_{x} P(x) \cdot \frac{Q(x)}{P(x)} \right)
+$$&lt;p&gt;左边计算：
+&lt;/p&gt;
+$$
+\sum_{x} P(x) \ln \frac{Q(x)}{P(x)} = -\sum_{x} P(x) \ln \frac{P(x)}{Q(x)} = -D_{\text{KL}}(P \parallel Q)
+$$&lt;p&gt;右边计算：
+&lt;/p&gt;
+$$
+\sum_{x} P(x) \cdot \frac{Q(x)}{P(x)} = \sum_{x} Q(x) = 1
+$$&lt;p&gt;
+因此：
+&lt;/p&gt;
+$$
+\ln \left( \sum_{x} Q(x) \right) = \ln 1 = 0
+$$&lt;p&gt;代入 Jensen 不等式得：
+&lt;/p&gt;
+$$
+-D_{\text{KL}}(P \parallel Q) \le 0
+$$&lt;p&gt;两边乘以 $-1$（注意不等号方向反转）：
+&lt;/p&gt;
+$$
+D_{\text{KL}}(P \parallel Q) \ge 0
+$$&lt;p&gt;等号成立的条件：由于 $\ln$ 是严格凹函数，Jensen 不等式取等当且仅当 $Y$ 为常数，即 $\frac{Q(X)}{P(X)} = c$ 几乎处处成立。结合 $\sum Q(x) = \sum P(x) = 1$ 可得 $c = 1$，从而 $Q(x) = P(x)$ 几乎处处成立。&lt;/p&gt;
+&lt;p&gt;对于连续情形，只需将求和换为积分，证明过程完全类似。&lt;/p&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;于是，结合重建损失和先验损失，我们有：
+\[
+L_{\text{VAE}}(\phi, \theta) = L_{\text{VAE-Recon}}(\phi, \theta) + \beta L_{\text{VAE-Prior}}(\phi)
+\]
+\[
+= -\mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x}), \mathbf{z} \sim q_{\phi}(\mathbf{z} \mid \mathbf{x})} \left[ \log p_{\theta}(\mathbf{x} \mid \mathbf{z}) \right] + \beta \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x})} \left[ D_{\text{KL}}(q_{\phi}(\cdot \mid \mathbf{x}) \parallel p_{\text{prior}}) \right]
+\]&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div style="border: 2px solid #1a8bed; padding: 10px; border-radius: 15px; margin: 10px 0;"&gt;
+&lt;p&gt;下面我们计算一下KL Divergence Between Isotropic Gaussians：
+对于任意d的情况，由之前的isotropic Gaussian的PDF我们可以得到：
+&lt;/p&gt;
+$$\mathcal{N}(x; \mu, \sigma^2 I) = (2\pi\sigma^2)^{-\frac{d}{2}} \exp\left( -\frac{\|x - \mu\|^2}{2\sigma^2} \right)$$&lt;p&gt;
+有$\log q(x) = -\frac{d}{2} \log(2\pi\sigma_q^2) - \frac{|x - \mu_q|^2}{2\sigma_q^2}$, $\log p(x) = -\frac{d}{2} \log(2\pi\sigma_p^2) - \frac{|x - \mu_p|^2}{2\sigma_p^2}$, 于是：&lt;/p&gt;
+$$
+D_{\text{KL}}(q \parallel p) = \mathbb{E}_{\mathbf{x} \sim q} \left[ \log q(\mathbf{x}) - \log p(\mathbf{x}) \right] = \frac{1}{2} \left[ d \log \frac{\sigma_p^2}{\sigma_q^2} + \mathbb{E}_{\mathbf{x} \sim q} \left[ \frac{\|\mathbf{x} - \mu_p\|^2}{\sigma_p^2} - \frac{\|\mathbf{x} - \mu_q\|^2}{\sigma_q^2} \right] \right]$$&lt;p&gt;
+又：
+&lt;/p&gt;
+$$
+\mathbb{E}_{\mathbf{x} \sim q} \left[ \frac{\|\mathbf{x} - \mu_p\|^2}{\sigma_p^2} \right] = \frac{1}{\sigma_p^2} \mathbb{E}_{\mathbf{x} \sim q} \left[ \|\mathbf{x} - \mu_q + \mu_q - \mu_p\|^2 \right] = \frac{1}{\sigma_p^2} \left( d\sigma_q^2 + \|\mu_q - \mu_p\|^2 \right)$$&lt;p&gt;上式用到了：
+&lt;/p&gt;
+$$
+\mathbb{E}_{\mathbf{x} \sim q} \left[\mathbf{x} - \mu_q\right] = 0$$&lt;p&gt;
+又：&lt;/p&gt;
+$$
+\mathbb{E}_{\mathbf{x} \sim q} \left[ \frac{\|\mathbf{x} - \mu_q\|^2}{\sigma_q^2} \right] = \frac{1}{\sigma_q^2} \mathbb{E}_{\mathbf{x} \sim q} \left[ \|\mathbf{x} - \mu_q\|^2 \right] = \frac{1}{\sigma_q^2} \cdot d\sigma_q^2 = d
+$$&lt;p&gt;综上有：
+&lt;/p&gt;
+$$D_{\text{KL}}(q \parallel p) = \frac{1}{2} \left[ d \log \frac{\sigma_p^2}{\sigma_q^2} + \frac{d\sigma_q^2 + \|\mu_q - \mu_p\|^2}{\sigma_p^2} - d \right] = \frac{1}{2} \left[ d \left( \frac{\sigma_q^2}{\sigma_p^2} -\log \frac{\sigma_q^2}{\sigma_p^2} - 1 \right) + \frac{\|\mu_q - \mu_p\|^2}{\sigma_p^2} \right]$$&lt;p&gt;
+和note中的公式其实是一样的，在各向同性高斯分布下，各个维度的方差相同，所以没有必要写成note中那个格式。&lt;/p&gt;
+&lt;p&gt;由于$F(x) = x - \log x - 1$在x=1处取得最小值0，所以当$\frac{\sigma_q^2}{\sigma_p^2} = 1$时取最小；当$\mu_p = \mu_q$时，KL散度的第二部分最小为0。
+这也符合了之前提到的KL散度非负性以及等号成立的条件。&lt;/p&gt;
+&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;我们将标准高斯分布带入上式有：
+$$L_{\text{VAE-Prior}}(\phi) = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x})} \left[ D_{\text{KL}}(q_{\phi}(\cdot \mid \mathbf{x}) \parallel \mathcal{N}(0, I_k)) \right] = \mathbb{E} \left[ \frac{1}{2} K(\sigma_{\phi}^2(\mathbf{x})) + \frac{1}{2} \| \boldsymbol{\mu}_{\phi}(\mathbf{x}) \|^2 \right]$$
+其中$K(a) = k(a - \log a - 1)$, 将$\mu_p=0和\sigma_p=1$带入即可得到上式。
+最终有：
+$$
+\mathcal{L}_{\text{VAE}}(\phi, \theta)
+= \mathcal{L}_{\text{VAE-Recon}}(\phi, \theta) + \beta \mathcal{L}_{\text{VAE-Prior}}(\phi)
+= \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x}), \, \mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \frac{1}{2\sigma_\theta^2(\mathbf{z})} \|\mathbf{x} - \mu_\theta(\mathbf{z})\|^2 + \frac{d}{2} \log \sigma_\theta^2(\mathbf{z}) + \frac{\beta}{2} \mathcal{K}(\sigma_\phi^2(\mathbf{x})) + \frac{\beta}{2} \|\mu_\phi(\mathbf{x})\|^2 \right]
+$$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The four terms of the above loss function are very intuitive: 第一项是重建误差，第二项是decoder的方差，可以理解为不确定性，第三项是make latent variance 1, 第四项是make latent mean 0.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="training-a-vae"&gt;Training a VAE
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;ok，我们已经有了一个不错的loss定义，现在需要考虑如何训练它。现在有一个最大的问题是我们需要对z进行采样，而这个待采样的分布又是由神经网络预测的，这就导致我们的backward中间遇到了一个依概率采样的操作，这个操作压根不可以微分，所以我们需要一个reparameterization trick来解决这个问题。对于
+$$q_\phi(\mathbf{z} \mid \mathbf{x}) = \mathcal{N}(\mathbf{z}; \mu_\phi(\mathbf{x}), \sigma_\phi^2(\mathbf{x}) \mathbf{I}_k)$$
+我们可以换个方法采样：
+$$\boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I}_k), \quad \mathbf{z} = \mu_\phi(\mathbf{x}) + \sigma_\phi(\mathbf{x}) \boldsymbol{\epsilon} \;\Rightarrow\; \mathbf{z} \sim q_\phi(\cdot \mid \mathbf{x})$$
+这样一来我们每次都先采样好一个$\epsilon$, 然后直接计算出z，这样就可以微分了。
+于是我们改进loss函数为：
+$$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x}), \, \boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I}_k)} \left[ \frac{1}{2\sigma_\theta^2(\mathbf{z})} \|\mathbf{x} - \mu_\theta(\mu_\phi(\mathbf{x}) + \sigma_\phi(\mathbf{x})\boldsymbol{\epsilon})\|^2 + \frac{d}{2} \log \sigma_\theta^2(\mathbf{z}) + \frac{\beta}{2} \mathcal{K}(\sigma_\phi^2(\mathbf{x})) + \frac{\beta}{2} \|\mu_\phi(\mathbf{x})\|^2 \right]$$&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;再结合之前说过的可以固定方差，于是：
+&lt;/p&gt;
+$$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x}), \, \boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I}_k)} \left[ \frac{1}{2\sigma^2} \|\mathbf{x} - \mu_\theta(\mu_\phi(\mathbf{x}) + \sigma_\phi(\mathbf{x})\boldsymbol{\epsilon})\|^2 + \frac{\beta}{2}\mathcal{K}(\sigma_\phi^2(\mathbf{x})) + \frac{\beta}{2} \|\mu_\phi(\mathbf{x})\|^2 \right]$$&lt;ul&gt;
+&lt;li&gt;本篇需要推导的部分到此结束，请自行查看note部分的VAE训练伪代码。note还提到了一些工程上的优化方法，比如加一个GAN的判别器，使用预训练模型提取特征来计算误差，$\beta$参数的调节等等。并且指出当今几乎所有SOTA生成模型都遵循先训练一个良好的VAE自编码器，然后将数据在latent中进行flow or difussion model训练，最后再decode。所以最终生成图片的指令不仅看flow or difussion model的训练效果，还要看autoencoder compression的效果以及最终recover的情况。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="stable-diffusion-3-and-meta-moive-gen-video"&gt;Stable Diffusion 3 and Meta Moive Gen Video
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;自行阅读note🤣&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>MIT_6.S184_3 — How To Condition on a Prompt</title><link>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</link><pubDate>Mon, 18 May 2026 09:31:42 +0800</pubDate><guid>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</guid><description>&lt;h3 id="引"&gt;引
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;在上一讲中我们已经介绍了difussion model是如何定义，如何进行训练的，现在我们可以用flow matching 或者 score matching来训练一个generative model，并且用ODE或者SDE进行采样。但是在真正使用时，我们肯定是希望能够给定一个prompt来进行条件生成的，而我们上述的模型都是直接在$z \in data$上进行训练的，至于最终的采样结果完全是z中一个随机点，所以我们需要一些方法来让我们的模型能够根据一个prompt来进行条件生成。&lt;/li&gt;
 &lt;/ul&gt;
