@@ -29,9 +29,7 @@
 &lt;li&gt;这个部分没啥好说的，直接看note，我建议是把note中的DiT Block看一遍，能get到它由3个子模块组成即可。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;we note that class-conditioned DiT’s, such as the one implemented in the lab, are typically simpler and eschew the cross attention layer in favor of a time and class-based AdaNorm conditioning. 对于比较简单的条件输入y(比如类别标签)，我们没必要整一个单独的cross attention layer来将图片信息和prompt信息进行融合，简单的用t，y做一个MLP得到几个参数和x乘一乘就够了，这样就大大简化了模型的复杂度和计算量。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="u-net"&gt;U-Net
 &lt;/h4&gt;&lt;ul&gt;
@@ -176,9 +174,7 @@ $$
 $$&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;The four terms of the above loss function are very intuitive: 第一项是重建误差，第二项是decoder的方差，可以理解为不确定性，第三项是make latent variance 1, 第四项是make latent mean 0.&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="training-a-vae"&gt;Training a VAE
 &lt;/h4&gt;&lt;ul&gt;
@@ -208,9 +204,7 @@ $$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{
 &lt;img src='1.png' width=500&gt;
 &lt;/center&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;三十年河东，三十年河西不仅描述了人世变迁难以料得，且是河道变迁的事实。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;黄河下游河段长期淤积形成举世闻名的“地上河”，河水约束在大堤内成海河流域与淮河流域的分水岭。除大汶河由东平湖汇入外，本河段无较大支流汇入。 下游河段除南岸东平湖至济南间为低山丘陵外，其余全靠堤防挡水，堤防总长1400余千米。&lt;/li&gt;
@@ -226,9 +220,7 @@ $$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{
 &lt;li&gt;下面这张图很有意思， 可以发现华北平原地区是一片文明空白区，这个是为什么呢？&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;河流处于漫流状态，没有固定的河道，多股并行或河道迁移不定，洪水期流路更加复杂。当时的华北平原地区就是这样一个漫流区，河道不固定，洪水频发，土地经常被淹没，所以没有人敢在这里定居，更别说发展文明了。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;center&gt;
 &lt;img src='3.png' width=500&gt;
@@ -242,9 +234,7 @@ $$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{
 &lt;img src='4.png' width=500&gt;
 &lt;/center&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这里需要补充一下为什么东汉以后黄河总是形成地上河，并且三年两决堤。当初战国时期修建河堤时，两边河堤的距离有100里地，所以黄河可以自由的往两边扩展，泥沙什么的都均匀的分散，不容易形成地上河。后来随着人口的增加，人们想要更加高效的利用土地和黄河，于是两岸河堤不断的往黄河河床靠，最后直到紧贴，导致黄河的泥沙无法有效的分散，不断堆积，最终形成了地上河。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h5 id="第二次改道"&gt;第二次改道
 &lt;/h5&gt;&lt;ul&gt;
@@ -289,9 +279,7 @@ $$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{
 &lt;li&gt;1128年（南宋建炎二年）人为决河于今滑县李固渡，大河由泗入淮，这是第四次重大改道。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这里的人为决堤是当时的北宋朝廷往南方逃跑，但是打不过呀，于是相处了一招以水代兵的邪招。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
 &lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
@@ -346,9 +334,7 @@ $$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这次人为决堤又是为什么呢？原来当时的金国已经被北方崛起的蒙古打得找不着北了，金国皇帝从北京跑到开封再跑到商丘，没地方跑了啊，蒙古人就想到了一个办法，决堤让黄河水淹商丘，遗憾的是商丘地势比较高，没有被淹没，蒙古人等了两年，黄河水退了之后就攻破商丘，金国灭亡。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h6 id="第六次改道"&gt;第六次改道
 &lt;/h6&gt;&lt;ul&gt;
@@ -372,9 +358,7 @@ $$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{
 &lt;li&gt;黄土高原的侵蚀活动由来已久，中国地质学家分析了河套平原、汾渭平原、华北平原等黄土高原侵蚀的相关沉积区，指出至更新世黄土高原至少已经经历了三次堆积、侵蚀交替的轮回期，全新世期间黄土高原虽然仍有高空降沉堆积，但地貌过程则以侵蚀为主。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;之前我们提到过，在山西黄河出山口的地方容易形成冲积扇，科学家们就在这些地方研究不同沉积层的物质，通过测量和估计，得到了以下结果。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;根据黄土高原地貌发展阶段、河网密度以及黄河下游相关沉积物等条件建立
@@ -382,9 +366,7 @@ $$\mathcal{L}_{\text{VAE}}(\phi, \theta) = \mathbb{E}_{\mathbf{x} \sim p_{\text{
 研究表明在黄土高原的总侵蚀量中自然侵蚀最少占70%，加速侵蚀最多30%。这一比例表明即使在今天黄土高原人类活动最活跃的时期 ，也仍然以自然侵蚀为主，人类活动导致的加速侵蚀，仅占较小的一部分。该研究成果认为黄土高原地貌演化仍处于初期或中期阶段，自然侵蚀占绝对优势，治理成效较为有限。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;所以说什么，保护环境，还我黄土高原的绿水青山，都是扯淡的，就算没有人类活动，黄土高原的水土流失也是不可避免的，治理效果有限。而且第四纪以来，由于青藏高原崛起，导致印度洋水汽无法到达我国西北地区，黄土高原没有绿水青山本就是正常的。并且按照地貌循环理论，黄土高原最后就是会变成一个平原🤣&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;</description></item><item><title>MIT_6.S184_3 — How To Condition on a Prompt</title><link>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</link><pubDate>Mon, 18 May 2026 09:31:42 +0800</pubDate><guid>https://fuquan99666.github.io/p/mit_6.s184_3-how-to-condition-on-a-prompt/</guid><description>&lt;h3 id="引"&gt;引
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;在上一讲中我们已经介绍了difussion model是如何定义，如何进行训练的，现在我们可以用flow matching 或者 score matching来训练一个generative model，并且用ODE或者SDE进行采样。但是在真正使用时，我们肯定是希望能够给定一个prompt来进行条件生成的，而我们上述的模型都是直接在$z \in data$上进行训练的，至于最终的采样结果完全是z中一个随机点，所以我们需要一些方法来让我们的模型能够根据一个prompt来进行条件生成。&lt;/li&gt;
@@ -413,9 +395,7 @@ $$\mathcal{L}_{\text{CFM}}^{\text{guided}}(\theta) = \mathbb{E}_{(z,y) \sim p_{\
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这个方法理论上是可行的，但是实际训练结果证明效果并不好（相关但是不够准确），可能是模型没有学习到正确的marginal vector field, 或者是网络上的(image, text)数据本身有问题。为了强化生成结果和prompt的相关性，我们介绍一种当前SOTA(state-of-the-art)的训练方法。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="classifer-free-guidance"&gt;Classifer-Free Guidance
 &lt;/h3&gt;&lt;h4 id="classifier-guidance"&gt;Classifier Guidance
@@ -445,14 +425,10 @@ where w &amp;gt; 1 is known as the guidance scale.&lt;/p&gt;
 &lt;li&gt;How can we learn the term log $p_t(y|x)$? Note that this can be considered as a sort of classifier of noised data (i.e. it gives the log-likelihoods of y given x). So we can simply learn it via supervised learning. 这里的supervised learning的意思应该我们从data中取一对(z,y), 然后在z上加一个噪声，$x = \alpha_t z + \beta_t \epsilon$, 然后让神经网络根据这个x来预测y。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这里有一个细节是，我们用了大量的(z,y)训练一个很好的分类器之后，在第二步训练时我们是对x求解梯度，通过改变x来让它更倾向于分类y！所以我们称这个方法为classifier guidance. 由于这个方法需要额外训练一个分类器模型，需要两倍的工作量，并且当y不是一个类别标签而是一个高维度文本描述时，这个分类器的训练会非常困难，求梯度更是难上加难。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;/blockquote&gt;
-&lt;blockquote&gt;
 &lt;blockquote&gt;
 &lt;p&gt;其实，只有当w=1的时候，classifier guidance才是真正的guided vector field, 当w不等于1时，虽然它的采样结果更符合prompt，但是 it is not the “true” guided vector field. （偏离真实vector field,但结果更fit，这就是reinforce）&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="classifier-free-guidance"&gt;Classifier-Free Guidance
 &lt;/h4&gt;&lt;ul&gt;
@@ -513,9 +489,7 @@ $$\mathcal{L}_{\text{CFM}}^{\text{CFG}}(\theta) = \mathbb{E}_{(z,y) \sim p_{\tex
 &lt;li&gt;Today, more important for protection than just another level of memory hierarchy.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;值的注意的是VM的概念出现的非常早，大概是上世纪60年代，在IBM 360处理器中引入的，甚至比cache早，因为那个时候处理器和访存速度的差距很小，还不需要cache，但是我们需要支持多个程序同时进行，为了不让它们的内存打架，VM应运而生。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;下图是添加了VM的memory hierarchy, 可以看到VM的位置处在DRAM和磁盘之间。&lt;/li&gt;
@@ -544,9 +518,7 @@ $$\mathcal{L}_{\text{CFM}}^{\text{CFG}}(\theta) = \mathbb{E}_{(z,y) \sim p_{\tex
 &lt;/ul&gt;
 &lt;h4 id="一个比喻"&gt;一个比喻
 &lt;/h4&gt;&lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;在一个图书管理系统中，每一本书的名字就是一个virtual address, 而它的实际图书编号则是一个physical address, 我们通过图书管理系统的目录来查找这个书名的编号，就相当于是VM中的地址转换过程，在得到了书籍编号后，你可能发现这本书在该图书馆，也有可能在别的图书馆，这就相当于是一个在DRAM，一个在硬盘中。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="physical-memory-and-storage"&gt;Physical Memory and Storage
 &lt;/h3&gt;&lt;ul&gt;
@@ -558,9 +530,7 @@ $$\mathcal{L}_{\text{CFM}}^{\text{CFG}}(\theta) = \mathbb{E}_{(z,y) \sim p_{\tex
 &lt;li&gt;需要注意的是DRAM比SRAM的易失性更高，在通电情况喜爱，SRAM不会损失数据，但是DRAM会，因为DRAM的存储单元是一个电容，电容会漏电，所以需要不断的刷新(刷新就是微处理器会不断的读取并且写会DRAM)来保持数据的完整性，而SRAM则是由多个晶体管组成的，相对来说要稳定很多。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;值得注意的是，经常有人说什么什么DDR3、4、5的内存条，要明确内存条使用DRAM制造的，DDR3、4、5只是一种接口协议，其实HBM也是一种接口协议(高带宽传输，专用于服务器、AI训练)，所以不要把DDR4当成是内存条本身了。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="storage"&gt;Storage
 &lt;/h4&gt;&lt;ul&gt;
@@ -751,10 +721,8 @@ $$&lt;p&gt;
 其中(i)是通过带入$u_t^{\text{target}}(x|z)$与z的关系式就得到了。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;The denoiser has a very intuitive interpre-tation: it is the expected value of clean data z given noisy data x.People often call such models denoising diffusion models as learning D_t and learning u_target are theoretically equivalent.
 这里note中提到了一个很有意思的点，will the denoiser always output a “clean” data point? Why or why not, and what might this depend on? 这个让我想起了EAI课程中wh老师举过一个例子，在无人驾驶中，如果路中间有一个障碍物，那么我们记录左转和右转都是有效，写出一个loss函数是 (x-1)^2 + (x+1)^2, 但问题是这个loss函数最优解是x=0，完全撞上了障碍物，大错特错了。这里的道理是一样的，如果我们的data distribution有多个峰值，那么对于一个噪声数据点x来说，它的后验概率可能在多个峰值上都有比较大的值，那么它的denoiser输出的就是这些峰值的一个加权平均，可能并不是一个“clean”的数据点了。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="sampling-with-sdes"&gt;Sampling with SDEs
 &lt;/h3&gt;&lt;ul&gt;
@@ -770,9 +738,7 @@ $$
 你可能觉得很奇怪，我们原本的SDE想法是一个确定的vector field加上一个noise项，为什么这里要加上一个score function呢？这一点其实很好理解，我们一般是先确定了一个probability path, 然后计算vector field来进行ODE sampling的，但是对于SDE来说，加上了一个noise，会导致中间的$p_t$发生变化，所以我们需要加上这个score function来修正noise带来的影响。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;加上这个修正项，可以保证每个时刻的p_t总概率分布是正确的，只不过每一个x采样的路径可能会受到noise影响而歪歪扭扭。这里是对于任何一个σ_t都成立的，但是由于训练中的误差，采样时的误差，我们可以挑选一个最佳的σ_t来得到最好的采样效果。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -990,9 +956,7 @@ $$-\beta_t s_t^\theta(x) = \epsilon_t^\theta(x) \quad \Rightarrow \quad
 &lt;li&gt;在完成了ALU的设计后，可以去peek一眼alu_harness.circ, 以及tests/part_a/alu/alu-add.circ, 你会发现harness就是一个测试模版，而tests中对应名字的文件就是具体指令的测试，它在ROM中预设置了一些指令和数据，然后通过模拟几个时钟来观察是否输出正确。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;顺便提一嘴，当初寒假购置一个二手电脑，安装一个archlinux，现在做这些基于各种linux原生工具的lab和project，感觉非常丝滑，也是见识到了命令行工具的强大。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="task2-register-file-regfile"&gt;Task2: Register File (RegFile)
 &lt;/h3&gt;&lt;ul&gt;
@@ -1001,10 +965,8 @@ $$-\beta_t s_t^\theta(x) = \epsilon_t^\theta(x) \quad \Rightarrow \quad
 &lt;li&gt;现在和ALU一样，我们需要根据rs1,rs2,rd的值来选择我们读取，写入的寄存器。对于读取，我们同理使用一个很大的mux来选择即可。在这里我可以好心提醒一下，一定要使用tunnel，即便是使用了tunnel，在logisim中拉32条线也是非常麻烦的，PATIENCE! 对于写入，情况恰好相反，我们有一个待写入的值，一个rd写入对象，之前说过我们无法直接挑出具体的那一个寄存器来写入，文档中提示了可以使用DMUX来实现，它的功能是根据select bits的值来选择一个输出为输入值，其他的输出则为0，这样我们就可以同时设置好写入和没有写入的寄存器的Write_en了。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;在这里再次安利一波archlinux，之前寒假在做cs336，使用的是windows上的wsl，能用是能用，就是感觉不舒服😆&lt;/p&gt;
 &lt;p&gt;最近也是看了大半的linux101, 更是深感linux的强大，windows上的那些cmd，powershell用起来就很难绷。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="task3-the-addi-instruction"&gt;Task3: The addi Instruction
 &lt;/h3&gt;&lt;ul&gt;
@@ -1032,9 +994,7 @@ $$-\beta_t s_t^\theta(x) = \epsilon_t^\theta(x) \quad \Rightarrow \quad
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;至此，我们的partA部分宣告完成，由于这个project的性质，所以我的博客不可能详细到所有细节如何实现，只能是梳理梳理文件关系，一些值得思考的设计问题。更多的实现细节需要你自己去探索，使用各种文档，工具，实在不行时和github上的参考参考，这个正是这个project的意义。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h2 id="partb"&gt;PartB
 &lt;/h2&gt;&lt;h3 id="task4-more-instructions"&gt;Task4: More Instructions
@@ -1044,10 +1004,8 @@ $$-\beta_t s_t^\theta(x) = \epsilon_t^\theta(x) \quad \Rightarrow \quad
 &lt;li&gt;请看文档中提到的info: Memory, 总结一下就是我们传入了一个4 bit的Write_en, 这里的每一位都表示对应字节是否能写(比如1&amp;rsquo;b1000，就表示只有最高位字节可以写入)， 同时我们需要内存对齐，由于RISC-V的指令和寄存器都是32位的，所以为了方便，我们read和write内存的时候都要按照4的整数倍来，也就是设置Write_address的[1:0]为0 ，用之前提到的splitter即可。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这里比较奇怪的一点是在写这篇博客时我还没注意到这个align，之前也通过了test，怪? 在修复这个问题后，我详细研究了mem.circ这个模块，恍然大悟，
 在这个模块中DRAM是先只取[15:2]，等于帮我们做了这个align🤣, 然后它用了4个子内存模块，每一个都是16k*8，这个16k表示有多少个word address，和那个[15:2]对应，每一个word address它会分别到每一个子内存块取对应address的一个8位数据(1 byte), 然后最后再用一个splitter汇总成一个word。 妙啊妙啊，所以真的推荐大家把每一个模块的设计都认真看一遍，而不是简简单单的为了通过test。看到了如此优雅的DRAM实现，你就会意识到为什么align这么重要，因为它大大简化了硬件的实现！&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;请看Info: Branch Comparator, 这个模块非常简单，我们接受rs1，rs2，Brun(这个是信号位，后面说)，输出BrEq, BrLt. 我们可以使用logisim中自带的Comparator, 它可以设置sign和unsign, 由于Eq的情况对于二者是一样的，所以直接搞一个就行，Lt则需要根据BrUn来mux一下。&lt;/li&gt;
@@ -1057,17 +1015,13 @@ $$-\beta_t s_t^\theta(x) = \epsilon_t^\theta(x) \quad \Rightarrow \quad
 &lt;li&gt;好了，本关最大boss来了，control_logic.circ, 这个部分自由度非常高，用文档的话来说，你没必要面面俱到，只要能符合给定指令集合的需求就行，能让不同指令有不同control logic就行，你也可以添加输入和输出来增加你认为重要的信号位。有两种方法可以实现control_logic, 第一种是hard-wired control, 就是直接根据指令，拆分，组合得到每一个信号位，这个方法听起来有点哈人😇，我一开始就是这么认为的。第二种是使用一个ROM，直接预先存储所有指令对应的信号位，然后对于输入的指令，我们先拆分判断它的类型，然后直接在ROM中读取对应的所有信号。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;关于两种control_logic的方法，第一种hard-wired一般用于RISC指令集架构，因为它们的指令更加精简，线路设计更加简单。第二种ROM一般用于CISC架构比如intel&amp;rsquo;s x86-64, 它有一个好处就是通过修改ROM中的control word，很方便就能re-programmed. 我本来是想用ROM的，但是一想到它需要先分清指令类型，也就是说只要两个指令的control word稍稍不同，那么我们就得新建一行ROM，总感觉很冗余啊。你试想，单单对于一个I类指令，有很多操作种类，你要分很多ALUSel, 但是实际上由于它们都是I类，所以很多信号位都是一样的，这样区分就非常的浪费😡。 所以还是用第一种吧。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;具体操作就是，我们首先用一个splitter将inst拆分，然后针对每一种信号，如果它是1位的，那么根据opcode和func3，and/or 出一个结果(对于0/1，我们选择容易判断的一方即可)，如果是多位的，那么我们可以先按照1位的思路把每一种都搞出来，然后mux即可。总体思想就是先分大类，再分小类。宁可错杀一个，不可少杀一个。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;我们来分析一个信号(ALUSel)作为典型， 首先明确所有的指令中，除了RI指令外，别的指令就算有Alu，也是add。所以上来可以一个2路mux，默认是0，另一个是ALUSel_IR. 而对于ALUSel_IR, 你最好仔细研究一下ISA那张图，你会发现，I指令的操作几乎和R一样，比后者少几个，而且func3都是对应的，所以我们完全可以用func3来再次划分，有的func3只有一个操作，但是有的比如func3=0, 在R中它除了add，还有mul和sub。我们需要单独判断，根据func7来判断is_mul,is_sub. 把所有这些额外判断的操作和之前根据func3得到的一个mux输出再次mux，得到最后的ALUSel_IR.&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -1111,12 +1065,10 @@ $$-\beta_t s_t^\theta(x) = \epsilon_t^\theta(x) \quad \Rightarrow \quad
 &lt;li&gt;基本上完工，剩下一些小问题来讨论讨论。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;首先是一些模块的自由组合，比如我们在control_logic中的writeback有写到pc4, 但其实我们完全可以在BSel中添加一个4，这样就把pc4归纳到result一类中，二者都是可以的。&lt;/p&gt;
 &lt;p&gt;其次是有一个指令是lui, 它的B是imm没有疑问，问题是它的A，按照现有逻辑，默认是rs1的5位，但是显然对于lui来说这是不对的，应该是确定的0，如何解决的呢，我们在writeback中直接加了一个imm，而这个imm就是按照lui判断的。这从另一方面告诉我们在设计某一个信号的时候需要完全从上到下scan一遍ISA，确保包含所有情况。&lt;/p&gt;
 &lt;p&gt;再次就是关于branch/jump的问题，如果发现PCSel真的是1，那么发生跳转，但是此时下一条指令已经被fetch了，所以我们需要在IF_ID流水线寄存器的输入端加入一个mux，加入一个输入是00000013,这个指令是addi x0,x0,0, 也就是我们常说的nop，在ics课中我们也许经常用到nop，但是知道此时我才真正搞明白nop是如何加入的。&lt;/p&gt;
 &lt;p&gt;最后一个问题我们早就提过, 这个流水线真的是2stage吗，文档中说是，真的是吗？很明显regfile和mem的写入都是需要clk的，所以它是一个3stage的。其实一开始我错误的认为它是4stage的，因为我想对于ld类指令，它需要先从mem中读取，然后再写入reg，岂不是多了两个cycle，后来一拍脑袋，哎read是立即的，所以ld也是相当于3个cycle完成。那么3个stage会存在raw问题吗，不会的，因为前一条指令在写会寄存器文件时，后一条指令在读取对应的寄存器，由于half-to-half特性，在logisim中其实都不用这个特性了，cycle很长完全够用，一定能先写入再读取。DREM也是同理。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;至此，所有问题基本解决，我也写燃尽了。&lt;/li&gt;
@@ -5883,5 +5835,25 @@ we will use archimedean spiral to place words from center to outside.&lt;/li&gt;
 &gt;this website&lt;/a&gt;.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;</description></item><item><title>归档</title><link>https://fuquan99666.github.io/archives/</link><pubDate>Tue, 28 May 2019 00:00:00 +0000</pubDate><guid>https://fuquan99666.github.io/archives/</guid><description/></item><item><title>关于</title><link>https://fuquan99666.github.io/%E5%85%B3%E4%BA%8E/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://fuquan99666.github.io/%E5%85%B3%E4%BA%8E/</guid><description>&lt;p&gt;This is a blog for Fuquan99666 .
-Thanks to Elainafan for helping me set up this hugo blog site.&lt;/p&gt;</description></item><item><title>圈子</title><link>https://fuquan99666.github.io/friends-circle/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://fuquan99666.github.io/friends-circle/</guid><description>&lt;h1 id="朋友们的最新文章"&gt;朋友们的最新文章
-&lt;/h1&gt;&lt;p&gt;这里会展示朋友们最近发布的文章。&lt;/p&gt;</description></item><item><title>搜索</title><link>https://fuquan99666.github.io/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://fuquan99666.github.io/search/</guid><description/></item><item><title>友链</title><link>https://fuquan99666.github.io/%E5%8F%8B%E9%93%BE/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://fuquan99666.github.io/%E5%8F%8B%E9%93%BE/</guid><description/></item></channel></rss>
+Thanks to Elainafan for helping me set up this hugo blog site.&lt;/p&gt;</description></item><item><title>搜索</title><link>https://fuquan99666.github.io/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://fuquan99666.github.io/search/</guid><description/></item><item><title>友链</title><link>https://fuquan99666.github.io/friends/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://fuquan99666.github.io/friends/</guid><description>&lt;p&gt;欢迎各位在评论区留下自己的小站网址！&lt;/p&gt;
+&lt;p&gt;参考样式&amp;amp;本站信息：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt;1
+&lt;/span&gt;&lt;span class="lnt"&gt;2
+&lt;/span&gt;&lt;span class="lnt"&gt;3
+&lt;/span&gt;&lt;span class="lnt"&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;title: zzz~
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;description: not one, not two, not seven ~~
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;website: https://fuquan99666.github.io
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;image: https://fuquan99666.github.io/avatar.png
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;如欲在本站添加友链，请你&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;确认已在你的友链添加了本站。&lt;/li&gt;
+&lt;li&gt;确保你的站点活着。&lt;/li&gt;
+&lt;li&gt;确保博客内容符合国家法律。&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>

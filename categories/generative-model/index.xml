@@ -29,9 +29,7 @@
 &lt;li&gt;这个部分没啥好说的，直接看note，我建议是把note中的DiT Block看一遍，能get到它由3个子模块组成即可。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;we note that class-conditioned DiT’s, such as the one implemented in the lab, are typically simpler and eschew the cross attention layer in favor of a time and class-based AdaNorm conditioning. 对于比较简单的条件输入y(比如类别标签)，我们没必要整一个单独的cross attention layer来将图片信息和prompt信息进行融合，简单的用t，y做一个MLP得到几个参数和x乘一乘就够了，这样就大大简化了模型的复杂度和计算量。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="u-net"&gt;U-Net
 &lt;/h4&gt;&lt;ul&gt;
@@ -176,9 +174,7 @@ $$
 $$&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;The four terms of the above loss function are very intuitive: 第一项是重建误差，第二项是decoder的方差，可以理解为不确定性，第三项是make latent variance 1, 第四项是make latent mean 0.&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="training-a-vae"&gt;Training a VAE
 &lt;/h4&gt;&lt;ul&gt;
@@ -226,9 +222,7 @@ $$\mathcal{L}_{\text{CFM}}^{\text{guided}}(\theta) = \mathbb{E}_{(z,y) \sim p_{\
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这个方法理论上是可行的，但是实际训练结果证明效果并不好（相关但是不够准确），可能是模型没有学习到正确的marginal vector field, 或者是网络上的(image, text)数据本身有问题。为了强化生成结果和prompt的相关性，我们介绍一种当前SOTA(state-of-the-art)的训练方法。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="classifer-free-guidance"&gt;Classifer-Free Guidance
 &lt;/h3&gt;&lt;h4 id="classifier-guidance"&gt;Classifier Guidance
@@ -258,14 +252,10 @@ where w &amp;gt; 1 is known as the guidance scale.&lt;/p&gt;
 &lt;li&gt;How can we learn the term log $p_t(y|x)$? Note that this can be considered as a sort of classifier of noised data (i.e. it gives the log-likelihoods of y given x). So we can simply learn it via supervised learning. 这里的supervised learning的意思应该我们从data中取一对(z,y), 然后在z上加一个噪声，$x = \alpha_t z + \beta_t \epsilon$, 然后让神经网络根据这个x来预测y。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这里有一个细节是，我们用了大量的(z,y)训练一个很好的分类器之后，在第二步训练时我们是对x求解梯度，通过改变x来让它更倾向于分类y！所以我们称这个方法为classifier guidance. 由于这个方法需要额外训练一个分类器模型，需要两倍的工作量，并且当y不是一个类别标签而是一个高维度文本描述时，这个分类器的训练会非常困难，求梯度更是难上加难。&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;/blockquote&gt;
-&lt;blockquote&gt;
 &lt;blockquote&gt;
 &lt;p&gt;其实，只有当w=1的时候，classifier guidance才是真正的guided vector field, 当w不等于1时，虽然它的采样结果更符合prompt，但是 it is not the “true” guided vector field. （偏离真实vector field,但结果更fit，这就是reinforce）&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="classifier-free-guidance"&gt;Classifier-Free Guidance
 &lt;/h4&gt;&lt;ul&gt;
@@ -393,10 +383,8 @@ $$&lt;p&gt;
 其中(i)是通过带入$u_t^{\text{target}}(x|z)$与z的关系式就得到了。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;The denoiser has a very intuitive interpre-tation: it is the expected value of clean data z given noisy data x.People often call such models denoising diffusion models as learning D_t and learning u_target are theoretically equivalent.
 这里note中提到了一个很有意思的点，will the denoiser always output a “clean” data point? Why or why not, and what might this depend on? 这个让我想起了EAI课程中wh老师举过一个例子，在无人驾驶中，如果路中间有一个障碍物，那么我们记录左转和右转都是有效，写出一个loss函数是 (x-1)^2 + (x+1)^2, 但问题是这个loss函数最优解是x=0，完全撞上了障碍物，大错特错了。这里的道理是一样的，如果我们的data distribution有多个峰值，那么对于一个噪声数据点x来说，它的后验概率可能在多个峰值上都有比较大的值，那么它的denoiser输出的就是这些峰值的一个加权平均，可能并不是一个“clean”的数据点了。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="sampling-with-sdes"&gt;Sampling with SDEs
 &lt;/h3&gt;&lt;ul&gt;
@@ -412,9 +400,7 @@ $$
 你可能觉得很奇怪，我们原本的SDE想法是一个确定的vector field加上一个noise项，为什么这里要加上一个score function呢？这一点其实很好理解，我们一般是先确定了一个probability path, 然后计算vector field来进行ODE sampling的，但是对于SDE来说，加上了一个noise，会导致中间的$p_t$发生变化，所以我们需要加上这个score function来修正noise带来的影响。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;加上这个修正项，可以保证每个时刻的p_t总概率分布是正确的，只不过每一个x采样的路径可能会受到noise影响而歪歪扭扭。这里是对于任何一个σ_t都成立的，但是由于训练中的误差，采样时的误差，我们可以挑选一个最佳的σ_t来得到最好的采样效果。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;

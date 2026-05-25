@@ -16,9 +16,7 @@
 &lt;li&gt;Today, more important for protection than just another level of memory hierarchy.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;值的注意的是VM的概念出现的非常早，大概是上世纪60年代，在IBM 360处理器中引入的，甚至比cache早，因为那个时候处理器和访存速度的差距很小，还不需要cache，但是我们需要支持多个程序同时进行，为了不让它们的内存打架，VM应运而生。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;下图是添加了VM的memory hierarchy, 可以看到VM的位置处在DRAM和磁盘之间。&lt;/li&gt;
@@ -47,9 +45,7 @@
 &lt;/ul&gt;
 &lt;h4 id="一个比喻"&gt;一个比喻
 &lt;/h4&gt;&lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;在一个图书管理系统中，每一本书的名字就是一个virtual address, 而它的实际图书编号则是一个physical address, 我们通过图书管理系统的目录来查找这个书名的编号，就相当于是VM中的地址转换过程，在得到了书籍编号后，你可能发现这本书在该图书馆，也有可能在别的图书馆，这就相当于是一个在DRAM，一个在硬盘中。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="physical-memory-and-storage"&gt;Physical Memory and Storage
 &lt;/h3&gt;&lt;ul&gt;
@@ -61,9 +57,7 @@
 &lt;li&gt;需要注意的是DRAM比SRAM的易失性更高，在通电情况喜爱，SRAM不会损失数据，但是DRAM会，因为DRAM的存储单元是一个电容，电容会漏电，所以需要不断的刷新(刷新就是微处理器会不断的读取并且写会DRAM)来保持数据的完整性，而SRAM则是由多个晶体管组成的，相对来说要稳定很多。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;值得注意的是，经常有人说什么什么DDR3、4、5的内存条，要明确内存条使用DRAM制造的，DDR3、4、5只是一种接口协议，其实HBM也是一种接口协议(高带宽传输，专用于服务器、AI训练)，所以不要把DDR4当成是内存条本身了。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="storage"&gt;Storage
 &lt;/h4&gt;&lt;ul&gt;
@@ -209,9 +203,7 @@ OS会记录当前正在活跃的进程，选择对应的page table，然后memor
 &lt;li&gt;在完成了ALU的设计后，可以去peek一眼alu_harness.circ, 以及tests/part_a/alu/alu-add.circ, 你会发现harness就是一个测试模版，而tests中对应名字的文件就是具体指令的测试，它在ROM中预设置了一些指令和数据，然后通过模拟几个时钟来观察是否输出正确。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;顺便提一嘴，当初寒假购置一个二手电脑，安装一个archlinux，现在做这些基于各种linux原生工具的lab和project，感觉非常丝滑，也是见识到了命令行工具的强大。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="task2-register-file-regfile"&gt;Task2: Register File (RegFile)
 &lt;/h3&gt;&lt;ul&gt;
@@ -220,10 +212,8 @@ OS会记录当前正在活跃的进程，选择对应的page table，然后memor
 &lt;li&gt;现在和ALU一样，我们需要根据rs1,rs2,rd的值来选择我们读取，写入的寄存器。对于读取，我们同理使用一个很大的mux来选择即可。在这里我可以好心提醒一下，一定要使用tunnel，即便是使用了tunnel，在logisim中拉32条线也是非常麻烦的，PATIENCE! 对于写入，情况恰好相反，我们有一个待写入的值，一个rd写入对象，之前说过我们无法直接挑出具体的那一个寄存器来写入，文档中提示了可以使用DMUX来实现，它的功能是根据select bits的值来选择一个输出为输入值，其他的输出则为0，这样我们就可以同时设置好写入和没有写入的寄存器的Write_en了。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;在这里再次安利一波archlinux，之前寒假在做cs336，使用的是windows上的wsl，能用是能用，就是感觉不舒服😆&lt;/p&gt;
 &lt;p&gt;最近也是看了大半的linux101, 更是深感linux的强大，windows上的那些cmd，powershell用起来就很难绷。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="task3-the-addi-instruction"&gt;Task3: The addi Instruction
 &lt;/h3&gt;&lt;ul&gt;
@@ -251,9 +241,7 @@ OS会记录当前正在活跃的进程，选择对应的page table，然后memor
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;至此，我们的partA部分宣告完成，由于这个project的性质，所以我的博客不可能详细到所有细节如何实现，只能是梳理梳理文件关系，一些值得思考的设计问题。更多的实现细节需要你自己去探索，使用各种文档，工具，实在不行时和github上的参考参考，这个正是这个project的意义。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;h2 id="partb"&gt;PartB
 &lt;/h2&gt;&lt;h3 id="task4-more-instructions"&gt;Task4: More Instructions
@@ -263,10 +251,8 @@ OS会记录当前正在活跃的进程，选择对应的page table，然后memor
 &lt;li&gt;请看文档中提到的info: Memory, 总结一下就是我们传入了一个4 bit的Write_en, 这里的每一位都表示对应字节是否能写(比如1&amp;rsquo;b1000，就表示只有最高位字节可以写入)， 同时我们需要内存对齐，由于RISC-V的指令和寄存器都是32位的，所以为了方便，我们read和write内存的时候都要按照4的整数倍来，也就是设置Write_address的[1:0]为0 ，用之前提到的splitter即可。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;这里比较奇怪的一点是在写这篇博客时我还没注意到这个align，之前也通过了test，怪? 在修复这个问题后，我详细研究了mem.circ这个模块，恍然大悟，
 在这个模块中DRAM是先只取[15:2]，等于帮我们做了这个align🤣, 然后它用了4个子内存模块，每一个都是16k*8，这个16k表示有多少个word address，和那个[15:2]对应，每一个word address它会分别到每一个子内存块取对应address的一个8位数据(1 byte), 然后最后再用一个splitter汇总成一个word。 妙啊妙啊，所以真的推荐大家把每一个模块的设计都认真看一遍，而不是简简单单的为了通过test。看到了如此优雅的DRAM实现，你就会意识到为什么align这么重要，因为它大大简化了硬件的实现！&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;请看Info: Branch Comparator, 这个模块非常简单，我们接受rs1，rs2，Brun(这个是信号位，后面说)，输出BrEq, BrLt. 我们可以使用logisim中自带的Comparator, 它可以设置sign和unsign, 由于Eq的情况对于二者是一样的，所以直接搞一个就行，Lt则需要根据BrUn来mux一下。&lt;/li&gt;
@@ -276,17 +262,13 @@ OS会记录当前正在活跃的进程，选择对应的page table，然后memor
 &lt;li&gt;好了，本关最大boss来了，control_logic.circ, 这个部分自由度非常高，用文档的话来说，你没必要面面俱到，只要能符合给定指令集合的需求就行，能让不同指令有不同control logic就行，你也可以添加输入和输出来增加你认为重要的信号位。有两种方法可以实现control_logic, 第一种是hard-wired control, 就是直接根据指令，拆分，组合得到每一个信号位，这个方法听起来有点哈人😇，我一开始就是这么认为的。第二种是使用一个ROM，直接预先存储所有指令对应的信号位，然后对于输入的指令，我们先拆分判断它的类型，然后直接在ROM中读取对应的所有信号。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;关于两种control_logic的方法，第一种hard-wired一般用于RISC指令集架构，因为它们的指令更加精简，线路设计更加简单。第二种ROM一般用于CISC架构比如intel&amp;rsquo;s x86-64, 它有一个好处就是通过修改ROM中的control word，很方便就能re-programmed. 我本来是想用ROM的，但是一想到它需要先分清指令类型，也就是说只要两个指令的control word稍稍不同，那么我们就得新建一行ROM，总感觉很冗余啊。你试想，单单对于一个I类指令，有很多操作种类，你要分很多ALUSel, 但是实际上由于它们都是I类，所以很多信号位都是一样的，这样区分就非常的浪费😡。 所以还是用第一种吧。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;具体操作就是，我们首先用一个splitter将inst拆分，然后针对每一种信号，如果它是1位的，那么根据opcode和func3，and/or 出一个结果(对于0/1，我们选择容易判断的一方即可)，如果是多位的，那么我们可以先按照1位的思路把每一种都搞出来，然后mux即可。总体思想就是先分大类，再分小类。宁可错杀一个，不可少杀一个。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;我们来分析一个信号(ALUSel)作为典型， 首先明确所有的指令中，除了RI指令外，别的指令就算有Alu，也是add。所以上来可以一个2路mux，默认是0，另一个是ALUSel_IR. 而对于ALUSel_IR, 你最好仔细研究一下ISA那张图，你会发现，I指令的操作几乎和R一样，比后者少几个，而且func3都是对应的，所以我们完全可以用func3来再次划分，有的func3只有一个操作，但是有的比如func3=0, 在R中它除了add，还有mul和sub。我们需要单独判断，根据func7来判断is_mul,is_sub. 把所有这些额外判断的操作和之前根据func3得到的一个mux输出再次mux，得到最后的ALUSel_IR.&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -330,12 +312,10 @@ OS会记录当前正在活跃的进程，选择对应的page table，然后memor
 &lt;li&gt;基本上完工，剩下一些小问题来讨论讨论。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;blockquote&gt;
 &lt;p&gt;首先是一些模块的自由组合，比如我们在control_logic中的writeback有写到pc4, 但其实我们完全可以在BSel中添加一个4，这样就把pc4归纳到result一类中，二者都是可以的。&lt;/p&gt;
 &lt;p&gt;其次是有一个指令是lui, 它的B是imm没有疑问，问题是它的A，按照现有逻辑，默认是rs1的5位，但是显然对于lui来说这是不对的，应该是确定的0，如何解决的呢，我们在writeback中直接加了一个imm，而这个imm就是按照lui判断的。这从另一方面告诉我们在设计某一个信号的时候需要完全从上到下scan一遍ISA，确保包含所有情况。&lt;/p&gt;
 &lt;p&gt;再次就是关于branch/jump的问题，如果发现PCSel真的是1，那么发生跳转，但是此时下一条指令已经被fetch了，所以我们需要在IF_ID流水线寄存器的输入端加入一个mux，加入一个输入是00000013,这个指令是addi x0,x0,0, 也就是我们常说的nop，在ics课中我们也许经常用到nop，但是知道此时我才真正搞明白nop是如何加入的。&lt;/p&gt;
 &lt;p&gt;最后一个问题我们早就提过, 这个流水线真的是2stage吗，文档中说是，真的是吗？很明显regfile和mem的写入都是需要clk的，所以它是一个3stage的。其实一开始我错误的认为它是4stage的，因为我想对于ld类指令，它需要先从mem中读取，然后再写入reg，岂不是多了两个cycle，后来一拍脑袋，哎read是立即的，所以ld也是相当于3个cycle完成。那么3个stage会存在raw问题吗，不会的，因为前一条指令在写会寄存器文件时，后一条指令在读取对应的寄存器，由于half-to-half特性，在logisim中其实都不用这个特性了，cycle很长完全够用，一定能先写入再读取。DREM也是同理。&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;至此，所有问题基本解决，我也写燃尽了。&lt;/li&gt;
