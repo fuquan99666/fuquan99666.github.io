@@ -364,6 +364,23 @@ A specific case of the above method is masked diffusion language models (MDLMs).
 &lt;center&gt;
 &lt;img src='4.png' width=500&gt;
 &lt;/center&gt;
+&lt;h3 id="discrete-diffusion-models-vs-autoregress-models"&gt;Discrete Diffusion Models vs Autoregress Models
+&lt;/h3&gt;&lt;h4 id="advantages"&gt;Advantages
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Generate Multiple Tokens in Parallel -&amp;gt; More Speed ?!&lt;/li&gt;
+&lt;li&gt;Generate Tokens in any order -&amp;gt; Text editing ?!&lt;/li&gt;
+&lt;li&gt;New probability paths -&amp;gt; Can we design ones that make semantic sense?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="disadvantages"&gt;Disadvantages
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;No KV caching -&amp;gt; Less Speed ?!&lt;/li&gt;
+&lt;li&gt;Need to learn how to generate Tokens in any order -&amp;gt; Harder to learn?!&lt;/li&gt;
+&lt;li&gt;Autogressive order (left-to-right) makes semantic sense -&amp;gt; Is it worth it ?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="so-"&gt;So ？
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;在不同场景下，它们各有优势和劣势，至于哪个更好，让field和future决定吧！&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3 id="结束了吗"&gt;结束了吗？
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;至此，本次课程基本结束，后面还有一些补充的证明附录，感兴趣的朋友可以去看一下。本讲内容很多，我们相当于是把前几讲的内容从连续空间应用到了离散空间，很多方法和概念都是一样的，当下SOTA的扩散语言模型使用的就是我们提到的这些内容（使用之前提到过的一些transformer架构）！&lt;/li&gt;
