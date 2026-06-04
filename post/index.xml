@@ -1,4 +1,35 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on My Site</title><link>https://fuquan99666.github.io/post/</link><description>Recent content in Posts on My Site</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>zz486</copyright><lastBuildDate>Mon, 01 Jun 2026 18:42:45 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>中史地_12 — 农业的空间历程</title><link>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</link><pubDate>Mon, 01 Jun 2026 18:42:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</guid><description>&lt;h3 id="农业起源与文明的发展"&gt;农业起源与文明的发展
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on My Site</title><link>https://fuquan99666.github.io/post/</link><description>Recent content in Posts on My Site</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>zz486</copyright><lastBuildDate>Tue, 02 Jun 2026 15:56:45 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>课程大横评_0</title><link>https://fuquan99666.github.io/p/%E8%AF%BE%E7%A8%8B%E5%A4%A7%E6%A8%AA%E8%AF%84_0/</link><pubDate>Tue, 02 Jun 2026 15:56:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E8%AF%BE%E7%A8%8B%E5%A4%A7%E6%A8%AA%E8%AF%84_0/</guid><description>&lt;h3 id="引"&gt;引
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;作为课程大横评系列的第一篇，我将对上过的很多课程进行一次全面的评价和总结，涵盖课程内容、教学质量、作业难度、推荐度等多个维度。通过这个系列文章，希望能对大家提供一些选课建议，加油！&lt;/li&gt;
+&lt;li&gt;本篇将会不断更新完善，敬请期待！&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="中国历史地理"&gt;中国历史地理
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;teacher：北京大学，韩茂莉&lt;/li&gt;
+&lt;li&gt;内容概要：这门课以hml老师的《中国历史地理》书籍为基础，从疆域变迁与边疆问题入手，逐步展开历史政区与地方行政制度的演变；再经由古代交通道路、川陕交通与军事地理、丝绸之路与东西方文化交流，勾勒出古代中国的交通与军事格局；接着转入运河与长江流域交通路线、江河之变与河湖水道变迁、长江中游河道与主要湖泊的演变，呈现水利与自然环境对人类活动的深刻影响；最后落点到农业的空间历程，完成从政治、军事、交通、水利到农业的全景式叙述。
+整体而言，这门课不是历史事件的简单罗列，而是历史学与地理学方法的融合——讲的是中国人如何在这片土地上划分、行走、运输、治理、耕种、改造，以及土地又如何反过来塑造了他们。&lt;/li&gt;
+&lt;li&gt;自学链接: 仅开放给北大学生。&lt;/li&gt;
+&lt;li&gt;课程质量：5/5 ，hml老师讲课内容丰富，擅长串联，并且会在ppt的基础上扩展很多。&lt;/li&gt;
+&lt;li&gt;课程听感：4.5/5 ，老师讲课声音大小适中，语速偏慢，有时候也会幽默一下，不过有时候会比较催眠。&lt;/li&gt;
+&lt;li&gt;课程任务量：5/5， 基本无，只有一个期末考试。&lt;/li&gt;
+&lt;li&gt;课程难度：5/5，理解上不难，不过知识量是真的多。&lt;/li&gt;
+&lt;li&gt;综合推荐度：4.9/5，对历史地理感兴趣的同学可以冲一下。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="mit_6s184"&gt;MIT_6.S184
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;teacher: MIT, Peter Holderrieth&lt;/li&gt;
+&lt;li&gt;内容概要：这门课以 MIT_6.S184 提供的80多页硬核讲义为基础，从ODE,SDE等数学基础出发，讲述了如何一步一步构建Flow Matching和Score Matching；然后转向条件生成，讨论如何通过Prompt控制生成过程；再进一步，讲到如何构建大规模图像或视频生成网络架构；最后落在 Discrete Diffusion Models，把连续空间中的扩散思想推广到离散状态空间，完成从连续到离散的完整闭环。
+整体而言，这门课不是泛泛介绍SOTA模型，而是从数学推导出发，把VAE、扩散、流匹配、得分匹配、CTMC等看似分散的方法串成一条逻辑线。通过这门课，你不仅能学到各种SOTA生成模型的细节，还能真正理解它们背后的数学原理。&lt;/li&gt;
+&lt;li&gt;自学链接: &lt;a class="link" href="https://diffusion.csail.mit.edu/2026/index.html" target="_blank" rel="noopener"
+&gt;https://diffusion.csail.mit.edu/2026/index.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;课程质量：5/5 ，课程内容将如今各种SOTA的生成模型都深挖了一遍细节，提供了一份质量高到离谱的note，很适合自学。当初EAI老师wh说过如果想要完全理解生成模型，一定要读透这个80多页的note🫡&lt;/li&gt;
+&lt;li&gt;课程听感：4.2/5 ，老师到底还是个博士生，有的细节讲的不够清晰，尤其是最后一节课讲CTMC，不过整体还是不错的。&lt;/li&gt;
+&lt;li&gt;课程任务量：4.8/5，作业量不大，三个小lab，难度都是补充代码级别的，属于是只要理解了课程内容就能完成，而且每一个都有很精美的可视化效果。&lt;/li&gt;
+&lt;li&gt;课程难度：4.0/5，课程内容比较深入🥵，各种定义之间有千丝万缕的联系，各种硬核数学证明，请确保你有耐心读完note的每一讲。&lt;/li&gt;
+&lt;li&gt;综合推荐度：4.7/5，适合对生成模型感兴趣并且有一定思考能力的同学，学完后你将发出感慨：“SOTA生成模型不过如此😆”。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="tbd"&gt;TBD
+&lt;/h3&gt;</description></item><item><title>中史地_12 — 农业的空间历程</title><link>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</link><pubDate>Mon, 01 Jun 2026 18:42:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</guid><description>&lt;h3 id="农业起源与文明的发展"&gt;农业起源与文明的发展
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;农业是文明的起源，世界农业最早驯化地有三处，分别是伊拉克的两河流域，中国的长江、黄河中下游地带，墨西哥南部与南美安第斯山区。&lt;/li&gt;
 &lt;/ul&gt;
