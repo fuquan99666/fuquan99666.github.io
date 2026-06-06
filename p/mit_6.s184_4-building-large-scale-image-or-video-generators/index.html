@@ -58,8 +58,8 @@ D_{\text{KL}}(q \parallel p) = \mathbb{E}_{\mathbf{x} \sim q} \left[ \log q(\mat
 \mathbb{E}_{\mathbf{x} \sim q} \left[ \frac{\|\mathbf{x} - \mu_q\|^2}{\sigma_q^2} \right] = \frac{1}{\sigma_q^2} \mathbb{E}_{\mathbf{x} \sim q} \left[ \|\mathbf{x} - \mu_q\|^2 \right] = \frac{1}{\sigma_q^2} \cdot d\sigma_q^2 = d
 $$<p>综上有：</p>$$D_{\text{KL}}(q \parallel p) = \frac{1}{2} \left[ d \log \frac{\sigma_p^2}{\sigma_q^2} + \frac{d\sigma_q^2 + \|\mu_q - \mu_p\|^2}{\sigma_p^2} - d \right] = \frac{1}{2} \left[ d \left( \frac{\sigma_q^2}{\sigma_p^2} -\log \frac{\sigma_q^2}{\sigma_p^2} - 1 \right) + \frac{\|\mu_q - \mu_p\|^2}{\sigma_p^2} \right]$$<p>和note中的公式其实是一样的，在各向同性高斯分布下，各个维度的方差相同，所以没有必要写成note中那个格式。</p><p>由于$F(x) = x - \log x - 1$在x=1处取得最小值0，所以当$\frac{\sigma_q^2}{\sigma_p^2} = 1$时取最小；当$\mu_p = \mu_q$时，KL散度的第二部分最小为0。
 这也符合了之前提到的KL散度非负性以及等号成立的条件。</p></div><ul><li>我们将标准高斯分布带入上式有：
-$$L_{\text{VAE-Prior}}(\phi) = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x})} \left[ D_{\text{KL}}(q_{\phi}(\cdot \mid \mathbf{x}) \parallel \mathcal{N}(0, I_k)) \right] = \mathbb{E} \left[ \frac{1}{2} K(\sigma_{\phi}^2(\mathbf{x})) + \frac{1}{2} \| \boldsymbol{\mu}_{\phi}(\mathbf{x}) \|^2 \right]$$
-其中$K(a) = k(a - \log a - 1)$, 将$\mu_p=0和\sigma_p=1$带入即可得到上式。
+$$L_{\text{VAE-Prior}}(\phi) = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x})} \left[ D_{\text{KL}}(q_{\phi}(\cdot \mid \mathbf{x}) \parallel \mathcal{N}(0, I_k)) \right] = \mathbb{E} \left[ \frac{1}{2} \mathcal{K}(\sigma_{\phi}^2(\mathbf{x})) + \frac{1}{2} \| \boldsymbol{\mu}_{\phi}(\mathbf{x}) \|^2 \right]$$
+其中$\mathcal{K}(a) = d(a - \log a - 1)$, 将$\mu_p=0和\sigma_p=1$带入即可得到上式。
 最终有：
 $$
 \mathcal{L}_{\text{VAE}}(\phi, \theta)

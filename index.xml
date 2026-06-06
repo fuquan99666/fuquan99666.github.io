@@ -1211,8 +1211,8 @@ $$D_{\text{KL}}(q \parallel p) = \frac{1}{2} \left[ d \log \frac{\sigma_p^2}{\si
 &lt;/div&gt;
 &lt;ul&gt;
 &lt;li&gt;我们将标准高斯分布带入上式有：
-$$L_{\text{VAE-Prior}}(\phi) = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x})} \left[ D_{\text{KL}}(q_{\phi}(\cdot \mid \mathbf{x}) \parallel \mathcal{N}(0, I_k)) \right] = \mathbb{E} \left[ \frac{1}{2} K(\sigma_{\phi}^2(\mathbf{x})) + \frac{1}{2} \| \boldsymbol{\mu}_{\phi}(\mathbf{x}) \|^2 \right]$$
-其中$K(a) = k(a - \log a - 1)$, 将$\mu_p=0和\sigma_p=1$带入即可得到上式。
+$$L_{\text{VAE-Prior}}(\phi) = \mathbb{E}_{\mathbf{x} \sim p_{\text{data}}(\mathbf{x})} \left[ D_{\text{KL}}(q_{\phi}(\cdot \mid \mathbf{x}) \parallel \mathcal{N}(0, I_k)) \right] = \mathbb{E} \left[ \frac{1}{2} \mathcal{K}(\sigma_{\phi}^2(\mathbf{x})) + \frac{1}{2} \| \boldsymbol{\mu}_{\phi}(\mathbf{x}) \|^2 \right]$$
+其中$\mathcal{K}(a) = d(a - \log a - 1)$, 将$\mu_p=0和\sigma_p=1$带入即可得到上式。
 最终有：
 $$
 \mathcal{L}_{\text{VAE}}(\phi, \theta)
