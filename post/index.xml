@@ -1,4 +1,191 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on My Site</title><link>https://fuquan99666.github.io/post/</link><description>Recent content in Posts on My Site</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>zz486</copyright><lastBuildDate>Tue, 02 Jun 2026 15:56:45 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>课程大横评_0</title><link>https://fuquan99666.github.io/p/%E8%AF%BE%E7%A8%8B%E5%A4%A7%E6%A8%AA%E8%AF%84_0/</link><pubDate>Tue, 02 Jun 2026 15:56:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E8%AF%BE%E7%A8%8B%E5%A4%A7%E6%A8%AA%E8%AF%84_0/</guid><description>&lt;h3 id="引"&gt;引
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on My Site</title><link>https://fuquan99666.github.io/post/</link><description>Recent content in Posts on My Site</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>zz486</copyright><lastBuildDate>Sat, 06 Jun 2026 16:34:17 +0800</lastBuildDate><atom:link href="https://fuquan99666.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>CS61c_15 — I/O</title><link>https://fuquan99666.github.io/p/cs61c_15-i/o/</link><pubDate>Sat, 06 Jun 2026 16:34:17 +0800</pubDate><guid>https://fuquan99666.github.io/p/cs61c_15-i/o/</guid><description>&lt;h3 id="引"&gt;引
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;在开启IO篇章前，我们回想一下在CS61c中我们已经干了什么，我们从最基础的C语言开始，并在project 1中实现了一个简单的&amp;quot;life game&amp;quot;，然后我们学习了汇编语言，并在project 2中实现了一个简单的minist汇编识别网络，接着我们学习了ISA和CPU架构，在project 3中设计了一个简单的CPU，进一步学习了如何添加cache，如何添加虚拟内存。为了得到一个完整意义上的计算机，我们还缺少一个重要组成部分，即I/O设备。&lt;/li&gt;
+&lt;li&gt;只有加上I/O设备，我们才能让计算机连接键盘、鼠标，并且在显示器上显示结果，或者将其连接到网络，本文将介绍如何实现计算机和I/O设备的交互！&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="how-to-interact-with-devices-"&gt;How to interact with Devices ?
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Assume a program running on a CPU, how can it interact with devices? For example, how can it read a character from the keyboard, or write something to the display?&lt;/li&gt;
+&lt;li&gt;为此，有人提出了I/O Interface的概念，I/O Interface是CPU和设备之间的一个抽象层，CPU通过I/O Interface来访问设备，而设备通过I/O Interface来与CPU通信。I/O Interface提供了一套统一的接口，让CPU可以通过读写特定的地址来访问设备，而不需要关心设备的具体实现细节。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="instruction-set-architecture-for-io"&gt;Instruction Set Architecture for I/O
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;What must processor do for I/O
+&lt;ul&gt;
+&lt;li&gt;Input: Read a sequence of bytes&lt;/li&gt;
+&lt;li&gt;Output: Write a sequence of bytes&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Interface options:
+&lt;ul&gt;
+&lt;li&gt;为每一个设备设计特殊的指令，但这是不现实的，因为设备经常更新换代，所以旧指令会过时，这与我们设计ISA的初衷是相悖的(我们希望一套ISA能用很久)。&lt;/li&gt;
+&lt;li&gt;Memory mapped I/O: 将设备映射到内存地址空间中，CPU通过读写特定的内存地址来访问设备，这样就不需要为每个设备设计特殊的指令了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="memory-mapped-io"&gt;Memory Mapped I/O
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;Certain addresses are not &amp;lsquo;regular memory&amp;rsquo;&lt;/li&gt;
+&lt;li&gt;Instead, they correspond to registers in I/O devices&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+&lt;img src='1.png' width=500&gt;
+&lt;/center&gt;
+&lt;blockquote&gt;
+&lt;p&gt;如图所示，通常来说主内存的较低地址区中有部分地址被保留给I/O设备使用，这些地址直接映射到每个I/O设备寄存器的物理接口上，读这些地址相当于直接读取寄存器的实时状态. 换句话说，之前每个设备有自己特殊指令来访问，现在是通过不同设备有不同地址来访问，CPU通过读写这些特定的地址来与设备通信。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="processor-io-speed-mismatch"&gt;Processor-I/O Speed Mismatch
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;假设我们有一个 1 GHz microprocessor I/O throughput, 如果读写可以在一个时钟时间完成，那么它的数据吞吐量就是 4 GiB/s (lw/sw)&lt;/li&gt;
+&lt;li&gt;然而一些典型的 I/O data rates:
+&lt;ul&gt;
+&lt;li&gt;10 B/s (keyboard)&lt;/li&gt;
+&lt;li&gt;3 MiB/s (Bluetooth 3.0)&lt;/li&gt;
+&lt;li&gt;0.06-1.25 GiB/s (USB 2/3.1)&lt;/li&gt;
+&lt;li&gt;7-250 MiB/s (Wifi, depends on standard)&lt;/li&gt;
+&lt;li&gt;125 MiB/s (G-bit Ethernet)&lt;/li&gt;
+&lt;li&gt;480 MiB/s (SATA3 HDD)&lt;/li&gt;
+&lt;li&gt;560 MiB/s (cutting edge SSD)&lt;/li&gt;
+&lt;li&gt;5 GiB/s (Thunderbolt 3)&lt;/li&gt;
+&lt;li&gt;32 GiB/s (High-end DDR4 DRAM)&lt;/li&gt;
+&lt;li&gt;64 GiB/s (HBM2 DRAM)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;对于一个多核系统，可能存在多个核心同时需要往内存中读写数据，所以对内存的数据吞吐速率要求更高，为此诞生了HBM2 DRAM等高端内存技术。&lt;/p&gt;
+&lt;p&gt;由上述数据可知，大多数I/O设备的数据传输速率远远低于处理器的速度, 那么处理器如何判断设备是否准备好了呢？I/O Polling !&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="io-polling"&gt;I/O Polling
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Device registers generally serve two functions:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Control Register, says it&amp;rsquo;s ok to read/write (I/O ready)&lt;/li&gt;
+&lt;li&gt;Data Register, contains data.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Processor reads from Control Register in loop.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Waiting for device to set Ready bit in control reg (0-&amp;gt;1)&lt;/li&gt;
+&lt;li&gt;Indicates &amp;ldquo;data available&amp;rdquo; or &amp;ldquo;ready to accept data&amp;rdquo;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Processor then loads from (input) or writes to (output) data register. Then Control register resets Ready bit to 0.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;一个Polling loop的示例代码如下：&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;div class="chroma"&gt;
+&lt;table class="lntable"&gt;&lt;tr&gt;&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code&gt;&lt;span class="lnt"&gt; 1
+&lt;/span&gt;&lt;span class="lnt"&gt; 2
+&lt;/span&gt;&lt;span class="lnt"&gt; 3
+&lt;/span&gt;&lt;span class="lnt"&gt; 4
+&lt;/span&gt;&lt;span class="lnt"&gt; 5
+&lt;/span&gt;&lt;span class="lnt"&gt; 6
+&lt;/span&gt;&lt;span class="lnt"&gt; 7
+&lt;/span&gt;&lt;span class="lnt"&gt; 8
+&lt;/span&gt;&lt;span class="lnt"&gt; 9
+&lt;/span&gt;&lt;span class="lnt"&gt;10
+&lt;/span&gt;&lt;span class="lnt"&gt;11
+&lt;/span&gt;&lt;span class="lnt"&gt;12
+&lt;/span&gt;&lt;span class="lnt"&gt;13
+&lt;/span&gt;&lt;span class="lnt"&gt;14
+&lt;/span&gt;&lt;span class="lnt"&gt;15
+&lt;/span&gt;&lt;span class="lnt"&gt;16
+&lt;/span&gt;&lt;span class="lnt"&gt;17
+&lt;/span&gt;&lt;span class="lnt"&gt;18
+&lt;/span&gt;&lt;span class="lnt"&gt;19
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class="lntd"&gt;
+&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-c" data-lang="c"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 已知7fff000,7fff004分别是input的ctrl和data register
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// 7fff008,7fff00c分别是output的ctrl和data register
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// Input: Read from keyboard into a0
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;lui&lt;/span&gt; &lt;span class="n"&gt;t0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x7fff0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;Waitloop&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;lw&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;andi&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;beq&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;zero&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Waitloop&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;lw&lt;/span&gt; &lt;span class="n"&gt;a0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="c1"&gt;// Output: Write a1 to display
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;lui&lt;/span&gt; &lt;span class="n"&gt;t0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x7fff0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nl"&gt;Waitloop1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;lw&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;andi&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0x1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;beq&lt;/span&gt; &lt;span class="n"&gt;t1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;zero&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Waitloop1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;sw&lt;/span&gt; &lt;span class="n"&gt;a1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;12&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;以上的流程就是I/O Polling，处理器不断地轮询设备的控制寄存器，直到设备准备好为止，这种方式虽然简单，但效率很低.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;比如，一个鼠标检测器需要每秒钟检测30次鼠标的状态，如果一次检测需要400cycles，那么每秒钟就是12k cycles，在处理器频率为1GHz的情况下，这个检测会占用0.0012%的处理器时间，可以接受。&lt;/p&gt;
+&lt;p&gt;再比如，一个磁盘每秒钟可以产生16MB的数据，如果每次polling处理16B的数据，那么每秒钟需要1M次polling，假设每次poll需要400个cycles，那么就是400M cycles/s, 占用处理器40%的时间，这就不可接受了。当然，问题一方面是polling这种原始方式很低效，另一方面是每次只处理16B数据太少了，导致polling次数过多。
+由这个例子可以知道，只要是大数据流遇上了小data register，就会导致处理器必须进行高频率的polling，这时就需要引入更高效的I/O机制了。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="io-interrupts"&gt;I/O Interrupts
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;打个简单的比方：Polling就像是我们在家里开了一个派对，你每过几分钟就到门口看一下是否有客人来了，而人们很早之前就发明了门铃，门铃就是一个Interrupt，当有客人按门铃时，门铃会发出一个信号，告诉你有客人来了，这样你就不需要一直去门口看了。&lt;/li&gt;
+&lt;li&gt;I/O Interrupts相比Polling的优势在于它让处理器不需要在设备准备好之前一直查询，只有当设备准备好时发出一个信号，处理器才会去处理这个事件，这样就大大提高了效率。&lt;/li&gt;
+&lt;li&gt;对于Low data rate, 比如键盘和鼠标，使用Interrupts是合适的。但是对于high data rate, 比如disk和network，由于Interrupts会导致进程切换的巨大开销，所以通常是start with interrupts, but switch to DMA(directly memory access) once data starts coming.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="programmed-io-pio"&gt;Programmed I/O (PIO)
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;定义&lt;/strong&gt;：Programmed I/O 是指&lt;strong&gt;数据传输由 CPU 亲自执行指令来完成&lt;/strong&gt;的方式。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;工作方式&lt;/strong&gt;：在 PIO 模式下，CPU 通过 &lt;code&gt;lw&lt;/code&gt;/&lt;code&gt;sw&lt;/code&gt;（或 &lt;code&gt;in&lt;/code&gt;/&lt;code&gt;out&lt;/code&gt;）指令，亲手把数据从设备的数据寄存器搬到内存，或者从内存搬到设备。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PIO 与 Polling 的关系&lt;/strong&gt;：PIO 回答的是“&lt;strong&gt;谁搬数据&lt;/strong&gt;”，Polling 回答的是“&lt;strong&gt;怎么知道该搬了&lt;/strong&gt;”。它们经常一起出现——CPU 先通过 Polling 等待设备就绪，然后用 PIO 的方式亲手搬数据。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PIO 与 Interrupts 的搭配&lt;/strong&gt;：设备也可以通过中断通知 CPU 数据就绪，然后 CPU 仍然用 PIO 方式亲手搬数据。只是当数据量大时，这种组合效率太低。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;解决办法：DMA（直接内存访问）&lt;/strong&gt;：DMA 让专用硬件控制器来搬数据，CPU 只负责发命令和收通知，从而从繁重的数据搬运中解放出来。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="dma"&gt;DMA
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;定义&lt;/strong&gt;：DMA（Direct Memory Access）是一种&lt;strong&gt;让专用硬件控制器直接在设备和内存之间搬数据&lt;/strong&gt;的技术，CPU 只负责发命令和收通知。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;New hardware&lt;/strong&gt;: The DMA Engine, 它包含了一些由CPU写入的寄存器：
+&lt;ul&gt;
+&lt;li&gt;Memory Address to place data.&lt;/li&gt;
+&lt;li&gt;the number of bytes to transfer.&lt;/li&gt;
+&lt;li&gt;I/O device to transfer from/to.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;center&gt;
+&lt;img src='2.png' width=500&gt;
+&lt;/center&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;如图所示是DMA的工作流程，&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;对于Ingoing data, CPU 收到一个interrupt，告诉它设备有数据了，然后CPU把DMA Engine的寄存器写好，告诉它数据要放到内存的哪个位置，要传入多少字节，以及数据来自哪个设备，然后CPU回去执行其他任务，DMA独立地把数据从设备搬到内存，搬完之后再发一个interrupt告诉CPU数据已经搬好了。&lt;/li&gt;
+&lt;li&gt;对于Outgoing data, （通常是软件主动发起）CPU决定发送数据，先确认device准备就绪，然后写好DMA Engine的寄存器，告诉它数据要从内存的哪个位置搬到设备，要搬多少字节，以及数据要传到哪个设备，然后CPU回去执行其他任务，DMA独立地把数据从内存搬到设备，搬完之后再发一个interrupt告诉CPU数据已经搬好了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Where in the memory hierarchy do we plug in the DMA engine?&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;直接连到L1上，好处是读写都是最新的数据，坏处是占用L1本就精贵的空间，CPU不活啦。&lt;/li&gt;
+&lt;li&gt;直接连到内存上，好处是不会占用CPU的cache空间，也就不会污染cache，坏处是读写不能及时更新，比如L1中有最新CPU写入的数据，但DMA在内存中读取的是旧数据；DMA在内存中写入了新数据，但CPU在L1中读取的还是旧数据。所以需要手动管理DMA和CPU之间数据一致性问题。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;以上是两种极端情况，实际中我们偏向后者，因为DMA通常是大块数据传输，直接连到内存上更合适，虽然需要手动管理数据一致性，但这是可以接受的。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="networking"&gt;Networking
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;～～～, 这部分我就偷个懒了🥵&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="lab08"&gt;Lab08
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;基于Camera.jar和VMSIM两个模拟器的lab，只要能理解VA到PA的过程就能完成，Camera.jar我已经放到了仓库的lab08下，在README中也有提到关于用java8运行VMSIM的一个坑。&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>课程大横评_0</title><link>https://fuquan99666.github.io/p/%E8%AF%BE%E7%A8%8B%E5%A4%A7%E6%A8%AA%E8%AF%84_0/</link><pubDate>Tue, 02 Jun 2026 15:56:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E8%AF%BE%E7%A8%8B%E5%A4%A7%E6%A8%AA%E8%AF%84_0/</guid><description>&lt;h3 id="引"&gt;引
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;作为课程大横评系列的第一篇，我将对上过的很多课程进行一次全面的评价和总结，涵盖课程内容、教学质量、作业难度、推荐度等多个维度。通过这个系列文章，希望能对大家提供一些选课建议，加油！&lt;/li&gt;
 &lt;li&gt;本篇将会不断更新完善，敬请期待！&lt;/li&gt;
@@ -601,7 +788,7 @@ A specific case of the above method is masked diffusion language models (MDLMs).
 这里的tag就是VPN，它还需要继承一些控制位，比如Valid bit(通常用来判断该页面是否在DRAM中)，Dirty bit(用来判断该页面是否被修改过了，如果被修改过了，那么在被swap到磁盘之前我们需要先将它写回磁盘中)。
 &lt;blockquote&gt;
 &lt;p&gt;这里对Dirty bit的解释有些绕口，首先我们要理解什么时候要swap，在上一讲中我们知道，当DRAM爆满并且有新的进程需要allocate 一个物理页的时候会发生swap，如果那个被swap的物理页的Dirty bit是0，那么直接swap即可；如果是1，那么我们需要更新它在磁盘中的那个&amp;quot;原件&amp;quot;(当然它必须是文件页，而不是那种临时分配的匿名页)，然后swap。
-Valid bit真代表这个页面是否在DRAM中吗，又后面的一些思考，或许代表该条entry是否有效更合适。&lt;/p&gt;
+Valid bit真代表这个页面是否在DRAM中吗，由后面的一些思考，或许代表该条entry是否有效更合适。&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="tlb-designs"&gt;TLB Designs
 &lt;/h4&gt;&lt;ul&gt;
@@ -708,7 +895,7 @@ Valid bit真代表这个页面是否在DRAM中吗，又后面的一些思考，�
 &lt;li&gt;对于context switch来说(通常由timer或者外部信号触发)，我们需要保存当前进程的pc、registers、SPTBR等信息，然后加载新进程的pc、registers、SPTBR等信息，这样就完成了进程的切换了。对于TLB呢，直接把所有entry的valid bit都设置为0就好了，这样就保证了新进程访问任何虚拟地址都会触发TLB miss来重新加载对应的PPN了。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
-&lt;p&gt;哎woc，这似乎回答了上面的疑问，即tag匹配但是valid bit是0的情况，还真不一定是swap导致的，也许阴差阳错就在context switch之后发生了，这个时候就得用新的SPTBR走一趟Walker了，因为此时真的有可能已经allocated了一个有效的物理页了！！！&lt;/p&gt;
+&lt;p&gt;哎woc，这似乎回答了上面的疑问，即tag匹配但是valid bit是0的情况，还真不一定是swap导致的，也许阴差阳错就在context switch之后发生了，这个时候就得用新的SPTBR走一趟Walker了，因为此时真的有可能已经allocated了一个有效的物理页了（新进程的）！！！&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="vm-performance"&gt;VM Performance
 &lt;/h3&gt;&lt;ul&gt;
