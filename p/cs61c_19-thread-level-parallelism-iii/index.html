@@ -1,0 +1,388 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Hardware Synchronization Solution:\nAtomic read/write 即 Read & write in single instruction. No other access permitted between read and write.一般都涉及到共享内存。 Common implementation:\nAtomic swap of register <-> memory Pair of instructions for &ldquo;linked&rdquo; read and write, write fails if memory location has been &ldquo;tampered&rdquo; with after linked read. 下面以 RISC-V 的AMO(Atomic Memory Operations)为例，介绍一下第一种实现方法。AMOs atomically perform an operation on an operand in memory and set the destination register to the original memory value.\n"><title>CS61c_19 — Thread-Level Parallelism III</title><link rel=canonical href=https://fuquan99666.github.io/p/cs61c_19-thread-level-parallelism-iii/><link rel=stylesheet href=/scss/style.min.f2e462ea8f790b8cd59e1cfd01ceb3e32d4f09044e45bd8a2afe32da94398383.css><meta property='og:title' content="CS61c_19 — Thread-Level Parallelism III"><meta property='og:description' content="Hardware Synchronization Solution:\nAtomic read/write 即 Read & write in single instruction. No other access permitted between read and write.一般都涉及到共享内存。 Common implementation:\nAtomic swap of register <-> memory Pair of instructions for &ldquo;linked&rdquo; read and write, write fails if memory location has been &ldquo;tampered&rdquo; with after linked read. 下面以 RISC-V 的AMO(Atomic Memory Operations)为例，介绍一下第一种实现方法。AMOs atomically perform an operation on an operand in memory and set the destination register to the original memory value.\n"><meta property='og:url' content='https://fuquan99666.github.io/p/cs61c_19-thread-level-parallelism-iii/'><meta property='og:site_name' content='My Site'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:published_time' content='2026-06-18T20:05:36+08:00'><meta property='article:modified_time' content='2026-06-18T20:05:36+08:00'><meta name=twitter:title content="CS61c_19 — Thread-Level Parallelism III"><meta name=twitter:description content="Hardware Synchronization Solution:\nAtomic read/write 即 Read & write in single instruction. No other access permitted between read and write.一般都涉及到共享内存。 Common implementation:\nAtomic swap of register <-> memory Pair of instructions for &ldquo;linked&rdquo; read and write, write fails if memory location has been &ldquo;tampered&rdquo; with after linked read. 下面以 RISC-V 的AMO(Atomic Memory Operations)为例，介绍一下第一种实现方法。AMOs atomically perform an operation on an operand in memory and set the destination register to the original memory value.\n"><link rel="shortcut icon" href=/favicon.ico></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu_e94f98a3296399de.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>My Site</a></h1><h2 class=site-description>欢迎来到我的网站！</h2></div></header><ol class=menu-social><li><a href=https://github.com/fuquan99666 target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>主页</span></a></li><li><a href=/%E5%85%B3%E4%BA%8E/><svg class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>关于</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li><a href=/friends/><svg class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>友链</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><ol><li><a href=#hardware-synchronization>Hardware Synchronization</a><ol><li><a href=#openmp-locks>OpenMP Locks</a></li><li><a href=#deadlock>Deadlock</a></li><li><a href=#openmp-timing>OpenMP Timing</a></li></ol></li><li><a href=#shared-memory-and-caches>Shared Memory and Caches</a></li><li><a href=#cache-coherency>Cache Coherency</a></li><li><a href=#lab10>Lab10</a><ol><li><a href=#vector-addition>Vector Addition</a></li><li><a href=#dot-product>Dot Product</a></li><li><a href=#http-web-server-and-multi-processing>Http Web Server and Multi-processing</a></li></ol></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/cs61c/ style=background-color:;color:#fff>CS61c</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/cs61c_19-thread-level-parallelism-iii/>CS61c_19 — Thread-Level Parallelism III</a></h2></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-06-18T20:05:36+08:00>2026-06-18</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 10 分钟</time></div></footer></div></header><section class=article-content><h3 id=hardware-synchronization>Hardware Synchronization</h3><ul><li><p>Solution:</p><ul><li>Atomic read/write</li><li>即 Read & write in single instruction. No other access permitted between read and write.一般都涉及到共享内存。</li></ul></li><li><p>Common implementation:</p><ul><li>Atomic swap of register &lt;-> memory</li><li>Pair of instructions for &ldquo;linked&rdquo; read and write, write fails if memory location has been &ldquo;tampered&rdquo; with after linked read.</li></ul></li><li><p>下面以 RISC-V 的AMO(Atomic Memory Operations)为例，介绍一下第一种实现方法。AMOs atomically perform an operation on an operand in memory and set the destination register to the original memory value.</p></li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// 比如R-Type中的add
+</span></span></span><span class=line><span class=cl><span class=n>amoadd</span><span class=p>.</span><span class=n>w</span> <span class=n>rd</span><span class=p>,</span><span class=n>rs2</span><span class=p>,</span> <span class=p>(</span><span class=n>rs1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>t</span> <span class=o>=</span> <span class=n>M</span><span class=p>[</span><span class=n>x</span><span class=p>[</span><span class=n>rs1</span><span class=p>]];</span>
+</span></span><span class=line><span class=cl>    <span class=n>x</span><span class=p>[</span><span class=n>rd</span><span class=p>]</span> <span class=o>=</span> <span class=n>t</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=n>M</span><span class=p>[</span><span class=n>x</span><span class=p>[</span><span class=n>rs1</span><span class=p>]]</span> <span class=o>=</span> <span class=n>t</span> <span class=o>+</span> <span class=n>x</span><span class=p>[</span><span class=n>rs2</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 硬件上可以保证这三个操作进行期间，其他线程无法访问这个内存地址，因此可以实现原子性。
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 有了AMO，我们就可以实现第一种方式，比如实现一个简单的锁：
+</span></span></span><span class=line><span class=cl><span class=c1>// 假设lock存放在(a0)
+</span></span></span><span class=line><span class=cl>        <span class=n>li</span> <span class=n>t0</span><span class=p>,</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl><span class=nl>Try</span><span class=p>:</span>    <span class=n>amoswap</span><span class=p>.</span><span class=n>w</span><span class=p>.</span><span class=n>aq</span> <span class=n>t1</span><span class=p>,</span> <span class=n>t0</span><span class=p>,</span> <span class=p>(</span><span class=n>a0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>bnez</span> <span class=n>t1</span><span class=p>,</span> <span class=n>Try</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nl>Locked</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// critical section
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nl>Unlock</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>amoswap</span><span class=p>.</span><span class=n>w</span><span class=p>.</span><span class=n>rl</span> <span class=n>x0</span><span class=p>,</span> <span class=n>x0</span><span class=p>,</span> <span class=p>(</span><span class=n>a0</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><blockquote><p>上面的代码实现了一个简单的自旋锁，当一个线程想要进入临界区时，它会尝试获取锁值，如果是0，说明锁是空闲的，它就会将锁值设置为1并进入临界区；如果锁值已经是1，就会反复尝试获取锁。这和上一篇提到用while(lock != 0 )的C语言实现最大的区别就是，这里我们使用了AMO指令来保证原子性，而不是简单的读写操作。AMO通常会在执行指令时锁住对应的内存地址，确保在指令执行期间其他线程无法访问这个地址，从而实现了原子性。</p></blockquote><h4 id=openmp-locks>OpenMP Locks</h4><ul><li>有人也许会问，啊，难道我们一定要用RISC-V晦涩的AMO指令来实现吗，有没有简单点的办法呢？当然有！比如OpenMP就提供了专门的锁机制，叫做omp_lock_t, 示例如下：</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;stdlib.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;omp.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kt>omp_lock_t</span> <span class=n>lock</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=nf>omp_init_lock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#pragma omp parallel 
+</span></span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>id</span> <span class=o>=</span> <span class=nf>omp_get_thread_num</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// parallel section
+</span></span></span><span class=line><span class=cl>        <span class=c1>// ...
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nf>omp_set_lock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// start sequential section
+</span></span></span><span class=line><span class=cl>        <span class=c1>// ...
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=nf>printf</span><span class=p>(</span><span class=s>&#34;id = %d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// end sequential section
+</span></span></span><span class=line><span class=cl>        <span class=nf>omp_unset_lock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1>// parallel section
+</span></span></span><span class=line><span class=cl>        <span class=c1>// ...
+</span></span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=nf>omp_destroy_lock</span><span class=p>(</span><span class=o>&amp;</span><span class=n>lock</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><blockquote><p>上面代码中展示了如何在OpenMP中使用锁来保护临界区，十分方便。OpenMP甚至提供了critical指令来进一步简化锁的使用，示例如下：</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl><span class=cp>#include</span> <span class=cpf>&lt;omp.h&gt;</span><span class=cp>
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=kt>int</span> <span class=n>NUM_THREADS</span> <span class=o>=</span> <span class=mi>100</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=k>const</span> <span class=kt>long</span> <span class=n>num_steps</span> <span class=o>=</span> <span class=mi>10000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>double</span> <span class=n>step</span> <span class=o>=</span> <span class=mi>1</span> <span class=o>/</span> <span class=p>((</span><span class=kt>double</span><span class=p>)</span><span class=n>num_steps</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>	<span class=kt>double</span> <span class=n>sum</span><span class=p>[</span><span class=n>NUM_THREADS</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>NUM_THREADS</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=n>sum</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>	<span class=kt>double</span> <span class=n>pi</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=nf>omp_set_num_threads</span><span class=p>(</span><span class=n>NUM_THREADS</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=cp>#pragma omp parallel
+</span></span></span><span class=line><span class=cl>	<span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=kt>int</span> <span class=n>id</span> <span class=o>=</span> <span class=nf>omp_get_thread_num</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>		<span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=n>id</span> <span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>num_steps</span><span class=p>;</span> <span class=n>i</span><span class=o>+=</span> <span class=n>NUM_THREADS</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>			<span class=kt>double</span> <span class=n>x</span> <span class=o>=</span> <span class=p>(</span><span class=n>i</span><span class=o>+</span><span class=mf>0.5</span><span class=p>)</span> <span class=o>*</span> <span class=n>step</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>			<span class=n>sum</span><span class=p>[</span><span class=n>id</span><span class=p>]</span> <span class=o>+=</span> <span class=mf>4.0</span> <span class=o>*</span> <span class=n>step</span><span class=o>/</span><span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>x</span><span class=o>*</span><span class=n>x</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>			<span class=c1>// printf(&#34;i =%3d, id =%3d\n&#34;, i, id);
+</span></span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=cp>#pragma omp critical
+</span></span></span><span class=line><span class=cl>        <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=n>pi</span> <span class=o>+=</span> <span class=n>sum</span><span class=p>[</span><span class=n>id</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=nf>printf</span><span class=p>(</span><span class=s>&#34;pi = %6.12f</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>pi</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=deadlock>Deadlock</h4><ul><li>可能会发生死锁的情况：当一个线程持有锁A并等待锁B，而另一个线程持有锁B并等待锁A时，就会发生死锁。</li><li>比如著名的 Dining Philosopher&rsquo;s Problem:<ul><li>Think until the left fork is available; when it is, pick it up</li><li>Think until the right fork is available; when it is, pick it up</li><li>When both forks are held, eat for a fixed amount of time</li><li>Then, put the right fork down</li><li>Then, put the left fork down</li><li>Repeat from the beginning</li><li>可能发生的情况：每个人都拿起了左边的叉子，此时每个人都在等待右边的叉子，但是右边的叉子被别人拿着了，因此所有人都在等待，无法继续执行下去🤣</li></ul></li></ul><h4 id=openmp-timing>OpenMP Timing</h4><ul><li>OpenMP提供了 <code>double omp_get_wtime(void)</code> 来获取当前wall clock time，单位为s。</li><li>Time is measured per thread ! Two distinct threads may return different values for the same call to omp_get_wtime().</li><li>这个函数返回的是一个相对时间，至于起点是哪天，谁也不知道，我们也不管它，反正调用两次求时间差即可。</li></ul><h3 id=shared-memory-and-caches>Shared Memory and Caches</h3><ul><li>SMP: (Shared Memory) Symmetric Multiprocessor<ul><li>Two or more identical CPUs/Cores</li><li>Single shared coherent memory</li></ul></li></ul><center><img src=1.png width=500></center><ul><li>如上图所示，现在所有的计算机都采用这种SMP架构，由于内存逐渐变慢，因此我们引入了cache来加速内存访问，当多个CPU有多个独立的cache时，就会出现一些问题。如下图所示，初始M[1000]=20, P1 read M[1000], P2 read M[1000], P0 write M[1000]=40. P1和P2都把M[1000]=20缓存了，然而P0把内存中的M[1000]给改了，P1和P2的cache咋办呢？这就需要Cache Coherency来保证了。</li></ul><center><img src=2.png width=500></center><h3 id=cache-coherency>Cache Coherency</h3><ul><li>Idea: When any processor has cache miss or write, notify other processors via interconnection network.<ul><li>If read, other processors may have copies.</li><li>If write, invalidate other copies.</li></ul></li><li>写的具体做法：Write transactions from one processor, other caches &ldquo;snoop&rdquo; the common interconnect checking for tags they hold. Invalidate any copies of same address modified in other cache.</li></ul><blockquote><p>Cache中每一个缓存行都可以追踪一个状态，常见的状态有以下几种：</p><ol><li><p>Shared: 该缓存行在多个cache中都有副本，并且都是干净的（没有被修改过）。</p></li><li><p>Modified: 该缓存行被修改了，并且别的cache中没有副本（被Invalidated了）。且主内存未被更新。</p></li><li><p>Exclusive: 该缓存行在当前cache中有副本，并且是干净的（没有被修改过）。主内存中的数据与该缓存行一致。</p></li><li><p>Owner: 该缓存行在当前cache中有副本(干净的)，在其他cache可能有副本，但是只有它能change，当它更新时，会通知其他cache更新或者失效。</p></li></ol><p>这个分类倒是不那么重要，回到上一个问题，如何解决P0 write M[1000]=40导致P1和P2的cache失效的问题呢？我们可以直接通过Interconnection Network来通知它们对应缓存行失效，或者直接顺手更新了，这样就保证了cache coherency。</p></blockquote><ul><li>之前学习Cache时，有提到过Cache有3种miss，分别是：<ul><li>Compulsory Miss : $\quad$ 访问一个地址第一次发生的miss，这个无法避免。通常可以增加block size来缓解。</li><li>Capacity Miss : $\quad$ Cache太小（fully associative），无法容纳所有需要的block，导致miss。通常可以增加cache size来缓解。</li><li>Conflict Miss : $\quad$ Multiple memory locations map to the same cache location. 可以通过增加cache size, 增加associativity来缓解。</li></ul></li><li>在学习了Cache Coherency之后，我们还需要考虑一个新的miss，叫Coherence Miss，也被称为communication miss. 3C to 4C 🤣</li><li>下图展示了一个典型的Coherence Miss. P0需要读写变量X，P1需要读写变量Y，两个变量看似没有关系，然而它们的真实地址可能在同一个缓存行上！因此当P0写X时，Cache0的缓存行更新，同时发出信号通知Cache1对应缓存行失效；反之依然。如此一来，P0和P1就会频繁地发生Coherence Miss，导致性能大幅下降，这就是所谓的False Sharing。</li></ul><center><img src=3.png width=500></center><blockquote><p>简而言之，Coherence Miss就是多个线程访问了同一个缓存行上的不同位置。由于我们设计的Cache Coherency机制是以缓存行为单位，所以多个线程针对该缓存行反反复复通信更新，导致性能下降。</p><p>所以，block size千万不能很大，不然不同线程很容易访问到同一个缓存行上的元素。在并行编程中，Coherence Miss往往占Cache Miss的大头，因此在设计并行算法时，我们需要尽量让线程访问分隔的内存区域，减少False Sharing的发生。</p><p>比如之前求π, 我们为每一个线程定义了一个sum[id]来存储局部和，这个做法虽然避免对sum的竞争，但是会导致False Sharing, 因为sum[id]们显然在同一个缓存行上。ai大人说可以通过增加padding来解决这个问题，比如定义一个结构体，每个sum占用一个缓存行的大小(sum[id] + padding = block size)，这样不同sum[id]在不同缓存行，就可以避免False Sharing了。</p><p>说到这，不知道你有没有疑惑，OS呢，OS怎么不管管它们😡。之前说过OS确实能将不同进程的实际内存分隔开，但是我们现在处理的是多线程问题，在一个主线程下，多个子线程共享一块实际内存区域（只不过各自的map不同），所以冲突问题必然存在。</p></blockquote><h3 id=lab10>Lab10</h3><ul><li>本次lab十分有趣，第一部分是熟悉如何用OpenMP写并行程序，第二部分是以一个服务器为例子，引入多进程编程。</li></ul><h4 id=vector-addition>Vector Addition</h4><ul><li>下面是原始向量加法代码：</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=kt>void</span> <span class=nf>v_add_naive</span><span class=p>(</span><span class=kt>double</span><span class=o>*</span> <span class=n>x</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>y</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>z</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=cp>#pragma omp parallel
+</span></span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>ARRAY_SIZE</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>            <span class=n>z</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=cm>/*
+</span></span></span><span class=line><span class=cl><span class=cm>这个原始代码问题很大，不仅没有起到并行的作用，反而同样的向量加法被多个线程重复执行了多次，
+</span></span></span><span class=line><span class=cl><span class=cm>导致性能差差。
+</span></span></span><span class=line><span class=cl><span class=cm>*/</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>下面是两种优化方法，其实在前面都提到过。</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 方法一： Slicing based on i % omp_get_num_threads()
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=nf>v_add_optimized_adjacent</span><span class=p>(</span><span class=kt>double</span><span class=o>*</span> <span class=n>x</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>y</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>z</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=cp>#pragma omp parallel
+</span></span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>id</span> <span class=o>=</span> <span class=nf>omp_get_thread_num</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>num_threads</span> <span class=o>=</span> <span class=nf>omp_get_num_threads</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=n>id</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>ARRAY_SIZE</span><span class=p>;</span> <span class=n>i</span><span class=o>+=</span><span class=n>num_threads</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>            <span class=n>z</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 方法二： Chunking —— split the array into contiguous chunks
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>void</span> <span class=nf>v_add_optimized_chunk</span><span class=p>(</span><span class=kt>double</span><span class=o>*</span> <span class=n>x</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>y</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>z</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=cp>#pragma omp parallel
+</span></span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>id</span> <span class=o>=</span> <span class=nf>omp_get_thread_num</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>num_threads</span> <span class=o>=</span> <span class=nf>omp_get_num_threads</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>chunk_size</span> <span class=o>=</span> <span class=p>(</span><span class=n>ARRAY_SIZE</span> <span class=o>+</span> <span class=n>num_threads</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)</span> <span class=o>/</span> <span class=n>num_threads</span><span class=p>;</span> 
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>start</span> <span class=o>=</span> <span class=n>id</span> <span class=o>*</span> <span class=n>chunk_size</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kt>int</span> <span class=n>end</span> <span class=o>=</span> <span class=n>start</span> <span class=o>+</span> <span class=n>chunk_size</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>end</span> <span class=o>&gt;</span> <span class=n>ARRAY_SIZE</span><span class=p>)</span> <span class=n>end</span> <span class=o>=</span> <span class=n>ARRAY_SIZE</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=n>start</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>end</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>            <span class=n>z</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><blockquote><p>如果结合前面提到的False Sharing问题，方法一显然存在很大的性能问题，而方法二由于将一个数组分成了几个连续的块，所以False Sharing的影响就小了很多。测试结果符合预期，方法一在多线程下几乎没有提升，方法二则有将近2x的提升。</p><p>事实上，方法二就是#pragma omp parallel for的默认实现方式，所以也可以直接用#pragma omp parallel for来写，OpenMP会帮我们自动分块，非常方便。</p></blockquote><h4 id=dot-product>Dot Product</h4><ul><li>两个向量点积和向量加法的区别是最后需要将每个位置的结果加起来得到sum，因此会涉及到对共享变量sum的竞争问题。下面是原始代码：</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// naive version
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>double</span> <span class=nf>dotp_naive</span><span class=p>(</span><span class=kt>double</span><span class=o>*</span> <span class=n>x</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>y</span><span class=p>,</span> <span class=kt>int</span> <span class=n>arr_size</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>global_sum</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=cp>#pragma omp parallel
+</span></span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=cp>#pragma omp for 
+</span></span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>arr_size</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>            <span class=cp>#pragma omp critical
+</span></span></span><span class=line><span class=cl>            <span class=n>global_sum</span> <span class=o>+=</span> <span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>*</span> <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>global_sum</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><ul><li>原始代码的问题大了去了，#pragma omp critical直接把所有线程都给限制住了，本来我们希望多个线程能同时计算乘法和加法，现在等于没有并行了，性能不升反降了。我们可以直接使用Reduction来解决这个问题，也可以手动实现。</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl><span class=c1>// Manual Reduction
+</span></span></span><span class=line><span class=cl><span class=kt>double</span> <span class=nf>dotp_manual</span><span class=p>(</span><span class=kt>double</span><span class=o>*</span> <span class=n>x</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>y</span><span class=p>,</span> <span class=kt>int</span> <span class=n>arr_size</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>global_sum</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=cp>#pragma omp parallel
+</span></span></span><span class=line><span class=cl>    <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kt>double</span> <span class=n>local_sum</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=cp>#pragma omp for
+</span></span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>arr_size</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>            <span class=n>local_sum</span> <span class=o>+=</span> <span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>*</span> <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=cp>#pragma omp critical 
+</span></span></span><span class=line><span class=cl>        <span class=n>global_sum</span> <span class=o>+=</span> <span class=n>local_sum</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>global_sum</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// Reduction Keyword
+</span></span></span><span class=line><span class=cl><span class=kt>double</span> <span class=nf>dotp_reduction_optimized</span><span class=p>(</span><span class=kt>double</span><span class=o>*</span> <span class=n>x</span><span class=p>,</span> <span class=kt>double</span><span class=o>*</span> <span class=n>y</span><span class=p>,</span> <span class=kt>int</span> <span class=n>arr_size</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=kt>double</span> <span class=n>global_sum</span> <span class=o>=</span> <span class=mf>0.0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=cp>#pragma omp parallel for reduction(+:global_sum)
+</span></span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>arr_size</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>        <span class=n>global_sum</span> <span class=o>+=</span> <span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>*</span> <span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>global_sum</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><blockquote><p>经过测试，原始代码在thread=1的情况性能还是很差，可能是omp critical的开销影响。而两个优化版本在多线程下性能提升明显，有将近7x的加速。</p></blockquote><h4 id=http-web-server-and-multi-processing>Http Web Server and Multi-processing</h4><ul><li>之前比较简单的lab我都是一笔带过，这次之所以细细展开，主要是这个Http Web Server的实现以及优化非常有意思，让看似鸡肋的<code>fork()</code>如此nb！</li><li>问题背景：我们设计了一个简单的Http Web Server, 它仅支持GET请求，并且是串行的。然而，如果有多个客户端同时发起请求，假设服务器一次处理需要1s，那么第n个请求就需要等待(n-1)s才能得到响应，用户直接炸毛。所以我们需要将其并行化！</li><li>一个很朴素的想法，每接受到一个请求，我们就fork一个子进程来处理这个请求，父进程继续监听新的请求，这样就相当于是并行化了。下面是代码实现：</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-c data-lang=c><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 省略循环部分...
+</span></span></span><span class=line><span class=cl><span class=kt>pid_t</span> <span class=n>parent_pid</span> <span class=o>=</span> <span class=nf>getpid</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kt>int</span> <span class=n>child_pid</span> <span class=o>=</span> <span class=nf>fork</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=n>child_pid</span> <span class=o>==</span> <span class=mi>0</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=kt>int</span> <span class=n>r</span> <span class=o>=</span> <span class=nf>prctl</span><span class=p>(</span><span class=n>PR_SET_PDEATHSIG</span><span class=p>,</span> <span class=n>SIGTERM</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nf>dispatch</span><span class=p>(</span><span class=n>client_socket_number</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=n>r</span> <span class=o>==</span> <span class=o>-</span><span class=mi>1</span> <span class=o>&amp;&amp;</span> <span class=nf>getppid</span><span class=p>()</span> <span class=o>!=</span> <span class=n>parent_pid</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>        <span class=nf>perror</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span> 
+</span></span><span class=line><span class=cl>        <span class=nf>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nf>exit</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> 
+</span></span></code></pre></td></tr></table></div></div><blockquote><p>似乎没啥好说的，很朴素的一个想法，然而它的性能提升非常大。在人工设置5s后摇的情况下，3个连续请求的延迟从10008ms干到了43ms!</p><p>这个小服务器甚至支持一些花活路由，比如localhost:8000/report, 它会返回调用dotp()的结果，localhost:8000/filter/girl.bmp，它会返回一张经过sobel edge dectection处理过的图片。当然，它的路由设计很简单，我们完全可以自己设计更复杂、更有意思的路由。</p><p>除了直接在浏览器中输入路径访问，我们还可以在命令行中使用curl来访问，比如<code>curl localhost:8000/girl.bmp</code>, 如果你想要快速测试服务器对多请求的延迟，用这个方式无疑最佳。</p><p>如果你打开files/credit.txt, 你会发现这个Site是由于cs162的作业4魔改过来的，只能说太强🫡</p><p>文档中提到，如果子进程刚刚启动，我们就按下Ctrl-C来终止服务器，在父进程死亡后，子进程一般会被init进程收养，成为孤儿进程。等到你想再次启动服务器时会发现8000端口被占用，无法启动(由于设置了5s延迟，子进程不会很快结束)，此时你只能用命令行杀死它。在上面的代码中，由于我们设置了<code>prctl(PR_SET_PDEATHSIG, SIGTERM)</code>, 当父进程死亡时，子进程会收到一个SIGTERM信号，释放资源并退出，解决了这个问题。</p><p>Forking a process to respond to a request is probably not the best parallelism approach – the modern solution is to use a thread pool where the overhead is much lower and you have convenient control over server load.</p></blockquote></section><footer class=article-footer><section class=article-copyright><svg class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{const e=[".main-article",".widget--toc"];e.forEach(e=>{const t=document.querySelector(e);t&&renderMathInElement(t,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})})</script></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/cs61c_18-thread-level-parallelism-ii/><div class=article-details><h2 class=article-title>CS61c_18 — Thread-Level Parallelism II</h2></div></a></article><article><a href=/p/cs61c_17-thread-level-parallelism-i/><div class=article-details><h2 class=article-title>CS61c_17 — Thread-Level Parallelism I</h2></div></a></article><article><a href=/p/cs61c_16-flynn-taxonomy-simd-instructions/><div class=article-details><h2 class=article-title>CS61c_16 — Flynn Taxonomy, SIMD Instructions</h2></div></a></article><article><a href=/p/cs61c_15-i/o/><div class=article-details><h2 class=article-title>CS61c_15 — I/O</h2></div></a></article><article><a href=/p/cs61c_14-virtual-memory-ii/><div class=article-details><h2 class=article-title>CS61c_14 — Virtual Memory II</h2></div></a></article></div></div></aside><script src=https://giscus.app/client.js data-repo=fuquan99666/fuquan99666.github.io data-repo-id=R_kgDOQuvzsw data-category=Announcements data-category-id=DIC_kwDOQuvzs84C0tAQ data-mapping=pathname data-strict=0 data-reactions-enabled=1 data-emit-metadata=0 data-input-position=top data-theme=light data-lang=en data-loading crossorigin=anonymous async></script><script>function setGiscusTheme(e){let t=document.querySelector("iframe.giscus-frame");t&&t.contentWindow.postMessage({giscus:{setConfig:{theme:e}}},"https://giscus.app")}(function(){addEventListener("message",t=>{if(event.origin!=="https://giscus.app")return;e()}),window.addEventListener("onColorSchemeChange",e);function e(){setGiscusTheme(document.documentElement.dataset.scheme==="light"?"light":"dark")}})()</script><footer class=site-footer><section class=copyright>&copy;
+2025 -
+2026 zz486</section><section class=powerby>啊啊啊啊啊啊啊<br>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.33.0>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
