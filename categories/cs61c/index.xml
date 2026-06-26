@@ -52,6 +52,15 @@ $$\frac{1}{S + \frac{1-S}{P}}$$其中 T 是原始程序的运行时间，P 是�
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;后面也许会写一篇关于Project 4的文章。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="project4--numc"&gt;Project4 &amp;ndash; Numc
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;可以参考&lt;a class="link" href="https://zhuanlan.zhihu.com/p/346676981" target="_blank" rel="noopener"
+&gt;这篇知乎&lt;/a&gt;对Project4的评价，总体来说与我的感受差不多。&lt;/li&gt;
+&lt;li&gt;前三个Task需要你查找不少Python C API的文档，有点坐牢的感觉，很多函数官方文档甚至不给个example ？&lt;/li&gt;
+&lt;li&gt;dumpy是不提供的，网上也没有，你可以让ai帮你把numpy包装成dumpy，注意矩阵初始化时不能使用numpy.random.rand( ), 因为在matrix.c中我们是用c的rand( )函数生成随机矩阵的，二者并不一样。为了保证正确性测试，请直接将numc.Matrix初始化的矩阵元素复制到dumpy的初始化矩阵。&lt;/li&gt;
+&lt;li&gt;经过我手搓证实，1D矩阵的shape处理确实恶心，各种edge test很烦，所以文档也提到可以忽略它的edge test，保证2D矩阵的正确性即可。&lt;/li&gt;
+&lt;li&gt;优化部分，循环展开和SIMD指令疑似没有什么效果，i-j-k -&amp;gt; i-k-j交换顺序能提高2-3倍，OpenMP多线程能提高3-4倍左右，pow使用快速幂算法能提高2-3倍，最终优化后能达到numpy的$\frac{1}{4}$左右的性能。当然，性能具体提升多少和测试矩阵大小，形状，种子，参数等都有关系。&lt;/li&gt;
 &lt;/ul&gt;</description></item><item><title>CS61c_19 — Thread-Level Parallelism III</title><link>https://fuquan99666.github.io/p/cs61c_19-thread-level-parallelism-iii/</link><pubDate>Thu, 18 Jun 2026 20:05:36 +0800</pubDate><guid>https://fuquan99666.github.io/p/cs61c_19-thread-level-parallelism-iii/</guid><description>&lt;h3 id="hardware-synchronization"&gt;Hardware Synchronization
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;

@@ -52,6 +52,15 @@ $$\frac{1}{S + \frac{1-S}{P}}$$其中 T 是原始程序的运行时间，P 是�
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;后面也许会写一篇关于Project 4的文章。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="project4--numc"&gt;Project4 &amp;ndash; Numc
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;可以参考&lt;a class="link" href="https://zhuanlan.zhihu.com/p/346676981" target="_blank" rel="noopener"
+&gt;这篇知乎&lt;/a&gt;对Project4的评价，总体来说与我的感受差不多。&lt;/li&gt;
+&lt;li&gt;前三个Task需要你查找不少Python C API的文档，有点坐牢的感觉，很多函数官方文档甚至不给个example ？&lt;/li&gt;
+&lt;li&gt;dumpy是不提供的，网上也没有，你可以让ai帮你把numpy包装成dumpy，注意矩阵初始化时不能使用numpy.random.rand( ), 因为在matrix.c中我们是用c的rand( )函数生成随机矩阵的，二者并不一样。为了保证正确性测试，请直接将numc.Matrix初始化的矩阵元素复制到dumpy的初始化矩阵。&lt;/li&gt;
+&lt;li&gt;经过我手搓证实，1D矩阵的shape处理确实恶心，各种edge test很烦，所以文档也提到可以忽略它的edge test，保证2D矩阵的正确性即可。&lt;/li&gt;
+&lt;li&gt;优化部分，循环展开和SIMD指令疑似没有什么效果，i-j-k -&amp;gt; i-k-j交换顺序能提高2-3倍，OpenMP多线程能提高3-4倍左右，pow使用快速幂算法能提高2-3倍，最终优化后能达到numpy的$\frac{1}{4}$左右的性能。当然，性能具体提升多少和测试矩阵大小，形状，种子，参数等都有关系。&lt;/li&gt;
 &lt;/ul&gt;</description></item><item><title>CS61c_19 — Thread-Level Parallelism III</title><link>https://fuquan99666.github.io/p/cs61c_19-thread-level-parallelism-iii/</link><pubDate>Thu, 18 Jun 2026 20:05:36 +0800</pubDate><guid>https://fuquan99666.github.io/p/cs61c_19-thread-level-parallelism-iii/</guid><description>&lt;h3 id="hardware-synchronization"&gt;Hardware Synchronization
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;
@@ -1873,8 +1882,20 @@ $$ π = 4 \int_0^1 \frac{1}{1+x^2} dx $$&lt;/li&gt;
 &lt;li&gt;课程难度：4.0/5，课程内容比较深入🥵，各种定义之间有千丝万缕的联系，各种硬核数学证明，请确保你有耐心读完note的每一讲。&lt;/li&gt;
 &lt;li&gt;综合推荐度：4.7/5，适合对生成模型感兴趣并且有一定思考能力的同学，学完后你将发出感慨：“SOTA生成模型不过如此😆”。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id="tbd"&gt;TBD
-&lt;/h3&gt;</description></item><item><title>中史地_12 — 农业的空间历程</title><link>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</link><pubDate>Mon, 01 Jun 2026 18:42:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</guid><description>&lt;h3 id="农业起源与文明的发展"&gt;农业起源与文明的发展
+&lt;h3 id="cs61c"&gt;CS61C
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;teacher: UC Berkeley, Dan Garcia and Bora Nikolic&lt;/li&gt;
+&lt;li&gt;内容概要：这门课是CS61系列的收官之作，围绕第一节课提到的计算机中六大伟大思想展开。内容从C语言基础，到RISC-V指令集，再到计算机底层硬件设计、CPU设计、流水线、缓存、虚拟内存、I/O、SIMD指令、多线程、Spark、ECC等，全面覆盖了计算机体系结构的各个方面。&lt;/li&gt;
+&lt;li&gt;自学链接：https://csdiy.wiki/体系结构/CS61C/&lt;/li&gt;
+&lt;li&gt;课程质量：5/5，相较于ICS课程，CS61C更专注于计算机体系结构的方方面面，并且两位老师会把xxx为什么要有、为什么要添加xxx，说的很清楚，这一点我认为很重要! 课程前后内容呼应，学习过程中常有“原来如此”的顿悟感。尤其是对RISC-V指令集和CPU数据通路（Datapath）的讲解，极为精彩。&lt;/li&gt;
+&lt;li&gt;课程听感：4.9/5，两位老师风格互补。Dan Garcia 幽默风趣，课堂常有杂技表演；Bora Nikolic 则非常严谨，偶尔也会展现冷幽默。他们常常在课堂上提到“xxx是伯克利搞出来的”，听得人充满向往。二人堪称黄金搭档。&lt;/li&gt;
+&lt;li&gt;课程任务量：4.8/5, 11个lab，4个project，lab的难度都不大，适合快速对知识点进行实践，project难度较大, 需要综合的知识较多, 其中非常推荐Project3 。Lab和Project均有不少资源和脚本都需要自己去找，需要花费不少时间。&lt;/li&gt;
+&lt;li&gt;课程难度：4.0/5，没有很高的数学门槛，主要考验对计算机体系结构的理解和动手能力。如果你对计算机如何工作充满好奇，应该会非常享受这门课。&lt;/li&gt;
+&lt;li&gt;综合推荐度：4.9/5，原本想打满分，但因Project4的体验有些“坑”，姑且扣0.1分。抛开Project4不谈，这绝对是妥妥的神课，可以说完胜你北的ICS。可以说，只有学了这门课，你才算真正了解坐在你面前的这台计算机，到底是个什么样的“人”。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;作为一个品鉴过CS61A、B、C三门课的人，我可以自信的说这个系列课就是牛逼！！！&lt;/p&gt;
+&lt;/blockquote&gt;</description></item><item><title>中史地_12 — 农业的空间历程</title><link>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</link><pubDate>Mon, 01 Jun 2026 18:42:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</guid><description>&lt;h3 id="农业起源与文明的发展"&gt;农业起源与文明的发展
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;农业是文明的起源，世界农业最早驯化地有三处，分别是伊拉克的两河流域，中国的长江、黄河中下游地带，墨西哥南部与南美安第斯山区。&lt;/li&gt;
 &lt;/ul&gt;

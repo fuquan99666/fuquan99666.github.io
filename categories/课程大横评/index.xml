@@ -28,5 +28,17 @@
 &lt;li&gt;课程难度：4.0/5，课程内容比较深入🥵，各种定义之间有千丝万缕的联系，各种硬核数学证明，请确保你有耐心读完note的每一讲。&lt;/li&gt;
 &lt;li&gt;综合推荐度：4.7/5，适合对生成模型感兴趣并且有一定思考能力的同学，学完后你将发出感慨：“SOTA生成模型不过如此😆”。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id="tbd"&gt;TBD
-&lt;/h3&gt;</description></item></channel></rss>
+&lt;h3 id="cs61c"&gt;CS61C
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;teacher: UC Berkeley, Dan Garcia and Bora Nikolic&lt;/li&gt;
+&lt;li&gt;内容概要：这门课是CS61系列的收官之作，围绕第一节课提到的计算机中六大伟大思想展开。内容从C语言基础，到RISC-V指令集，再到计算机底层硬件设计、CPU设计、流水线、缓存、虚拟内存、I/O、SIMD指令、多线程、Spark、ECC等，全面覆盖了计算机体系结构的各个方面。&lt;/li&gt;
+&lt;li&gt;自学链接：https://csdiy.wiki/体系结构/CS61C/&lt;/li&gt;
+&lt;li&gt;课程质量：5/5，相较于ICS课程，CS61C更专注于计算机体系结构的方方面面，并且两位老师会把xxx为什么要有、为什么要添加xxx，说的很清楚，这一点我认为很重要! 课程前后内容呼应，学习过程中常有“原来如此”的顿悟感。尤其是对RISC-V指令集和CPU数据通路（Datapath）的讲解，极为精彩。&lt;/li&gt;
+&lt;li&gt;课程听感：4.9/5，两位老师风格互补。Dan Garcia 幽默风趣，课堂常有杂技表演；Bora Nikolic 则非常严谨，偶尔也会展现冷幽默。他们常常在课堂上提到“xxx是伯克利搞出来的”，听得人充满向往。二人堪称黄金搭档。&lt;/li&gt;
+&lt;li&gt;课程任务量：4.8/5, 11个lab，4个project，lab的难度都不大，适合快速对知识点进行实践，project难度较大, 需要综合的知识较多, 其中非常推荐Project3 。Lab和Project均有不少资源和脚本都需要自己去找，需要花费不少时间。&lt;/li&gt;
+&lt;li&gt;课程难度：4.0/5，没有很高的数学门槛，主要考验对计算机体系结构的理解和动手能力。如果你对计算机如何工作充满好奇，应该会非常享受这门课。&lt;/li&gt;
+&lt;li&gt;综合推荐度：4.9/5，原本想打满分，但因Project4的体验有些“坑”，姑且扣0.1分。抛开Project4不谈，这绝对是妥妥的神课，可以说完胜你北的ICS。可以说，只有学了这门课，你才算真正了解坐在你面前的这台计算机，到底是个什么样的“人”。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;作为一个品鉴过CS61A、B、C三门课的人，我可以自信的说这个系列课就是牛逼！！！&lt;/p&gt;
+&lt;/blockquote&gt;</description></item></channel></rss>
