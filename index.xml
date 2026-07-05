@@ -1895,7 +1895,19 @@ $$ π = 4 \int_0^1 \frac{1}{1+x^2} dx $$&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;作为一个品鉴过CS61A、B、C三门课的人，我可以自信的说这个系列课就是牛逼！！！&lt;/p&gt;
-&lt;/blockquote&gt;</description></item><item><title>中史地_12 — 农业的空间历程</title><link>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</link><pubDate>Mon, 01 Jun 2026 18:42:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</guid><description>&lt;h3 id="农业起源与文明的发展"&gt;农业起源与文明的发展
+&lt;/blockquote&gt;
+&lt;h3 id="nju-os-operating-system-design-and-implementation"&gt;NJU OS: Operating System Design and Implementation
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;teacher: 南京大学，蒋炎岩&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="pku-编译原理实践"&gt;PKU 编译原理实践
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;teacher：无 ？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="cs-285"&gt;CS 285
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;teacher: UC Berkeley, Sergey Levine&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>中史地_12 — 农业的空间历程</title><link>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</link><pubDate>Mon, 01 Jun 2026 18:42:45 +0800</pubDate><guid>https://fuquan99666.github.io/p/%E4%B8%AD%E5%8F%B2%E5%9C%B0_12-%E5%86%9C%E4%B8%9A%E7%9A%84%E7%A9%BA%E9%97%B4%E5%8E%86%E7%A8%8B/</guid><description>&lt;h3 id="农业起源与文明的发展"&gt;农业起源与文明的发展
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;农业是文明的起源，世界农业最早驯化地有三处，分别是伊拉克的两河流域，中国的长江、黄河中下游地带，墨西哥南部与南美安第斯山区。&lt;/li&gt;
 &lt;/ul&gt;
@@ -3720,8 +3732,8 @@ where $C$ is independent of parameters $\theta$. Therefore, their gradients coin
 $$
 \nabla_\theta \mathcal{L}_{\text{SM}}(\theta) = \nabla_\theta \mathcal{L}_{\text{CSM}}(\theta).
 $$&lt;p&gt;
-In particular, for the minimizer $\theta^&lt;em&gt;$, it will hold that $s_t^{\theta^&lt;/em&gt;} = \nabla \log p_t$.&lt;/p&gt;
-&lt;ul&gt;
+In particular, for the minimizer $\theta ^*$, it will hold that : &lt;/p&gt;
+$$s_t^{\theta^*} = \nabla \log p_t$$&lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;note中又以gaussian为例子详细描述了Denoising Diffusion Models 以及最后的训练算法，这里最重要的insight就是为什么要叫denoising, 通过带入公式我们可以发现，如果$\beta_t$比较小，那么很容易数值爆炸(也就是要想训练出来的话必须加很多的噪声)。我们可以先提取出$\beta_t$, 舍掉它，然后你会发现优化项里是$\beta_t s_t^\theta(x) + \epsilon$, 于是可以令
 &lt;/p&gt;
